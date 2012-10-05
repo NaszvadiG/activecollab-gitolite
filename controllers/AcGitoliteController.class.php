@@ -141,7 +141,7 @@
             //die();
             try
             {
-                 DB::beginWork('Adding a new public key @ ' . __CLASS__);
+                DB::beginWork('Adding a new public key @ ' . __CLASS__);
                 $save_data = GitoliteAc::add_keys($active_user->getId(),$pub_file_name,$post_data);
                 if($save_data)
                 {   
@@ -177,7 +177,8 @@
                 }
             }catch (Exception $e)
             {   
-                 $this->response->exception("Can't save key this time, please try again.");
+                 $this->response->exception("Can't save key this time, might be key you are adding is already added");
+                //$this->response->exception("Error while saving key. May be key you are adding is already added.");
             }
            
     } else{

@@ -93,6 +93,22 @@
             return exec ("cd ~$whoami && pwd");
         }
         
+        public function get_server_user_path()
+        {
+             $admin_settings = self::get_admin_settings();
+             if(isset($admin_settings['gitoliteuser']) && $admin_settings['gitoliteuser'] != "")
+             {
+                 $user  = $admin_settings['gitoliteuser'];
+                 return exec ("cd ~$user && pwd");
+             }
+             else
+             {
+                 return false;
+                 
+             }
+        }
+
+
         function is_gitolite() 
         {
             $admin_settings = self::get_admin_settings();

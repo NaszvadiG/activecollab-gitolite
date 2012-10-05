@@ -43,7 +43,9 @@
          
         
          
-         
+        /* $sever_user_path = GitoliteAdmin::get_server_user_path();
+                    echo $sever_user_path;
+                    die();*/
          /*echo $repo_path = AC_GITOLITE_GIT_REPO_PATH."/";
          die();*/
          /*$response = ProjectGitolite::render_conf_file();
@@ -128,8 +130,16 @@
                     $errors = new ValidationErrors();    
                     $post_data =  $this->request->post();
                     $settings = GitoliteAdmin :: get_admin_settings();
-                    $repo_path = $settings['gitoliteadminpath']."/".$repository_data['name'];
-                  
+                    
+                    //$repo_path = $settings['gitoliteadminpath'].$repository_data['name'];
+                    $sever_user_path = GitoliteAdmin::get_server_user_path();
+                    if(!$sever_user_path)
+                    {
+                        $errors->addError('Repository path on server invalid');
+                    }
+                    
+                    $repo_path = $sever_user_path."/repositories/".$repository_data['name'].".git";
+                    
                     /*print_r($post_data);
                     die();*/
                     //$repo_name = trim($post_data['repository_name']);
@@ -236,11 +246,13 @@
                                 
                                 $command = "cd ".$dir." && git add * && git commit -am 'render conf file' && git push  || echo 'Not found'";
                                 exec($command,$output,$return_var);
-                                print_r($output);
-                                die();
+                                //print_r($output);
+                                //die();
                                 
-                                /*$command = "cd ".AC_GITOLITE_GIT_REPO_PATH." && git clone ".GIT_SERVER.":".$repo_name;
+                                /*$git_server = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'];
+                                $command = "cd ".$settings['gitoliteadminpath']." && git clone ".$git_server.":".$repo_name;
                                 exec($command,$output,$return_var);*/
+                                
                                 
                                 //$this->response->exception($output);
                             }

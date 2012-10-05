@@ -91,6 +91,7 @@
             
             $settings = GitoliteAdmin :: get_admin_settings();
             $conf_path = $settings['gitoliteadminpath']."/gitolite-admin/conf/gitolite.conf";
+            $webuser = exec("whoami");
             //$conf_path = "/var/www/gitolite/gitolite-admin/conf/gitolite.conf";
             //$conf_path = "/opt/lampp/htdocs/gitadmin/gitolite-admin/conf/gitolite.conf";
             
@@ -113,7 +114,7 @@
                 
                 $get_git_admins = DB::execute("SELECT * FROM ".$admin_settings_table_name);
                 fwrite($fh, "repo "."gitolite-admin"."\n");
-                fwrite($fh, "RW+" ."\t"."="."\t"."www-data"."\n");
+                fwrite($fh, "RW+" ."\t"."="."\t".$webuser."\n");
                 //fwrite($fh, "RW+" ."\t"."="."\t"."kasim-1"."\n");
                
                 if($get_git_admins)
@@ -145,6 +146,7 @@
                                             fwrite($fh, $access_array[GITOLITE_MANAGEACCESS] ."\t"."="."\t".$rowkeys['pub_file_name']."\n");
                                         }
                                     }
+                                    //fwrite($fh, "R" ."\t"."="."\t".$webuser."\n");
                                     /*fwrite($fh, "RW+" ."\t"."="."\t"."kasim"."\n");
                                     fwrite($fh, "RW+" ."\t"."="."\t"."mitesh"."\n");*/
                                 }
@@ -222,7 +224,7 @@
                                                         fwrite($fh, $access ."\t"."="."\t".$rowkeys['pub_file_name']."\n");
                                                     }
                                                 }
-                                                
+                                                fwrite($fh, "R" ."\t"."="."\t".$webuser."\n");
                                                 /*fwrite($fh, "RW+" ."\t"."="."\t"."kasim"."\n");
                                                 fwrite($fh, "RW+" ."\t"."="."\t"."mitesh");*/
                                             }
