@@ -19,7 +19,9 @@
   
     function index()
     {
-         if(AngieApplication::isModuleLoaded("source")  && $this->getControllerName() == 'ac_gitolite')
+         PeopleController::index();
+         $this->setView(get_view_path('index', 'people', SYSTEM_MODULE));
+        /*if(AngieApplication::isModuleLoaded("source")  && $this->getControllerName() == 'ac_gitolite')
          {
              $do_continue = false;
              if(is_dir(GIT_FILES_PATH.DIRECTORY_SEPARATOR."repositories"))
@@ -27,7 +29,7 @@
                  $do_continue = true;
              }
              
-         }
+         }*/
         /*echo "here33";
         die();*/
     } // index
@@ -90,12 +92,7 @@
                  if($public_keys == "") {
                    $errors->addError('Please enter key', 'public_keys');
                  } 
-                 //$this->response->exception($errors->hasErrors());
-                 //die();
-                 //$test =  preg_match("/^[A-Za-z0-9_]+$/", $post_data['key_name']);
                 
-                
-                 
                  /* Check for duplications Key name and Key */
                  if(!$errors->hasErrors())
                  {
@@ -172,7 +169,9 @@
                     exec($command,$output,$return_var);
                     
                     DB::commit('Key added @ ' . __CLASS__);
-                    $this->response->redirectToUrl($this->active_user->getViewUrl());
+                    //$this->response->redirectToUrl($this->active_user->getViewUrl());
+                    self::getpublickeys();
+                    $this->response->ok();
 
                 }
             }catch (Exception $e)

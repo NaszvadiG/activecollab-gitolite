@@ -21,11 +21,16 @@
          parent::index();
          
                //$this->wireframe->actions->add('add_git','Add New Git Repository' , Router::assemble('add_git_repository',array('project_slug' => $this->active_project->getSlug())));
+               
+               // check whether user have access to add repositories
+               if(ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
                 $this->wireframe->actions->add('add_git', 'Add New Git Repository', Router::assemble('add_git_repository',array('project_slug' => $this->active_project->getSlug())), array(
                         'onclick' => new FlyoutFormCallback('repository_created', array('width' => 'narrow')),
                         'icon' => AngieApplication::getImageUrl('layout/button-add.png', ENVIRONMENT_FRAMEWORK, AngieApplication::getPreferedInterface()),        	
                     ));
+               }
                  $can_add_repository = "true";
+               
                  $repositories = ProjectSourceRepositories::findByProjectId($this->active_project->getId(), $this->logged_user->getMinVisibility());
                  $this->response->assign(array(
                            'repositories' => $repositories,
