@@ -19,8 +19,7 @@
   
     function index()
     {
-         PeopleController::index();
-         $this->setView(get_view_path('index', 'people', SYSTEM_MODULE));
+        
         /*if(AngieApplication::isModuleLoaded("source")  && $this->getControllerName() == 'ac_gitolite')
          {
              $do_continue = false;
@@ -170,7 +169,7 @@
                     
                     DB::commit('Key added @ ' . __CLASS__);
                     //$this->response->redirectToUrl($this->active_user->getViewUrl());
-                    self::getpublickeys();
+                   
                     $this->response->ok();
 
                 }
