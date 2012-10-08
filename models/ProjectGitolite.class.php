@@ -79,7 +79,7 @@
             }
             $access_table_name = TABLE_PREFIX . 'gitolite_access_master';
                 
-            DB::execute("INSERT INTO $access_table_name (repo_id, permissions,user_id,group_id) VALUES (?, ?, ?, ?)",
+            DB::execute("INSERT INTO $access_table_name (repo_id,permissions,user_id,group_id) VALUES (?, ?, ?, ?)",
               $repo_id, $permissions,$user_id,$group_id
             );
          return DB::lastInsertId() ;
@@ -172,6 +172,7 @@
                                     $prjobj = new Project($row['project_id']);
                                     // get project users
                                     $prjusers = $prjobj->users()->getIdNameMap();
+                                    
                                     //echo "<br>".$prjobj->getName()."=============".$row['repo_name'];
                                     // get permissions
                                     //echo "SELECT * FROM ".$access_table_name." where repo_id = '".$row['repo_id']."'";
@@ -179,11 +180,13 @@
                                     if($permissions)
                                     {   // get repository permissions
                                         $perm_row = $permissions->getRowAt("0");
-                                        //print_r($perm_row);
-                                        
+                                        /*print_r($perm_row);
+                                        die();*/
                                         //$str = $perm_row['permissions'];
                                         //$str = ':3";i:9;s';
                                         $permissions = @unserialize($perm_row['permissions']);
+                                        //print_r($permissions);
+                                        //die();
                                         if($permissions !== false || $permissions === 'b:0;')
                                         {
                                             $permissions_array = $permissions;
@@ -192,7 +195,7 @@
                                         {
                                            $permissions_array = array();
                                         }    
-                                               
+                                            
                                         /*die();
                                         echo $perm_row['permissions'];*/
                                     }
@@ -200,37 +203,46 @@
                                     {
                                         $permissions_array = array();
                                     }
-                                    
-                                    /*print_r($permissions_array);
-                                    die();*/
+                                    /* if($row['repo_name'] == "testpermisssons")
+                                     {
+                                         print_r($permissions_array);
+                                         die();
+                                      }  
+                                    */
                                     // write repository name in conf file
                                     //echo $row['repo_name']."<br>";
                                     fwrite($fh, "repo ".$row['repo_name']."\n");
                                     if(is_foreachable($prjusers))
                                     {
-                                         
+                                        //print_r($prjusers);
                                         foreach ($prjusers as $keyusers => $valueusers) {
-                                            
+                                            //echo $keyusers."<br>";
                                             //echo "SELECT * FROM ".$public_key_table_name." where user_id = '".$keyusers."'";
                                             //echo "<br>";
+                                            //echo "SELECT * FROM ".$public_key_table_name." where user_id = '".$keyusers."' and is_deleted = '0'";
                                             $pubkeys = DB::execute("SELECT * FROM ".$public_key_table_name." where user_id = '".$keyusers."' and is_deleted = '0'");
-                                            if($pubkeys)
-                                            {
+                                            if(is_object($pubkeys))
+                                            {   
+                                               
                                                 while ($rowkeys = mysql_fetch_assoc($pubkeys->getResource())) 
-                                                {
+                                                { 
+                                                    //echo $keyusers;
                                                     $access = (isset($access_array[$permissions_array[$keyusers]])) ? $access_array[$permissions_array[$keyusers]] : "";
+                                                    //$us.= $keyusers."==========".$permissions_array[$keyusers]."<br>";
                                                     if($access != "" && $rowkeys['pub_file_name']!= "")
                                                     {
                                                         fwrite($fh, $access ."\t"."="."\t".$rowkeys['pub_file_name']."\n");
                                                     }
                                                 }
-                                                fwrite($fh, "R" ."\t"."="."\t".$webuser."\n");
+                                                //fwrite($fh, "R" ."\t"."="."\t".$webuser."\n");
                                                 /*fwrite($fh, "RW+" ."\t"."="."\t"."kasim"."\n");
                                                 fwrite($fh, "RW+" ."\t"."="."\t"."mitesh");*/
                                             }
                                         }
                                        //echo "<br>";
+                                         
                                     }
+                                      
                                     //fwrite($fh,"\n");
                                     //fclose($fh);
                             }
@@ -241,6 +253,7 @@
                 }
                 /*print_r(file_get_contents($conf_path));
                 die();*/
+                
                 return true;
             }
             else 

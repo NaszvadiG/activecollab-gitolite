@@ -117,6 +117,8 @@ class AcGitoliteModule extends AngieModule {
 	  $this->build_db();
 	  //create
 	  parent::install($position, $bulk);
+         Router::cleanUpCache(true);
+         cache_clear();
     } // install
     
     
@@ -205,11 +207,13 @@ class AcGitoliteModule extends AngieModule {
         
     }
     
-    /*function uninstall() {
+    function uninstall() {
         parent::uninstall();
-        $dobj = new DeveloperFramework();
-        $dobj->
-    }*/
+        Router::cleanUpCache(true);
+        cache_clear();
+        /*$dobj = new DeveloperFramework();
+        $dobj->*/
+    }
     function close_db()
     {
         return true;

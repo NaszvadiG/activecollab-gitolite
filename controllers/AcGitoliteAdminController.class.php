@@ -146,6 +146,11 @@ class AcGitoliteAdminController extends AdminController {
             die('Gitolite admin path not found');     
         } //if
         
+        if(!self::exec_enabled())
+        {
+             die("Please enable `exec` on this sever");
+        }
+        
         if(!is_dir(array_var($_GET, 'dir')))
         {
              //die('ok');
@@ -226,5 +231,13 @@ class AcGitoliteAdminController extends AdminController {
           die('ok');
         } // if*/
     }
+    
+    /*  exec_enabled
+     *  check whether exec is enabled on server
+     */
+    function exec_enabled() {
+         $disabled = explode(', ', ini_get('disable_functions'));
+        return !in_array('exec', $disabled);
+}
 
 }

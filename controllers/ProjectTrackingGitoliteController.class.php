@@ -122,6 +122,7 @@
                 
                 try {
                     //print_r($this->request->post());
+                    //die();
                    
                     /* Check form with validation error */
                     $repository_data = $this->request->post('repository');
@@ -235,7 +236,8 @@
                         $repo_id = ProjectGitolite::add_repo_details($repo_fk,$project_id,$user_id,$repo_path,$repository_data);
                         if($repo_id)
                         {
-
+                            /*print_r($post_data['access']);
+                            die();*/
                             $add_access = ProjectGitolite::add_access_levels($repo_id,serialize($post_data['access']),$user_id,1);
                             if($add_access)
                             {
