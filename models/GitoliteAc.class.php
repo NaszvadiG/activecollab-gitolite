@@ -152,4 +152,28 @@
         }
         
     }
+    
+    /*check_keys_added
+     * Check whether keys are added for particular user
+     */
+    function check_keys_added ($user_id = 0)
+    {
+        if($user_id == 0 || $user_id == "")
+        {
+            return false;
+        }
+        $keys_table_name = TABLE_PREFIX . 'gitolite_user_public_keys';
+        $result = DB::execute("SELECT COUNT(user_id) as key_count from ".$keys_table_name. " where user_id = '".$user_id."' and is_deleted  = '0'");
+        if($result)
+        {
+           
+            $get_key_count = $result->getRowAt(0);
+            return $get_key_count['key_count'];
+            
+        }
+        else
+        {
+            return false;
+        }
+    }
   }

@@ -27,4 +27,5 @@
 	  App.Wireframe.Content.bind('repository_created.content', function(event, repository) {
 	    App.Wireframe.Content.setFromUrl('{assemble route=project_repositories project_slug=$active_project->getSlug()}');
 	  });
+          
   </script>

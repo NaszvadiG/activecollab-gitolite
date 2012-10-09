@@ -281,6 +281,19 @@
         }
         
         
+        function update_access_levels($repo_id = 0, $permissions = "")
+        {
+            $access_table_name = TABLE_PREFIX . 'gitolite_access_master';
+            if($repo_id == 0 || $repo_id == "" || $permissions == "")
+            {
+                return FALSE;
+            }
+            /*echo "update  ".$access_table_name." set permissions = '$permissions' where repo_id = ".DB::escape($repo_id);
+            die();  */
+            $update_access  =  DB::execute("update  ".$access_table_name." set permissions = '$permissions' where repo_id = ".DB::escape($repo_id));
+            return TRUE;
+        }
+        
         
   }
     
