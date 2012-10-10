@@ -27,13 +27,14 @@ then
 	echo -e "\033[31m Uses:  sudo $0 {git-username} {php-username} \e[0m"
 	echo -e "\033[31m git-username: The git user is created with given name  \e[0m"
 	echo -e "\033[31m php-username:	Use the user described in phpinfo \e[0m"
+	exit 200
 fi
 
 
 
 
 # Detect Linux Distro
-uname -a | grep Ubuntu
+uname -a | grep Ubuntu &> /dev/null
 if [ $? -eq 0 ]
 then
 	echo -e "\033[34m Ubuntu Detected... \e[0m"
