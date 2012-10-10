@@ -23,14 +23,14 @@ then
 fi
 
 # Checking Arguments
-if [ $# -ne 2 ]
-then
-	echo
-	echo -e "\033[31m Uses:  sudo $0 {git-username} {php-username} \e[0m"
-	echo -e "\033[31m git-username: The git user is created with given name  \e[0m"
-	echo -e "\033[31m php-username:	Use the user described in phpinfo \e[0m"
-	exit 200
-fi
+#if [ $# -ne 2 ]
+#then
+#	echo
+#	echo -e "\033[31m Uses:  sudo $0 {git-username} {php-username} \e[0m"
+#	echo -e "\033[31m git-username: The git user is created with given name  \e[0m"
+#	echo -e "\033[31m php-username:	Use the user described in phpinfo \e[0m"
+#	exit 200
+#fi
 
 
 
@@ -73,12 +73,19 @@ fi
 
 # Check Git User is Already Exist
 #clear
-#echo -e "\033[34m A user account will be created for gitolite setup... \e[0m"
-#read -p "Enter the username [git]: " GITUSER
-GITUSER=$1
-if [[ $GITUSER = "" ]]
+
+if [ $# -lt 1 ]
 then
-	GITUSER=git
+	echo
+	echo -e "\033[34m A user account will be created for gitolite setup... \e[0m"
+	read -p "Enter the username [git]: " GITUSER
+
+	if [[ $GITUSER = "" ]]
+	then
+		GITUSER=git
+	fi
+else
+	GITUSER=$1
 fi
 
 grep ^$GITUSER /etc/passwd &> /dev/null
@@ -121,14 +128,20 @@ sudo -H -u $GITUSER gitolite/install -to /home/$GITUSER/bin || OwnError " Unable
 
 # Add Web User to Git User Group
 #clear
-#echo -e "\033[34m The php username is described in phpinfo file  \e[0m"
-#read -p "Enter the php username [www-data]:  " WEBUSER
-WEBUSER=$2
-if [[ $WEBUSER = "" ]]
+if [ $# -lt 2 ]
 then
-	WEBUSER=www-data
+	echo
+	echo -e "\033[34m The php username is described in phpinfo file  \e[0m"
+	read -p "Enter the php username [www-data]:  " WEBUSER
 
+	if [[ $WEBUSER = "" ]]
+	then
+		WEBUSER=www-data
+	fi
+else
+	WEBUSER=$2
 fi
+
 
 # Add Web User to Git Group
 echo
