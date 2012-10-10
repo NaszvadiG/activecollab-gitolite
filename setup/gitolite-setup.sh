@@ -21,6 +21,15 @@ then
         exit 100 
 fi
 
+# Checking Arguments
+if [ $# -ne 2 ]
+then
+	echo -e "\033[31m Uses:  sudo $0 {git-username} {php-username} \e[0m"
+	echo -e "\033[31m git-username: The git user is created with given name  \e[0m"
+	echo -e "\033[31m php-username:	Use the user described in phpinfo \e[0m"
+fi
+
+
 
 
 # Detect Linux Distro
@@ -58,8 +67,9 @@ fi
 
 # Check Git User is Already Exist
 clear
-echo -e "\033[34m A user account will be created for gitolite setup... \e[0m"
-read -p "Enter the username [git]: " GITUSER
+#echo -e "\033[34m A user account will be created for gitolite setup... \e[0m"
+#read -p "Enter the username [git]: " GITUSER
+GITUSER=$1
 if [[ $GITUSER = "" ]]
 then
 	GITUSER=git
@@ -102,8 +112,9 @@ sudo -H -u $GITUSER gitolite/install -to /home/$GITUSER/bin || OwnError " Unable
 
 # Add Web User to Git User Group
 clear
-echo -e "\033[34m The php username is described in phpinfo file  \e[0m"
-read -p "Enter the php username [www-data]:  " WEBUSER
+#echo -e "\033[34m The php username is described in phpinfo file  \e[0m"
+#read -p "Enter the php username [www-data]:  " WEBUSER
+WEBUSER=$2
 if [[ $WEBUSER = "" ]]
 then
 	WEBUSER=www-data
