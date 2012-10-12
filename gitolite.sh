@@ -2,7 +2,15 @@
 
 
 
-echo -e "\033[34m Gitolite Admin Installation Started At `date`  \e[0m" | tee -ai /var/log/gitolite.sh.log
+echo -e "\033[34m Gitolite Admin Installation Started At `date` \e[0m" | tee -ai /var/log/gitolite.sh.log
+echo
+echo -e "\033[34m For Detailed Installation Messages Use The Following Command \e[0m" 
+echo -e "\033[34m tail -f /var/log/gitolite.sh.log \e[0m" 
+echo
+echo
+
+
+
 
 # Capture Errors
 OwnError()
@@ -199,7 +207,7 @@ sudo -H -u $GITUSER sed -i 's/0077/0007/g' /home/$GITUSER/.gitolite.rc || OwnErr
 # Success Message
 echo
 echo
-echo -e "\033[34m Gitolite Admin is successfully setup at `date` ...  \e[0m" | tee -ai /var/log/gitolite.sh.log
+echo -e "\033[34m Gitolite Admin is successfully setup at `date` \e[0m" | tee -ai /var/log/gitolite.sh.log
 
 
 # Verify Gitolite Admin is Cloned
