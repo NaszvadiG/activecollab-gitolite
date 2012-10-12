@@ -43,7 +43,7 @@ then
 	echo -e "\033[34m Ubuntu Detected... \e[0m"
 else
 	echo
-	echo -e "\033[31m Currently this script support only ubuntu distro  :( \e[0m"
+	echo -e "\033[31m Currently this script support only ubuntu distro  \e[0m"
 	exit 200
 fi
 
@@ -61,12 +61,12 @@ then
 	# Update Cache
 	echo
 	echo -e "\033[34m Updating APT Cache... \e[0m"
-	sudo apt-get update &> /dev/null || OwnError "Unable To Update APT Cache :("
+	sudo apt-get update &> /dev/null || OwnError "Unable To Update APT Cache"
 
 	# Install Open SSH Server And Git
 	echo
 	echo -e "\033[34m Installing Open SSH Server and Git... \e[0m"
-	sudo apt-get install openssh-server git-core &> /dev/null|| OwnError "Unable To Install Open SSH Server and Git :("
+	sudo apt-get -y install openssh-server git-core &> /dev/null|| OwnError "Unable To Install Open SSH Server and Git"
 fi
 
 
@@ -101,27 +101,27 @@ fi
 # Create Git User
 echo
 echo -e "\033[34m Creating System User [$GITUSER]...  \e[0m"
-sudo adduser --system --home /home/$GITUSER --shell /bin/bash --group --disabled-login --disabled-password --gecos 'git version control' $GITUSER &> /dev/null || OwnError " Unable to create $GITUSER :("
+sudo adduser --system --home /home/$GITUSER --shell /bin/bash --group --disabled-login --disabled-password --gecos 'git version control' $GITUSER &> /dev/null || OwnError "Unable to create $GITUSER"
 
 # Create a bin Directory For Git User
 echo
 echo -e "\033[34m Creating bin Directory...  \e[0m"
-sudo -H -u $GITUSER mkdir /home/$GITUSER/bin || OwnError " Unable to create bin directory :("
+sudo -H -u $GITUSER mkdir /home/$GITUSER/bin || OwnError "Unable to create bin directory"
 
 # Create a setup Directory For Gitolite Repository
 echo
 echo -e "\033[34m Creating setup Directory  \e[0m"
-sudo -H -u $GITUSER mkdir /home/$GITUSER/setup || OwnError " Unable to create setup directory :("
+sudo -H -u $GITUSER mkdir /home/$GITUSER/setup || OwnError "Unable to create setup directory"
 
-cd /home/$GITUSER/setup || OwnError " Unable to change directory :("
+cd /home/$GITUSER/setup || OwnError " Unable to change directory"
 
 echo
 echo -e "\033[34m Cloning Gitolite...  \e[0m"
-sudo -H -u $GITUSER git clone git://github.com/sitaramc/gitolite &> /dev/null || OwnError " Unable to clone gitolote repository :("
+sudo -H -u $GITUSER git clone git://github.com/sitaramc/gitolite &> /dev/null || OwnError "Unable to clone gitolote repository"
 
 # Create a Symbolic Link For Gitolite in /home/git/bin Directory
 #sudo -H -u $GITUSER PATH=/home/$GITUSER/bin:$PATH || OwnError " Unable to updat PATH:("
-sudo -H -u $GITUSER gitolite/install -to /home/$GITUSER/bin || OwnError " Unable to create symbolic link :("
+sudo -H -u $GITUSER gitolite/install -to /home/$GITUSER/bin || OwnError "Unable to create symbolic link for Gitolite"
 
 
 
@@ -172,20 +172,20 @@ fi
 # Generate SSH Keys For Web User
 echo
 echo -e "\033[34m Generating SSH Keys For $WEBUSER \e[0m"
-sudo -H -u $WEBUSER ssh-keygen -q -N '' -f $WEBUSERHOME/.ssh/id_rsa || OwnError " Unable to create symbolic link :("
-sudo cp $WEBUSERHOME/.ssh/id_rsa.pub /home/$GITUSER/$WEBUSER.pub || OwnError " Unable to copy $WEBUSER Pubkey :(" 
-sudo chown $GITUSER:$GITUSER /home/$GITUSER/$WEBUSER.pub || OwnError " Unable to change ownership of $WEBUSER :("
+sudo -H -u $WEBUSER ssh-keygen -q -N '' -f $WEBUSERHOME/.ssh/id_rsa || OwnError "Unable to create ssh keys for $WEBUSER"
+sudo cp $WEBUSERHOME/.ssh/id_rsa.pub /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to copy $WEBUSER Pubkey" 
+sudo chown $GITUSER:$GITUSER /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to change ownership of $WEBUSER"
 
 # Setup Gitolite Admin
 echo
 echo -e "\033[34m Setup Gitolite Admin...  \e[0m"
 cd /home/$GITUSER
-sudo -H -u $GITUSER /home/$GITUSER/bin/gitolite setup -pk $WEBUSER.pub &> /dev/null || OwnError " Unable to setup Gitolite Admin (Key) :("
+sudo -H -u $GITUSER /home/$GITUSER/bin/gitolite setup -pk $WEBUSER.pub &> /dev/null || OwnError "Unable to setup Gitolite Admin (Key)"
 
 # Change UMASK Value
 echo
 echo -e "\033[34m Changing UMASK Value...  \e[0m"
-sudo -H -u $GITUSER sed -i 's/0077/0007/g' /home/$GITUSER/.gitolite.rc || OwnError " Unable to change UMASK :("
+sudo -H -u $GITUSER sed -i 's/0077/0007/g' /home/$GITUSER/.gitolite.rc || OwnError "Unable to change UMASK"
 
 # Success Message
 echo
@@ -193,5 +193,5 @@ echo
 echo -e "\033[34m Gitolite Admin is ready to work...  \e[0m"
 
 # Verify Gitolite Admin is Cloned
-#sudo -H -u $WEBUSER $GITUSER@localhost:gitolite-admin.git /tmp/gitolite-admin || OwnError " Unable to Clone Gitolite Admin :("
+#sudo -H -u $WEBUSER $GITUSER@localhost:gitolite-admin.git /tmp/gitolite-admin || OwnError " Unable to Clone Gitolite Admin"
 #sudo rm -rf /tmp/gitolite-admin
