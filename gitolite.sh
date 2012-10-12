@@ -88,7 +88,7 @@ else
 	GITUSER=$1
 fi
 
-grep ^$GITUSER /etc/passwd &> /dev/null
+grep ^$GITUSER$ /etc/passwd &> /dev/null
 if [ $? -eq 0 ]
 then
 	echo
