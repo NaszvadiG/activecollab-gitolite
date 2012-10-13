@@ -208,6 +208,7 @@ sudo -H -u $GITUSER sed -i 's/0077/0007/g' /home/$GITUSER/.gitolite.rc || OwnErr
 echo
 echo
 echo -e "\033[34m Gitolite Admin is successfully setup at `date` \e[0m" | tee -ai /var/log/gitolite.sh.log
+echo -e "\033[34m Please go back to Gitolite Admin, test connection and save settings. \e[0m" | tee -ai /var/log/gitolite.sh.log
 
 
 # Verify Gitolite Admin is Cloned
