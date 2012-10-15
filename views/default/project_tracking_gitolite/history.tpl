@@ -31,7 +31,7 @@
     
         $(document).ready(function() {
             if ($(".empty_page").length  == 0 ){
-                 $('.object_body.object_body_default').remove();
+                 $('.object_body.object_body_default').html('{$repo_path nofilter}');
             }
             else
             {   

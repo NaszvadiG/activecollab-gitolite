@@ -582,6 +582,8 @@
          
         
           $repository = $this->active_repository;
+          $repo_path = $repository->getRepositoryPathUrl();
+         
           $repo_fk = $repository->getId();
           $chk_gitolite = ProjectGitolite::is_gitolite_repo($repo_fk);
           
@@ -641,7 +643,8 @@
         }
         parent::history(); 
         $this->response->assign(array(
-                       'body_text' => $body_text));
+                       'body_text' => $body_text,
+                        'repo_path' => $repo_path));
      
     }
   }
