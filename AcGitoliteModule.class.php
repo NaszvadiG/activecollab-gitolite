@@ -72,7 +72,7 @@ class AcGitoliteModule extends AngieModule {
      * @return string
      */
     function getDescription() {
-	return lang('Add repositories, create users public keys');
+	return lang('Manage Git repositories and user public keys.');
     }// getDescription
 
     /**

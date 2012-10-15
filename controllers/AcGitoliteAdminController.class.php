@@ -19,8 +19,6 @@ class AcGitoliteAdminController extends AdminController {
         
     }
 
-
-
     /** gitolite_admin
      * Save gitolite admin settings
      */
@@ -137,9 +135,22 @@ class AcGitoliteAdminController extends AdminController {
         {
            if(is_dir(array_var($_GET, 'dir')."gitolite-admin"))
            {
-                die("ok");
-               die("gitolite-admin already exists");
-             
+               $comd = "ssh -T ac@rtcamp.info | grep gitolite-admin | grep 'R W'";
+               exec($comd,$output,$return_var);
+               if(count($output) > 1)
+               {
+                   if($output[0] == "R W gitolite-admin")
+                   {
+                       die("ok");
+                   }
+               }
+               else
+               {
+                   die("Unable to connect to server");
+               }
+              
+               //die("ok");
+               //die("gitolite-admin already exists");
                
                /*$comd = "cd ".array_var($_GET,  'dir')." && mv gitolite-admin/ gitolite-admin-".time()."/";
                exec($comd,$output);
