@@ -1,7 +1,7 @@
 <?php
 
   /**
-   * GitoliteAc class
+   * GitoliteAdmin class
    *
    * @package custom.modules.ac_gitolite
    * @subpackage models
@@ -15,22 +15,24 @@
          */
         public function get_admin_settings()
         {
-           $settings_table_name = TABLE_PREFIX . 'gitolite_admin_settings';
-          /*echo "SELECT COUNT(repo_id) as dup_name_cnt from ".$repo_table_name."
-                                  where project_id = '".$active_project."' and repo_name = '".$post_data['repository_name']."'";*/
-           $result = DB::execute("SELECT * from ".$settings_table_name);
-           if (is_foreachable($result)) 
+           $settings_table_name = TABLE_PREFIX . 'rt_config_settings';
+           
+           $result = DB::execute("SELECT * from ".$settings_table_name." 
+                                   WHERE module_name = '".AC_GITOLITE_MODULE."'");
+           if ($result) 
            {
-                foreach ($result as $settings) 
-                {
-
-                    $results = array(
-                                'gitoliteuser'=> $settings['gitoliteuser'],
-                                'gitoliteserveradd'=> $settings['gitoliteserveradd'],
-                                'gitoliteadmins'=> $settings['gitoliteadmins'],
-                                'gitoliteadminpath' => $settings['gitoliteadminpath']
+                
+               $settings =  $result->getRowAt(0);
+               if($settings['config_settings'] != "")
+               {
+                   $config_settings = @unserialize($settings['config_settings']);
+               }
+               $results = array(
+                                'gitoliteuser'=> $config_settings['gitoliteuser'],
+                                'gitoliteserveradd'=> $config_settings['gitoliteserveradd'],
+                                'gitoliteadminpath' => $config_settings['gitoliteadminpath']
                         );
-                } // foreach
+              
            }
            else
            {
@@ -43,8 +45,10 @@
         
         function setting_exists()
         {
-            $settings_table_name = TABLE_PREFIX . 'gitolite_admin_settings';
-            $result = DB::execute("SELECT COUNT(setting_id) as cnt_settings from ".$settings_table_name);
+            $settings_table_name = TABLE_PREFIX . 'rt_config_settings';
+            
+            $result = DB::execute("SELECT COUNT(setting_id) as cnt_settings from ".$settings_table_name.
+                                  " WHERE module_name = '".AC_GITOLITE_MODULE."'");
             if($result)
             {
                 $is_exists = $result->getRowAt(0);
@@ -54,35 +58,31 @@
         
         function insert_settings($post_data = array(),$active_user = 0)
         {
-            //,$admins = ""
+            
             if(count($post_data) == 0 || $active_user == 0)
             {
                 return FALSE;
             }
-        
-            $settings_table_name = TABLE_PREFIX . 'gitolite_admin_settings';
-            $admins = "";
-            DB::execute("INSERT INTO $settings_table_name (gitoliteuser, gitoliteserveradd,gitoliteadminpath,gitoliteadmins,added_by) VALUES (?, ?, ?,?,?)",
-                   $post_data['gitoliteuser'], $post_data['gitoliteserveradd'],$post_data['gitoliteadminpath'],$admins,$active_user
+            $module_name = AC_GITOLITE_MODULE;
+            $settings_table_name = TABLE_PREFIX . 'rt_config_settings';
+            DB::execute("INSERT INTO $settings_table_name (module_name,config_settings,added_by) VALUES (?, ?, ?)",
+                  $module_name,serialize($post_data),$active_user
             );
             return DB::lastInsertId() ;
         }
         
         function update_settings($post_data = array(),$active_user = 0)
         {
-            //|| $admins == ""
+            
             if(count($post_data) == 0 || $active_user == 0)
             {
                 return FALSE;
             } 
             $admins = "";
-            $settings_table_name = TABLE_PREFIX . 'gitolite_admin_settings';
+            $settings_table_name = TABLE_PREFIX . 'rt_config_settings';
             
            
-             DB::execute("UPDATE  $settings_table_name SET gitoliteuser = '". $post_data['gitoliteuser']."' ,
-                          gitoliteserveradd  = '".$post_data['gitoliteserveradd']."', 
-                          gitoliteadminpath = '".$post_data['gitoliteadminpath']."',
-                          gitoliteadmins    = '".$admins."'"
+             DB::execute("UPDATE  $settings_table_name SET config_settings = '".  serialize($post_data)."'"
             );
             return DB::affectedRows();
         }
@@ -133,8 +133,10 @@
             {
                 $return_str = "sudo bash gitolite-setup.sh git".' '.$_SERVER['USER'];
             }*/
+            
             return $script;
         }
+        
  }
     
     

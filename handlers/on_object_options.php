@@ -19,7 +19,7 @@
    if($object instanceof ProjectSourceRepository) {
        
         // Check whether repository is a gitolite repository
-        $repo_table_name = TABLE_PREFIX . 'gitolite_repomaster';
+        $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
         $objects_table_name = TABLE_PREFIX . 'project_objects';
         
         $result = DB::execute("SELECT * FROM $repo_table_name a, $objects_table_name b 

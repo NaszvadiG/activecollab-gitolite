@@ -35,12 +35,10 @@
 </div>
 {else}
     <div id="company">
-        <table class="" cellspacing=0>
-            <tr>
-                <th  colspan="3" style="text-align: center;">&nbsp;</th>
-	    </tr>
+        <table  class="active_projects common" cellspacing="5" cellpadding = "10">
+           
              <tr>
-                 <th class="name" colspan="3" style="text-align: center;"> Can't find gitolite admin</th>
+                 <th class="name" colspan="3" style="text-align: center;">Can't find gitolite admin.</th>
 	    </tr>
         
         </table>

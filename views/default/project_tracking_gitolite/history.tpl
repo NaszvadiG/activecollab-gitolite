@@ -14,7 +14,7 @@
     </div>
     
     <div class="grouped_commits">
-      {include file=get_view_path('_history_loop', 'repository', $smarty.const.SOURCE_MODULE)}
+      {include file=get_view_path('_history_loop', 'project_tracking_gitolite', $smarty.const.AC_GITOLITE_MODULE)}
     </div>
     
     <div class="show_thirty_more">

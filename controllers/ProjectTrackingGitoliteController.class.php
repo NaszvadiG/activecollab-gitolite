@@ -106,11 +106,7 @@
 
          if(AngieApplication::isModuleLoaded("source") && $this->getControllerName() == 'project_tracking_gitolite')
          { 
-             /*$do_continue = false;
-             if(is_dir(AC_GITOLITE_GIT_REPO_PATH))
-             {
-                 $do_continue = true;
-             }*/
+             
               $do_continue = true;
           }
           
@@ -357,9 +353,9 @@
           if($do_continue)
           {
               
-              $repo_table_name = TABLE_PREFIX . 'gitolite_repomaster';
+              $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
               $objects_table_name = TABLE_PREFIX . 'project_objects';
-              $access_table_name = TABLE_PREFIX . 'gitolite_access_master';      
+              $access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';      
               
               $users_details = $this->active_project->users()->getIdNameMap();
               //print_r($users_details);
@@ -379,8 +375,7 @@
                       $access = $access_array['permissions'];
                       
                       $permissions = @unserialize($access);
-                      //print_r($permissions);
-                      //die();
+                      
                       if($permissions !== false || $permissions === 'b:0;')
                       {
                           $permissions_array = $permissions;

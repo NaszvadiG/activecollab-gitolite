@@ -111,7 +111,7 @@ class AcGitoliteModule extends AngieModule {
         $default_charset = defined('DB_CHARSET') && (DB_CHARSET == 'utf8') ? 'DEFAULT CHARSET=utf8' : '';
         
         
-	$create_key_table = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "gitolite_user_public_keys` (
+	$create_key_table = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "rt_gitolite_user_public_keys` (
             `key_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
             `user_id` INT(10) NOT NULL,
             `key_name`  varchar(255) NOT NULL,
@@ -121,11 +121,11 @@ class AcGitoliteModule extends AngieModule {
             `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY  (`key_id`)
           ) $storage_engine $default_charset;";
-            //create the gitolite_user_public_keys table to store public keys
+            //create the rt_gitolite_user_public_keys table to store public keys
          DB::execute($create_key_table);
          
          
-         $create_repo_table = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "gitolite_repomaster` (
+         $create_repo_table = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "rt_gitolite_repomaster` (
             `repo_id` INT(11) NOT NULL AUTO_INCREMENT,
             `repo_fk` INT(10) NOT NULL,
             `project_id` INT(11) NOT NULL,
@@ -135,10 +135,10 @@ class AcGitoliteModule extends AngieModule {
             `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY  (`repo_id`)
           ) $storage_engine $default_charset;";
-            //create the gitolite_repomaster table to store repo information
+            //create the rt_gitolite_repomaster table to store repo information
          DB::execute($create_repo_table);
          
-         $create_access_table = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "gitolite_access_master` (
+         $create_access_table = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "rt_gitolite_access_master` (
             `access_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
             `repo_id` INT(11) NOT NULL,
             `permissions` TEXT NOT NULL,
@@ -147,11 +147,11 @@ class AcGitoliteModule extends AngieModule {
             `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY  (`access_id`)
           ) $storage_engine $default_charset;";
-            //create the gitolite_access_master table to store repository access information
+            //create the rt_gitolite_access_master table to store repository access information
          DB::execute($create_access_table);
  
          
-         $create_gitolite_admin_settings = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "gitolite_admin_settings` (
+         /*$create_rt_config_settings = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "rt_config_settings` (
             `setting_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
             `gitoliteuser` varchar(255) NOT NULL,
             `gitoliteserveradd` varchar(255) NOT NULL,
@@ -161,8 +161,20 @@ class AcGitoliteModule extends AngieModule {
             `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY  (`setting_id`)
           ) $storage_engine $default_charset;";
-            //create the gitolite_admin_settings table to store admin settings
-         DB::execute($create_gitolite_admin_settings);
+            //create the rt_config_settings table to store admin settings
+         DB::execute($create_rt_config_settings);*/
+         
+         $create_rt_config_settings = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "rt_config_settings` (
+            `setting_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+            `module_name` varchar(100) NOT NULL,
+            `config_settings` TEXT NOT NULL,
+            `added_by` INT(10) NOT NULL,
+            `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY  (`setting_id`)
+          ) $storage_engine $default_charset;";
+            //create the rt_config_settings table to store admin settings
+         DB::execute($create_rt_config_settings);
+         
          
     }
     

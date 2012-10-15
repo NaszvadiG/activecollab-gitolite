@@ -64,7 +64,7 @@
     <div id="repository_create_git">
         <div class="fields_wrapper">
             <strong style="text-align: center">Can't find gitolite admin. Please set settings from Gitollite Admin panel 
-                    using Administration or contact administrator</strong>
+                    using Administration or contact administrator.</strong>
         </div>
     </div>
 {/if}

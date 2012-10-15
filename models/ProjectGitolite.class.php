@@ -20,7 +20,7 @@
            {
                 return array();
            }
-           $repo_table_name = TABLE_PREFIX . 'gitolite_repomaster';
+           $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
            $source_table_name = TABLE_PREFIX . 'source_repositories';
           /*echo "SELECT COUNT(repo_id) as dup_name_cnt from ".$repo_table_name."
                                   where project_id = '".$active_project."' and repo_name = '".$post_data['repository_name']."'";*/
@@ -53,7 +53,7 @@
             {
                 return FALSE;
             }
-            $repo_table_name = TABLE_PREFIX . 'gitolite_repomaster';
+            $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
             
             DB::execute("INSERT INTO $repo_table_name (repo_fk,project_id,repo_name,git_repo_path,repo_created_by) VALUES (? ,?, ?, ?, ?)",
               $repo_fk,$active_project, $post_data['name'],$repo_path,$user_id
@@ -77,7 +77,7 @@
             {
                 return FALSE;
             }
-            $access_table_name = TABLE_PREFIX . 'gitolite_access_master';
+            $access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';
                 
             DB::execute("INSERT INTO $access_table_name (repo_id,permissions,user_id,group_id) VALUES (?, ?, ?, ?)",
               $repo_id, $permissions,$user_id,$group_id
@@ -106,11 +106,11 @@
             
             if(file_exists($conf_path) && $fh)
             {
-                $repo_table_name = TABLE_PREFIX . 'gitolite_repomaster';
-                $access_table_name = TABLE_PREFIX . 'gitolite_access_master';
-                $public_key_table_name = TABLE_PREFIX . 'gitolite_user_public_keys';
+                $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
+                $access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';
+                $public_key_table_name = TABLE_PREFIX . 'rt_gitolite_user_public_keys';
                 $source_table_name = TABLE_PREFIX . 'source_repositories';
-                $admin_settings_table_name = TABLE_PREFIX . 'gitolite_admin_settings';
+                $admin_settings_table_name = TABLE_PREFIX . 'rt_config_settings';
                 
                 $get_git_admins = DB::execute("SELECT * FROM ".$admin_settings_table_name);
                 fwrite($fh, "repo "."gitolite-admin"."\n");
@@ -264,7 +264,7 @@
         
         function get_project_repo($active_project = 0)
         {
-            $repo_table_name = TABLE_PREFIX . 'gitolite_repomaster';
+            $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
             $result = DB::execute("SELECT * from ".$repo_table_name."
                                   where project_id = '".$active_project."'");
            
@@ -283,7 +283,7 @@
         
         function update_access_levels($repo_id = 0, $permissions = "")
         {
-            $access_table_name = TABLE_PREFIX . 'gitolite_access_master';
+            $access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';
             if($repo_id == 0 || $repo_id == "" || $permissions == "")
             {
                 return FALSE;
@@ -301,8 +301,8 @@
            {
                 return false;
            }
-           $repo_table_name = TABLE_PREFIX . 'gitolite_repomaster';
-           $access_table_name = TABLE_PREFIX.'gitolite_access_master';
+           $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
+           $access_table_name = TABLE_PREFIX.'rt_gitolite_access_master';
            $result = DB::execute("SELECT count(repo_fk) as chk_gitolite, b.permissions from $repo_table_name a , 
                                   $access_table_name b where a.repo_id = b.repo_id and
                                    repo_fk = '$repo_fk'");

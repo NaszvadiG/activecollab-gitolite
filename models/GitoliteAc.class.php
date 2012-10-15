@@ -21,7 +21,7 @@
             return array();
         }
         
-        $keys_table_name = TABLE_PREFIX . 'gitolite_user_public_keys';
+        $keys_table_name = TABLE_PREFIX . 'rt_gitolite_user_public_keys';
         $result = DB::execute("SELECT * from ".$keys_table_name. " where user_id = '".$active_user."' and is_deleted  = '0'");
        
         if (is_foreachable($result)) 
@@ -42,9 +42,6 @@
         {
            $results = array() ;
         }
-        /*
-        print_r($results);
-        die();*/
        
         return $results;
     
@@ -62,10 +59,8 @@
        {
             return array();
        }
-       $keys_table_name = TABLE_PREFIX . 'gitolite_user_public_keys';
-       /*$result = DB::execute("SELECT COUNT(user_id) as dup_cnt from ".$keys_table_name. " 
-                              where (user_id = '".$active_user."' and key_name = '".$post_data['key_name']."') OR 
-                              (user_id = '".$active_user."' and key_name = '".$post_data['public_keys']."')");*/
+       $keys_table_name = TABLE_PREFIX . 'rt_gitolite_user_public_keys';
+       
        $result = DB::execute("SELECT COUNT(user_id) as dup_name_cnt from ".$keys_table_name."
                                 where user_id = '".$active_user."' and key_name = '".$post_data['key_name']."' and is_deleted = '0'
                                 UNION
@@ -95,7 +90,7 @@
             return FALSE;
         }
         
-        $keys_table_name = TABLE_PREFIX . 'gitolite_user_public_keys';
+        $keys_table_name = TABLE_PREFIX . 'rt_gitolite_user_public_keys';
        
         
         DB::execute("INSERT INTO $keys_table_name (user_id, key_name,pub_file_name, public_key) VALUES (?, ?, ?, ?)",
@@ -110,7 +105,7 @@
      */
     function remove_keys($key_id = 0)
     {
-        $keys_table_name = TABLE_PREFIX . 'gitolite_user_public_keys';
+        $keys_table_name = TABLE_PREFIX . 'rt_gitolite_user_public_keys';
         if($key_id == 0 || $key_id == "")
         {
             return false;
@@ -130,10 +125,15 @@
         }
     }
     
-    
+    /**
+     * get_filename 
+     * Get public file name
+     * @param type $key_id
+     * @return boolean
+     */
     function get_filename($key_id = 0)
     {
-        $keys_table_name = TABLE_PREFIX . 'gitolite_user_public_keys';
+        $keys_table_name = TABLE_PREFIX . 'rt_gitolite_user_public_keys';
         if($key_id == 0 || $key_id == "")
         {
             return false;
@@ -162,7 +162,7 @@
         {
             return false;
         }
-        $keys_table_name = TABLE_PREFIX . 'gitolite_user_public_keys';
+        $keys_table_name = TABLE_PREFIX . 'rt_gitolite_user_public_keys';
         $result = DB::execute("SELECT COUNT(user_id) as key_count from ".$keys_table_name. " where user_id = '".$user_id."' and is_deleted  = '0'");
         if($result)
         {

@@ -34,18 +34,6 @@ class AcGitoliteAdminController extends AdminController {
        
        $setup_script = GitoliteAdmin :: get_setup_path();
        
-       $admins_access = @unserialize($settings['gitoliteadmins']);
-       if($admins_access !== false || $admins_access === 'b:0;')
-       {
-            $admins_array = $admins_access;
-       }
-       else
-       {
-            $admins_array = array();
-       } 
-      
-       $admins = @implode(",", $admins_array);
-       
        $gitoliteadminpath = GitoliteAdmin :: get_admin_path();
        
        $gitoliteadminpath = "$gitoliteadminpath/gitolite/";
@@ -91,7 +79,7 @@ class AcGitoliteAdminController extends AdminController {
                 {   
                      $settings_update = GitoliteAdmin :: update_settings($post_data,$this->logged_user->getId());
                 }
-                DB::commit('Repository created @ ' . __CLASS__);
+                DB::commit('Admin Settings Saved @ ' . __CLASS__);
 
                 $this->flash->success("Settings saved successfully");
                 $this->response->ok();
@@ -149,7 +137,7 @@ class AcGitoliteAdminController extends AdminController {
         {
            if(is_dir(array_var($_GET, 'dir')."gitolite-admin"))
            {
-               
+                die("ok");
                die("gitolite-admin already exists");
              
                
