@@ -77,7 +77,7 @@ fi
 #clear
 if [ $# -lt 1 ]
 then
-	echo
+	#echo
 	echo -e "\033[34m A user account will be created for gitolite setup... \e[0m" | tee -ai /var/log/gitolite.sh.log
 	read -p "Enter the username [git]: " GITUSER
 
@@ -118,7 +118,7 @@ sudo -H -u $GITUSER mkdir /home/$GITUSER/setup || OwnError "Unable to create set
 
 cd /home/$GITUSER/setup || OwnError " Unable to change directory"
 
-echo
+#echo
 echo -e "\033[34m Cloning Gitolite...  \e[0m" | tee -ai /var/log/gitolite.sh.log
 sudo -H -u $GITUSER git clone git://github.com/sitaramc/gitolite &>> /var/log/gitolite.sh.log || OwnError "Unable to clone gitolote repository"
 
@@ -135,7 +135,7 @@ sudo -H -u $GITUSER gitolite/install -to /home/$GITUSER/bin || OwnError "Unable 
 #clear
 if [ $# -lt 2 ]
 then
-	echo
+	#echo
 	echo -e "\033[34m The PHP username is given at Gitolite Admin [Need Help section]  \e[0m" | tee -ai /var/log/gitolite.sh.log
 	read -p "Enter the php username [www-data]:  " WEBUSER
 
@@ -151,7 +151,7 @@ fi
 
 
 # Add Web User to Git Group
-echo
+#echo
 echo -e "\033[34m Adding $WEBUSER to $GITUSER group...  \e[0m" | tee -ai /var/log/gitolite.sh.log
 sudo adduser $WEBUSER $GITUSER &>> /var/log/gitolite.sh.log
 
@@ -171,7 +171,7 @@ then
 	echo -e "\033[34m The ssh key rt_rsa already exist... \e[0m"
 else
 	# Generate SSH Keys For Web User
-	echo
+	#echo
 	echo -e "\033[34m Generating ssh keys for $WEBUSER \e[0m" | tee -ai /var/log/gitolite.sh.log
 	sudo -H -u $WEBUSER ssh-keygen -q -N '' -f $WEBUSERHOME/.ssh/rt_rsa || OwnError "Unable to create ssh keys for $WEBUSER"
 	sudo cp $WEBUSERHOME/.ssh/rt_rsa.pub /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to copy $WEBUSER Pubkey" 
@@ -192,7 +192,7 @@ echo -e "\033[34m Changing umask value...  \e[0m" | tee -ai /var/log/gitolite.sh
 sudo -H -u $GITUSER sed -i 's/0077/0007/g' /home/$GITUSER/.gitolite.rc || OwnError "Unable to change UMASK"
 
 # Success Message
-echo
+#echo
 echo
 echo -e "\033[34m Gitolite Admin is successfully setup at `date` \e[0m" | tee -ai /var/log/gitolite.sh.log
 echo -e "\033[34m Please go back to Gitolite Admin, test connection and save settings. \e[0m" | tee -ai /var/log/gitolite.sh.log
