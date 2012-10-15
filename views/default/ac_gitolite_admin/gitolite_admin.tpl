@@ -181,7 +181,6 @@
 		//$.get(test_connection_url,{url: repository_url, engine: "GitRepository", async : true,dir:admin_dir},
                  $.get(test_connection_url,{user: gitoliteuser, engine: "GitRepository", async : true,dir:admin_dir,server:serveraddress},
 		function(data){
-                        
 			$('#test_connection_loading_img').hide();
 			if (jQuery.trim(data) == 'ok') {
 				$("#test_gitolite_connection").hide();
