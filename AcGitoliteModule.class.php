@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Merger module defintiion
+ * Ac Gitolite module defintiion
  *
- * @package activeCollab.modules.project_merger
+ * @package activeCollab.modules.ac_gitolite
  * @subpackage models
  */
 class AcGitoliteModule extends AngieModule {
@@ -19,11 +19,8 @@ class AcGitoliteModule extends AngieModule {
      *
      * @var string
      */
-    protected $version = '0.1';
+    
 
-  
-    private $check_version_url = 'http://www.uswebstyle.com/status/versions.xml';
-    private $products_url = 'http://www.uswebstyle.com/products.html';
 
     function getCheckVersionUrl() {
         return $this->check_version_url;
@@ -38,41 +35,26 @@ class AcGitoliteModule extends AngieModule {
      */
     function defineRoutes() 
     {
-        //Router::map('project_repositories', '/projects/:project_slug/repositories', array('controller'=>'repository', 'action'=>'index'));
-        // Repositories
+        
         Router::map('add_git_repository', '/projects/:project_slug/repositories/add-git', array('controller'=>'project_tracking_gitolite', 'action'=>'add_git_repo'));
         Router::map('project_repositories', '/projects/:project_slug/repositories', array('controller'=>'project_tracking_gitolite', 'action'=>'index'));
-        //Router::map('repository_history', '/projects/:project_slug/repositories/:project_source_repository_id', array('controller'=>'project_tracking_gitolite', 'action'=>'history'));
         Router::map('repository_history', '/projects/:project_slug/repositories/:project_source_repository_id', array('controller'=>'project_tracking_gitolite', 'action'=>'history'), array('project_source_repository_id'=>Router::MATCH_ID));
-        //Router::map('get_public_keys', 'people/:user_id/public-keys', array('controller'=>'ac_gitolite', 'action'=>'index'));
         Router::map('get_public_keys', 'people/:company_id/users/:user_id/public-keys', array('controller'=>'ac_gitolite', 'action'=>'getpublickeys'));
         Router::map('add_public_keys', 'people/:company_id/users/:user_id/add-public-keys', array('controller'=>'ac_gitolite', 'action'=>'add_public_keys'));
         Router::map('remove_key', 'people/:company_id/users/:user_id/delete-keys/:key_id', array('controller'=>'ac_gitolite', 'action'=>'remove_key'));
         Router::map('gitolite_admin', 'admin/gitolite_admin', array('controller'=> 'ac_gitolite_admin','action'=>'gitolite_admin'));
         Router::map('gitolite_test_connection', 'admin/test_connection', array('controller'=> 'ac_gitolite_admin','action'=>'test_connection'));
         Router::map('edit_git_repository', '/projects/:project_slug/repositories/:project_source_repository_id/edit-git', array('controller'=> 'project_tracking_gitolite','action'=>'edit_git_repo'));
-        //Router::map('repository_history', '/projects/:project_slug/repositories/:project_source_repository_id', array('controller'=>'project_tracking_gitolite', 'action'=>'history'));
-    }
-
-    
-    
-    
-// defineRoutes
+    }// defineRoutes
 
     function defineHandlers() 
     {
-       
-       //EventsManager::listen('on_project_tabs', 'on_project_tabs');
-       //EventsManager::listen('on_available_project_tabs', 'on_available_project_tabs');
+
        EventsManager::listen('on_inline_tabs', 'on_inline_tabs');   
        EventsManager::listen('on_admin_panel', 'on_admin_panel');   
        EventsManager::listen('on_object_options', 'on_object_options');   
-       
-       // EventsManager::listen('on_get_project_object_types', 'on_get_project_object_types');
         
-    }
-
-// defineHandlers
+    }// defineHandlers
 
     /**
      * Get module display name
@@ -82,9 +64,7 @@ class AcGitoliteModule extends AngieModule {
     function getDisplayName() {
      
         return lang('AC Gitolite Interface');
-    }
-
-// getDisplayName
+    }// getDisplayName
 
     /**
      * Return module description
@@ -92,12 +72,8 @@ class AcGitoliteModule extends AngieModule {
      * @return string
      */
     function getDescription() {
-       
-	return lang('Add repositories, create user , groups on repositories');
-
-    }
-
-// getDescription
+	return lang('Add repositories, create users public keys');
+    }// getDescription
 
     /**
      * Return module uninstallation message
@@ -107,8 +83,7 @@ class AcGitoliteModule extends AngieModule {
      */
     function getUninstallMessage() {
         return lang('Module will be deactivated!');
-    }
-// getUninstallMessage
+    }// getUninstallMessage
     
     /**
      * Install this module
@@ -119,12 +94,12 @@ class AcGitoliteModule extends AngieModule {
     function install($position = null, $bulk = false) {
       //dump the table
 	  $this->close_db();
-	  //create it :)
+	
 	  $this->build_db();
 	  //create
 	  parent::install($position, $bulk);
-         Router::cleanUpCache(true);
-         cache_clear();
+          Router::cleanUpCache(true);
+          cache_clear();
     } // install
     
     
@@ -134,7 +109,7 @@ class AcGitoliteModule extends AngieModule {
     {
         $storage_engine  = defined('DB_CAN_TRANSACT') && DB_CAN_TRANSACT ? 'ENGINE=InnoDB' : '';
         $default_charset = defined('DB_CHARSET') && (DB_CHARSET == 'utf8') ? 'DEFAULT CHARSET=utf8' : '';
-        //xero update
+        
         
 	$create_key_table = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "gitolite_user_public_keys` (
             `key_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
@@ -172,19 +147,9 @@ class AcGitoliteModule extends AngieModule {
             `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY  (`access_id`)
           ) $storage_engine $default_charset;";
-            //create the gitolite_repomaster table to store repo information
+            //create the gitolite_access_master table to store repository access information
          DB::execute($create_access_table);
  
-         /*$create_gitolite_admin_users = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "gitolite_admin_users` (
-            `admin_user_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-            `user_id` INT(10) NOT NULL,
-            `added_by` INT(10) NOT NULL,
-            `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY  (`admin_user_id`)
-          ) $storage_engine $default_charset;";
-            //create the gitolite_repomaster table to store repo information
-         DB::execute($create_gitolite_admin_users);*/
-         
          
          $create_gitolite_admin_settings = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "gitolite_admin_settings` (
             `setting_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
@@ -196,33 +161,20 @@ class AcGitoliteModule extends AngieModule {
             `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY  (`setting_id`)
           ) $storage_engine $default_charset;";
-            //create the gitolite_repomaster table to store repo information
+            //create the gitolite_admin_settings table to store admin settings
          DB::execute($create_gitolite_admin_settings);
          
-         
-         /*$create_key_table = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "gitolite_user_public_keys` (
-            `key_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-            `user_id` INT(10) NOT NULL,
-            `public_key` varchar(255) NOT NULL,
-            `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY  (`key_id`)
-          ) $storage_engine $default_charset;";
-            //create the gitolite_user_public_keys table
-         DB::execute($create_key_table);*/
-         
-        
     }
     
     function uninstall() {
         parent::uninstall();
         Router::cleanUpCache(true);
         cache_clear();
-        /*$dobj = new DeveloperFramework();
-        $dobj->*/
+
     }
     function close_db()
     {
         return true;
-        //DB::execute("DROP TABLE IF EXISTS `" . TABLE_PREFIX . "gitolite_user_public_keys`");
+        
     }
 }

@@ -43,7 +43,7 @@
                    
                    
                     $chk_gitolite = ProjectGitolite::is_gitolite_repo($repo_fk);
-                    //print_r($chk_gitolite);
+                    
                     if(is_array($chk_gitolite) && sizeof($chk_gitolite) > 0 && $chk_gitolite['chk_gitolite'] > 0)
                     {
                         
@@ -56,9 +56,7 @@
                         {
                            $permissions_array = array();
                         }
-                        //echo array_key_exists ($this->logged_user->getId(),$permissions_array);
-                       // print_r($permissions_array);
-                        //echo "<br>";
+                        
                         if((array_key_exists($this->logged_user->getId(),$permissions_array) && $permissions_array[$this->logged_user->getId()] > 1)
                            || $this->logged_user->isAdministrator() || $this->logged_user->isProjectManager() 
                            || $this->active_project->isLeader($this->logged_user) 
@@ -463,6 +461,7 @@
           {    
                 
                 try {
+                    
                     /*print_r($this->request->post());
                     die();*/
                    
@@ -602,7 +601,7 @@
                 {
                    $permissions_array = array();
                 }
-                //echo array_key_exists ($this->logged_user->getId(),$permissions_array);
+               
                // print_r($permissions_array);
                 //echo "<br>";
                 if((array_key_exists($this->logged_user->getId(),$permissions_array) && $permissions_array[$this->logged_user->getId()] > 1)

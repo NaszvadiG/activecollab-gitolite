@@ -25,7 +25,8 @@
   </div>
   
   <script type="text/javascript">
-    // reload the page as we need to render complex things like graphs
+      
+          // reload the page as we need to render complex things like graphs
 	  App.Wireframe.Content.bind('repository_created.content', function(event, repository) {
           App.Wireframe.Content.reload();
 	   // App.Wireframe.Content.setFromUrl('{assemble route=project_repositories project_slug=$active_project->getSlug()}');
