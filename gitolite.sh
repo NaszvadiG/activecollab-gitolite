@@ -174,8 +174,6 @@ else
 	#echo
 	echo -e "\033[34m Generating ssh keys for $WEBUSER \e[0m" | tee -ai /var/log/gitolite.sh.log
 	sudo -H -u $WEBUSER ssh-keygen -q -N '' -f $WEBUSERHOME/.ssh/rt_rsa || OwnError "Unable to create ssh keys for $WEBUSER"
-	sudo cp $WEBUSERHOME/.ssh/rt_rsa.pub /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to copy $WEBUSER Pubkey" 
-	sudo chown $GITUSER:$GITUSER /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to change ownership of $WEBUSER"
 fi
 
 
@@ -183,6 +181,8 @@ fi
 # Setup Gitolite Admin
 echo
 echo -e "\033[34m Setup Gitolite Admin...  \e[0m" | tee -ai /var/log/gitolite.sh.log
+sudo cp $WEBUSERHOME/.ssh/rt_rsa.pub /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to copy $WEBUSER Pubkey" 
+sudo chown $GITUSER:$GITUSER /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to change ownership of $WEBUSER"
 cd /home/$GITUSER
 sudo -H -u $GITUSER /home/$GITUSER/bin/gitolite setup -pk $WEBUSER.pub &>> /var/log/gitolite.sh.log || OwnError "Unable to setup Gitolite Admin (Key)"
 
