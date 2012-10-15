@@ -2,21 +2,16 @@
 
 
 
-echo -e "\033[34m Gitolite Admin Installation Started At `date` \e[0m" | tee -ai /var/log/gitolite.sh.log
-echo
-echo -e "\033[34m For Detailed Installation Messages Use The Following Command \e[0m" 
+echo -e "\033[34m Gitolite admin installation started at `date` \e[0m" | tee -ai /var/log/gitolite.sh.log
+echo -e "\033[34m For detailed installation messages use the following command \e[0m" 
 echo -e "\033[34m tail -f /var/log/gitolite.sh.log \e[0m" 
-echo
-echo
-
-
-
 
 # Capture Errors
 OwnError()
 {
         #echo $@ >&2
-        clear
+        #clear
+	echo
         echo -e "[ $0 ][ `date` ] \033[31m $@ \e[0m" | tee -ai /var/log/gitolite.sh.log 
         exit 100 
 }
@@ -43,8 +38,6 @@ fi
 #fi
 
 
-
-
 # Detect Linux Distro
 uname -a | grep Ubuntu &>> /var/log/gitolite.sh.log
 if [ $? -eq 0 ]
@@ -69,13 +62,13 @@ GITCORE=$(echo $?)
 if [ $OPENSSH -ne 0 ] || [ $GITCORE -ne 0 ]
 then
 	# Update Cache
-	echo
-	echo -e "\033[34m Updating APT Cache... \e[0m" | tee -ai /var/log/gitolite.sh.log
+	#echo
+	echo -e "\033[34m Updating apt cache... \e[0m" | tee -ai /var/log/gitolite.sh.log
 	sudo apt-get update &>> /var/log/gitolite.sh.log || OwnError "Unable To Update APT Cache"
 
 	# Install Open SSH Server And Git
-	echo
-	echo -e "\033[34m Installing Open SSH Server and Git... \e[0m" | tee -ai /var/log/gitolite.sh.log
+	#echo
+	echo -e "\033[34m Installing openssh-server and git-core... \e[0m" | tee -ai /var/log/gitolite.sh.log
 	sudo apt-get -y install openssh-server git-core &>> /var/log/gitolite.sh.log || OwnError "Unable To Install Open SSH Server and Git"
 fi
 
@@ -101,7 +94,7 @@ fi
 grep ^$GITUSER$ /etc/passwd &>> /var/log/gitolite.sh.log
 if [ $? -eq 0 ]
 then
-	echo
+	#echo
 	echo -e "\033[31m The $GITUSER user is already exist !! \e[0m" | tee -ai /var/log/gitolite.sh.log
 	echo -e "\033[31m Please remove the $GITUSER user or select different username !! \e[0m" | tee -ai /var/log/gitolite.sh.log
 	exit 100
@@ -109,18 +102,18 @@ fi
 
 
 # Create Git User
-echo
+#echo
 echo -e "\033[34m Creating System User [$GITUSER]...  \e[0m" | tee -ai /var/log/gitolite.sh.log
 sudo adduser --system --home /home/$GITUSER --shell /bin/bash --group --disabled-login --disabled-password --gecos 'git version control' $GITUSER &>> /var/log/gitolite.sh.log || OwnError "Unable to create $GITUSER"
 
 # Create a bin Directory For Git User
-echo
-echo -e "\033[34m Creating bin Directory...  \e[0m" | tee -ai /var/log/gitolite.sh.log
+#echo
+echo -e "\033[34m Creating bin directory...  \e[0m" | tee -ai /var/log/gitolite.sh.log
 sudo -H -u $GITUSER mkdir /home/$GITUSER/bin || OwnError "Unable to create bin directory"
 
 # Create a setup Directory For Gitolite Repository
-echo
-echo -e "\033[34m Creating setup Directory  \e[0m" | tee -ai /var/log/gitolite.sh.log
+#echo
+echo -e "\033[34m Creating setup directory  \e[0m" | tee -ai /var/log/gitolite.sh.log
 sudo -H -u $GITUSER mkdir /home/$GITUSER/setup || OwnError "Unable to create setup directory"
 
 cd /home/$GITUSER/setup || OwnError " Unable to change directory"
@@ -131,8 +124,8 @@ sudo -H -u $GITUSER git clone git://github.com/sitaramc/gitolite &>> /var/log/gi
 
 # Create a Symbolic Link For Gitolite in /home/git/bin Directory
 #sudo -H -u $GITUSER PATH=/home/$GITUSER/bin:$PATH || OwnError " Unable to updat PATH:("
-echo
-echo -e "\033[34m Creating Gitolite Symbolic Link...  \e[0m" | tee -ai /var/log/gitolite.sh.log
+#echo
+echo -e "\033[34m Creating Gitolite symbolic link...  \e[0m" | tee -ai /var/log/gitolite.sh.log
 sudo -H -u $GITUSER gitolite/install -to /home/$GITUSER/bin || OwnError "Unable to create symbolic link for Gitolite"
 
 
@@ -143,7 +136,7 @@ sudo -H -u $GITUSER gitolite/install -to /home/$GITUSER/bin || OwnError "Unable 
 if [ $# -lt 2 ]
 then
 	echo
-	echo -e "\033[34m The php username is described in phpinfo file  \e[0m" | tee -ai /var/log/gitolite.sh.log
+	echo -e "\033[34m The PHP username is given at Gitolite Admin [Need Help section]  \e[0m" | tee -ai /var/log/gitolite.sh.log
 	read -p "Enter the php username [www-data]:  " WEBUSER
 
 	if [[ $WEBUSER = "" ]]
@@ -159,7 +152,7 @@ fi
 
 # Add Web User to Git Group
 echo
-echo -e "\033[34m Adding $WEBUSER to $GITUSER Group...  \e[0m" | tee -ai /var/log/gitolite.sh.log
+echo -e "\033[34m Adding $WEBUSER to $GITUSER group...  \e[0m" | tee -ai /var/log/gitolite.sh.log
 sudo adduser $WEBUSER $GITUSER &>> /var/log/gitolite.sh.log
 
 # Get The Web User Home Dir Path
@@ -167,29 +160,23 @@ WEBUSERHOME=$(grep $WEBUSER /etc/passwd | cut -d':' -f6)
 if [ -z $WEBUSERHOME ]
 then
 	echo
-	echo -e "\033[31m Unable to Detect $WEBUSER Home Dir !! \e[0m" | tee -ai /var/log/gitolite.sh.log
+	echo -e "\033[31m Unable to detect $WEBUSER home dir !! \e[0m" | tee -ai /var/log/gitolite.sh.log
 	read -p "Enter the home dir path for $WEBUSER: " WEBUSERHOME
 fi
 
-# Checks Weather id_rsa Key Exist
-sudo ls  $WEBUSERHOME/.ssh/id_rsa &>> /var/log/gitolite.sh.log
+# Checks Weather rt_rsa Key Exist
+sudo ls  $WEBUSERHOME/.ssh/rt_rsa &>> /var/log/gitolite.sh.log
 if [ $? -eq 0 ]
 then
+	echo -e "\033[34m The ssh key rt_rsa already exist... \e[0m"
+else
+	# Generate SSH Keys For Web User
 	echo
-	echo -e "\033[31m 		Found $WEBUSERHOME/.ssh/id_rsa !! \e[0m" | tee -ai /var/log/gitolite.sh.log
-	echo -e "\033[31m 		Moved $WEBUSERHOME/.ssh/id_rsa to $WEBUSERHOME/.ssh/id_rsa.bak !! \e[0m" | tee -ai /var/log/gitolite.sh.log
-	sudo mv -v $WEBUSERHOME/.ssh/id_rsa $WEBUSERHOME/.ssh/id_rsa.bak &>> /var/log/gitolite.sh.log
-	sudo mv -v $WEBUSERHOME/.ssh/id_rsa.pub $WEBUSERHOME/.ssh/id_rsa.pub.bak &>> /var/log/gitolite.sh.log
+	echo -e "\033[34m Generating ssh keys for $WEBUSER \e[0m" | tee -ai /var/log/gitolite.sh.log
+	sudo -H -u $WEBUSER ssh-keygen -q -N '' -f $WEBUSERHOME/.ssh/rt_rsa || OwnError "Unable to create ssh keys for $WEBUSER"
+	sudo cp $WEBUSERHOME/.ssh/rt_rsa.pub /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to copy $WEBUSER Pubkey" 
+	sudo chown $GITUSER:$GITUSER /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to change ownership of $WEBUSER"
 fi
-
-
-# Generate SSH Keys For Web User
-echo
-echo -e "\033[34m Generating SSH Keys For $WEBUSER \e[0m" | tee -ai /var/log/gitolite.sh.log
-sudo -H -u $WEBUSER ssh-keygen -q -N '' -f $WEBUSERHOME/.ssh/id_rsa || OwnError "Unable to create ssh keys for $WEBUSER"
-sudo cp $WEBUSERHOME/.ssh/id_rsa.pub /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to copy $WEBUSER Pubkey" 
-sudo chown $GITUSER:$GITUSER /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to change ownership of $WEBUSER"
-
 
 
 
@@ -200,8 +187,8 @@ cd /home/$GITUSER
 sudo -H -u $GITUSER /home/$GITUSER/bin/gitolite setup -pk $WEBUSER.pub &>> /var/log/gitolite.sh.log || OwnError "Unable to setup Gitolite Admin (Key)"
 
 # Change UMASK Value
-echo
-echo -e "\033[34m Changing UMASK Value...  \e[0m" | tee -ai /var/log/gitolite.sh.log
+#echo
+echo -e "\033[34m Changing umask value...  \e[0m" | tee -ai /var/log/gitolite.sh.log
 sudo -H -u $GITUSER sed -i 's/0077/0007/g' /home/$GITUSER/.gitolite.rc || OwnError "Unable to change UMASK"
 
 # Success Message
