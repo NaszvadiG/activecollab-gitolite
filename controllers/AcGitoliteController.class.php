@@ -11,12 +11,10 @@
   class AcGitoliteController extends UsersController {
   
     
-    /**
-     * Prepare controller
-     */
    
     
     /**
+     * getpublickeys
      * List public keys in inline tabs
      */
     function getpublickeys()
@@ -45,6 +43,7 @@
     }
     
     /**
+     * add_public_keys
      * Add new public key of user. Create .pub file gitolite admin dir
      */
     function add_public_keys()
@@ -110,7 +109,6 @@
            }
            
             // insert key details in database.
-            //$pub_file_name  = $active_user->getEmail()."_".$key_name;
             $pub_file_name  = $key_name."-".$this->logged_user->getId();
 
             try
@@ -128,7 +126,7 @@
                         $this->response->exception("Gitolite admin path not set");
                         die();
                     }
-                    //$path = AC_GITOLITE_GIT_ADMIN_PATH.'keydir/'.$file;
+                    
                     $dirpath  = $admin_settings['gitoliteadminpath']."gitolite-admin/keydir/";
                     $path = $dirpath.$file;
                     
@@ -140,8 +138,6 @@
                     }
                     $res = fwrite($newfh,$post_data['public_keys']);
                     fclose($fh);
-                    //file_put_contents(AC_GITOLITE_GIT_ADMIN_PATH.'keydir/'.$file, $post_data['public_keys']);
-                    
                     /** Git Push Files **/
                     $command = "cd ".$dirpath." && git add * && git commit -am 'added key for user $file' && git push";
                     exec($command,$output,$return_var);
@@ -166,6 +162,7 @@
  }   
     
     /**
+     * remove_key
      * Remove a specific publick key
      */
     function remove_key()

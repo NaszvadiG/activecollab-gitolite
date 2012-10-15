@@ -3,6 +3,7 @@
 <div id="gitolite_admin">
   {form action=Router::assemble('gitolite_admin')}
   <input type="hidden" value= "{$setup_script}" id="script_path_default">
+  <input type = "hidden" value = "{$gitoliteuser}" id="old_value"> 
     <div class="content_stack_wrapper">
       
         
@@ -32,18 +33,16 @@
         
         <div class="content_stack_element">
         <div class="content_stack_element_info">
-          <h3>{lang}Gitolite Set up Script{/lang}</h3>
+          <h3>{lang}Need Help?{/lang}</h3>
         </div>
         
         <div class="content_stack_element_body">
             {wrap field=title}
-            {label for=pageTitle}Gitolite setup script{/label}
-            <span id="script_path">
+            {label for=pageTitle}Gitolite Setup Script{/label}
+            <code id="script_path">
               {$setup_script nofilter}
-          </span>
-          {/wrap}
-          {wrap field=sript_path}
-              <p class="aid">{lang}Please login to your remote server and run the above command.{/lang}</p>    
+          </code>
+          <p class="aid">{lang}Please login to your remote server and run the above command.{/lang}</p>
           {/wrap}
         </div>
         
@@ -136,12 +135,17 @@
          
          if($('#gitoliteuser').val() != "")
          {
-             var git_user = $('#gitoliteuser').val();
-             $('#gituser').html(git_user);
+             var git_user = $('#old_value').val();
+             var oldhtml = $('#script_path').html();
+             var newhtml = oldhtml.replace(/ git/g," "+$('#gitoliteuser').val());
+             $('#script_path').html(newhtml)
          }
          $('#gitoliteuser').blur(function() {
                var git_user = $('#gitoliteuser').val();
-                    $('#gituser').html(git_user);
+               var oldhtml = $('#script_path').html();
+               var newhtml = oldhtml.replace(' '+$('#old_value').val()," "+$('#gitoliteuser').val());
+               $('#script_path').html(newhtml)
+               $('#old_value').val($('#gitoliteuser').val())
         });
          /*$("#button_cancel").click(function(event) {
              App.widgets.FlyoutDialog = function () {

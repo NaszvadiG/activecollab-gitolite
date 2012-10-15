@@ -148,25 +148,7 @@ class AcGitoliteAdminController extends AdminController {
                {
                    die("Unable to connect to server");
                }
-              
-               //die("ok");
-               //die("gitolite-admin already exists");
                
-               /*$comd = "cd ".array_var($_GET,  'dir')." && mv gitolite-admin/ gitolite-admin-".time()."/";
-               exec($comd,$output);
-               $comd = "cd ".array_var($_GET, 'dir')." &&  git clone ".array_var($_GET, 'user')."@".array_var($_GET, 'server').":gitolite-admin.git || pwd";
-               exec($comd,$output);
-               if(count($output) > 1)
-               {
-                   die("Unable to connect to server");
-               }
-               else
-               {
-                  die("ok");
-               }
-               
-               die();*/
-               //exec($comd,$output);
            }
            else
            {
@@ -184,8 +166,7 @@ class AcGitoliteAdminController extends AdminController {
                 {
                    die("ok");
                 }
-                /*print_r($output);
-                die();*/
+ 
            }
            //var_dump(exec($comd,$output)) ;
            //die("ok");

@@ -125,8 +125,6 @@
                   
                   foreach ($users_details as $key => $value) 
                   {
-                      
-                      //$userobj = new User($key);
                      // check key exists 
                      $user_keys = GitoliteAc::check_keys_added($value['user']['id']);
                      
@@ -180,7 +178,6 @@
                     $post_data =  $this->request->post();
                     $settings = GitoliteAdmin :: get_admin_settings();
                     
-                    //$repo_path = $settings['gitoliteadminpath'].$repository_data['name'];
                     $sever_user_path = GitoliteAdmin::get_server_user_path();
                     if(!$sever_user_path)
                     {
@@ -237,13 +234,12 @@
                         $repository_path_url = array('repository_path_url' => $repo_path);
                     }
                     $repository_data = array_merge($repository_data,$repository_path_url);
-                    //print_r($repository_data);
-                    //  die();
+
                     $this->active_repository = new GitRepository();
                     $this->active_repository->setAttributes($repository_data);
                     $this->active_repository->setCreatedBy($this->logged_user);
                     
-                    //$result = $this->active_repository->testRepositoryConnection();
+                    
                     
                     $result = true;
                     if ($result !== true) {
@@ -276,8 +272,7 @@
                         $repo_id = ProjectGitolite::add_repo_details($repo_fk,$project_id,$user_id,$repo_path,$repository_data);
                         if($repo_id)
                         {
-                            /*print_r($post_data['access']);
-                            die();*/
+                            
                             $add_access = ProjectGitolite::add_access_levels($repo_id,serialize($post_data['access']),$user_id,1);
                             if($add_access)
                             {
@@ -290,8 +285,7 @@
                                /*$git_server = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'];
                                 $command = "cd ".$settings['gitoliteadminpath']." && git clone ".$git_server.":".$repo_name;
                                 exec($command,$output,$return_var);*/
-                                
-                                //$this->response->exception($output);
+
                             }
                             else
                             {
@@ -337,7 +331,6 @@
           if(!ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
                  $this->response->forbidden();
           } // if
-          //print_r($this->request->post());
                    
          $project  = $this->active_project;
          $project_id = $project->getId();
@@ -358,7 +351,7 @@
               $access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';      
               
               $users_details = $this->active_project->users()->getIdNameMap();
-              //print_r($users_details);
+             
               $result = DB::execute("SELECT a.repo_id,a.repo_name,a.git_repo_path,b.name FROM $repo_table_name a, $objects_table_name b 
                                 where a.`repo_fk` = b.integer_field_1 and b.type = 'ProjectSourceRepository'
                                 and b.id = '".$repo_id."'");
@@ -404,7 +397,7 @@
               {    
                   foreach ($users_details as $key => $value) 
                   {
-                      //$userobj = new User($key);
+                      
                      // check key exists
                      
                      $user_keys = GitoliteAc::check_keys_added($key);
@@ -425,9 +418,6 @@
                      
                   } 
               }
-              
-              //print_r($user_detail_permissions);
-              //die();
               $this->response->assign(
                             array(
                                   'curr_users' => $allowed_users,
@@ -457,18 +447,16 @@
                 
                 try {
                     
-                    /*print_r($this->request->post());
-                    die();*/
                    
                     /* Check form with validation error */
                     $repository_data = $this->request->post('repository');
-                    //print_r($repository_data);
+                    
                     
                     $errors = new ValidationErrors();    
                     $post_data =  $this->request->post();
                     $settings = GitoliteAdmin :: get_admin_settings();
                     
-                    //$repo_path = $settings['gitoliteadminpath'].$repository_data['name'];
+                   
                     $sever_user_path = GitoliteAdmin::get_server_user_path();
                     if(!$sever_user_path)
                     {
@@ -524,7 +512,6 @@
                     
                     $repo_fk = $this->active_repository->getId();
                     
-                    //$repo_id = ProjectGitolite::add_repo_details($repo_fk,$project_id,$user_id,$repo_path,$repository_data);
                     if($repo_id)
                     {
                         
@@ -556,7 +543,7 @@
                     }
                     DB::commit('Repository created @ ' . __CLASS__);
 
-                    //$this->response->ok();
+                   
                     $this->response->respondWithData($this->project_object_repository);
                  }
                 catch (Exception $e)
@@ -599,8 +586,6 @@
                    $permissions_array = array();
                 }
                
-               // print_r($permissions_array);
-                //echo "<br>";
                 if((array_key_exists($this->logged_user->getId(),$permissions_array) && $permissions_array[$this->logged_user->getId()] > 1)
                    || $this->logged_user->isAdministrator() || $this->logged_user->isProjectManager() 
                    || $this->active_project->isLeader($this->logged_user) 

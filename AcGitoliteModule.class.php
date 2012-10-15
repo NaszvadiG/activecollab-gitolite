@@ -115,7 +115,7 @@ class AcGitoliteModule extends AngieModule {
             `key_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
             `user_id` INT(10) NOT NULL,
             `key_name`  varchar(255) NOT NULL,
-            `public_key` varchar(255) NOT NULL,
+            `public_key` TEXT NOT NULL,
             `pub_file_name` varchar(255) NOT NULL,
             `is_deleted`    ENUM('0', '1') not null default '0',
             `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

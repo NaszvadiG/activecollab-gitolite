@@ -153,9 +153,12 @@
         
     }
     
-    /*check_keys_added
-     * Check whether keys are added for particular user
-     */
+   /**
+    * check_keys_added 
+    * Check whether keys are added for particular user
+    * @param type $user_id
+    * @return boolean
+    */
     function check_keys_added ($user_id = 0)
     {
         if($user_id == 0 || $user_id == "")
@@ -177,3 +180,4 @@
         }
     }
   }
+ 

@@ -42,7 +42,11 @@
 
         }
         
-        
+        /**
+         * setting_exists
+         * Check whether settings are already added.
+         * @return type
+         */
         function setting_exists()
         {
             $settings_table_name = TABLE_PREFIX . 'rt_config_settings';
@@ -56,6 +60,13 @@
             return $is_exists;
         }
         
+        /**
+         * insert_settings
+         * Insert module settings.
+         * @param type $post_data
+         * @param type $active_user
+         * @return boolean
+         */
         function insert_settings($post_data = array(),$active_user = 0)
         {
             
@@ -71,9 +82,16 @@
             return DB::lastInsertId() ;
         }
         
+        /**
+         * update_settings
+         * Update admin settings.
+         * @param type $post_data
+         * @param type $active_user
+         * @return boolean
+         */
         function update_settings($post_data = array(),$active_user = 0)
         {
-            
+
             if(count($post_data) == 0 || $active_user == 0)
             {
                 return FALSE;
@@ -87,12 +105,21 @@
             return DB::affectedRows();
         }
         
+        /**
+         * Get gitolite admin path.
+         * @return type
+         */
         public function get_admin_path()
         {
-            //$whoami  = exec ("whoami");
+            
             return exec ("cd ../work/git/ && pwd");
         }
         
+        /**
+         * get_server_user_path
+         * Get git user home path.
+         * @return boolean
+         */
         public function get_server_user_path()
         {
              $admin_settings = self::get_admin_settings();
@@ -108,7 +135,11 @@
              }
         }
 
-
+        /**
+         * is_gitolite
+         * Check whether is gitolite settings added.
+         * @return boolean
+         */
         function is_gitolite() 
         {
             $admin_settings = self::get_admin_settings();
@@ -121,19 +152,16 @@
             return $is_gitolite;
         }
         
+        /**
+         * get_setup_path
+         * Get gitolite setup script path.
+         * @param type $path
+         * @return string
+         */
         function get_setup_path($path = TRUE)
         {
             $path = exec("cd ../custom/modules/ac_gitolite/ && pwd");
-            $script = "<code>sudo bash $path/gitolite.sh</code> <span id = 'gituser'>git</span>".' '.$_SERVER['USER'];
-            /*if($path)
-            {
-                $return_str = exec("cd ../custom/modules/ac_gitolite/ && pwd");
-            }
-            else
-            {
-                $return_str = "sudo bash gitolite-setup.sh git".' '.$_SERVER['USER'];
-            }*/
-            
+            $script = "sudo bash $path/gitolite.sh git ".' '.$_SERVER['USER'];
             return $script;
         }
         
