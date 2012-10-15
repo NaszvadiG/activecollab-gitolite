@@ -16,39 +16,21 @@
      */
    
     
-  
-    function index()
-    {
-        
-        /*if(AngieApplication::isModuleLoaded("source")  && $this->getControllerName() == 'ac_gitolite')
-         {
-             $do_continue = false;
-             if(is_dir(GIT_FILES_PATH.DIRECTORY_SEPARATOR."repositories"))
-             {
-                 $do_continue = true;
-             }
-             
-         }*/
-        /*echo "here33";
-        die();*/
-    } // index
-     
-    
     /**
      * List public keys in inline tabs
      */
     function getpublickeys()
     {
-      //echo "dasd asdas d";
+      
      $active_user = $this->active_user;
      
      $user_public_keys = GitoliteAc::fetch_keys($active_user->getId());
      
-     //$admin_settings  = 
+     
      
      $is_gitolite = GitoliteAdmin::is_gitolite();
      
-      //print_r($user_public_keys);
+     
       
       $this->smarty->assign(array(
         'user_public_keys' => $user_public_keys,
@@ -73,7 +55,7 @@
              'form_action' => Router::assemble('add_public_keys', array('company_id' => $active_user->getCompanyId(),'user_id' => $active_user->getId())),
              'user_rmail' => $active_user->getEmail()
            ));  
-       //$this->smarty->assign();
+       
        if($this->request->isSubmitted()) // check for form submission
        {
            $post_data = $this->request->post(); 
@@ -118,7 +100,6 @@
                      }
     
                  }
-                 
                  // if errors found throw error exception
                  if($errors->hasErrors()) {
                    throw $errors;
@@ -131,9 +112,7 @@
             // insert key details in database.
             //$pub_file_name  = $active_user->getEmail()."_".$key_name;
             $pub_file_name  = $key_name."-".$this->logged_user->getId();
-            
-            //$this->response->exception($key_name_save);
-            //die();
+
             try
             {
                 DB::beginWork('Adding a new public key @ ' . __CLASS__);
@@ -167,8 +146,8 @@
                     $command = "cd ".$dirpath." && git add * && git commit -am 'added key for user $file' && git push";
                     exec($command,$output,$return_var);
                     
-                    DB::commit('Key added @ ' . __CLASS__);
-                    //$this->response->redirectToUrl($this->active_user->getViewUrl());
+                   DB::commit('Key added @ ' . __CLASS__);
+                   
                    $show_data['key_name'] = $post_data['key_name'];
                    $show_data['public_key'] = substr($post_data['public_keys'],0,25).".....".substr($post_data['public_keys'],-30);
                    $show_data['delete_url'] = $this->active_user->getViewUrl()."/"."delete-keys"."/".$save_data;
@@ -179,15 +158,12 @@
             }catch (Exception $e)
             {   
                  $this->response->exception("Can't save key this time, might be key you are adding is already added");
-                //$this->response->exception("Error while saving key. May be key you are adding is already added.");
+                
             }
            
-    } else{
-            //$this->response->redirectToUrl($this->active_user->getViewUrl());
-            
-            
-        }
-    }   
+    } 
+    
+ }   
     
     /**
      * Remove a specific publick key
@@ -197,39 +173,31 @@
         $get_data = $this->request->get(); 
         $active_user = $this->active_user;
         
-        
         if(isset($get_data['key_id']))
         {
             $key_id = $get_data['key_id'];
-            //try
-            //{
-                //if($active_user->canEdit($this->logged_user)) 
-                //{
-                    $filename = GitoliteAc::get_filename($key_id);
-                    
-                    if($filename != "")
-                    {
-                        $delete_keys = GitoliteAc::remove_keys($key_id);
-                        if(!$delete_keys)
-                        {
-                            throw new Exception("Can't delete key");
-                        }
-                        else
-                        {    
-                             $settings = GitoliteAdmin :: get_admin_settings();
-                             $dirpath  = $settings['gitoliteadminpath']."gitolite-admin/keydir/";
-                             $path = $dirpath.$filename.".pub";
-                             @unlink($path);
-                             $command = "cd ".$dirpath." && git add * && git commit -am 'deleted key $filename.pub' && git push  || echo 'Not found'";
-                             exec($command,$output,$return_var);
-                             echo '<script type="text/javascript">window.location.href = "' . $this->active_user->getViewUrl() . '"</script>';
-                        }   
-                    }
-                //}
-            //}catch (Exception $e)
-            //{   
-            //     $this->response->exception($e);
-            //}
+            
+            $filename = GitoliteAc::get_filename($key_id);
+
+            if($filename != "")
+            {
+                $delete_keys = GitoliteAc::remove_keys($key_id);
+                if(!$delete_keys)
+                {
+                    throw new Exception("Can't delete key");
+                }
+                else
+                {    
+                     $settings = GitoliteAdmin :: get_admin_settings();
+                     $dirpath  = $settings['gitoliteadminpath']."gitolite-admin/keydir/";
+                     $path = $dirpath.$filename.".pub";
+                     @unlink($path);
+                     $command = "cd ".$dirpath." && git add * && git commit -am 'deleted key $filename.pub' && git push  || echo 'Not found'";
+                     exec($command,$output,$return_var);
+                     echo '<script type="text/javascript">window.location.href = "' . $this->active_user->getViewUrl() . '"</script>';
+                }   
+            }
+                
         }
        
     }

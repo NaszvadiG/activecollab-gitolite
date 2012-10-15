@@ -40,10 +40,10 @@
                         
                         <tr>
                             <td colspan="4" class="note_keys">&nbsp;</td>
-                         </tr>
+                        </tr>
                         <tr>
                             <td colspan="4" class="note_keys">Note:&nbsp;&nbsp;Some users may not be visible here because public keys for that users is not added.</td>
-                         </tr>
+                        </tr>
                  {else} 
                      
                      <tr>

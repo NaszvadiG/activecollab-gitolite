@@ -19,15 +19,13 @@
 	      <div class="content_stack_element_body">
                   <div class="key_field">{textarea_field name="public_keys" class="small_txt_area"}{/textarea_field}</div>
                   <div class ="key_help">
+                      
                       <h3>To generate a new SSH key just open your terminal and use code below. </h3>
                       <code class="ssh_code">ssh-keygen -t rsa -C "{$user_rmail}" <br>
-                             # Creates a new ssh key using the provided email <br>
-                             # Generating public/private rsa key pair... <br>
-                      </code>
+                     </code>
                       <h3>Use code below to dump your public key and paste it in Public Key</h3>
                       <code class="ssh_code">
                          cat ~/.ssh/id_rsa.pub<br>
-                         # ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC6eNtGpNGwstc....
                       </code>
                   </div>
                   

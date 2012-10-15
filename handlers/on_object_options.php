@@ -1,8 +1,8 @@
 <?php
 
   /**
-   * Project Exporter module on_object_options event handler
-   *
+   * Ac Gitolite module on_inline_tabs event handler
+   *    
    * @package activeCollab.modules.project_exporter
    * @subpackage handlers
    */
@@ -18,6 +18,7 @@
   function ac_gitolite_handle_on_object_options(&$object, &$user, &$options, $interface) {
    if($object instanceof ProjectSourceRepository) {
        
+        // Check whether repository is a gitolite repository
         $repo_table_name = TABLE_PREFIX . 'gitolite_repomaster';
         $objects_table_name = TABLE_PREFIX . 'project_objects';
         
@@ -28,21 +29,11 @@
         {
             $options->add('edit_git', array(
               'url' => Router::assemble('edit_git_repository', array('project_slug' => $object->getProject()->getSlug(),'project_source_repository_id' => $object->getId())),
-              'text' => "Edit Gitolite",  
+              'text' => "Edit Access Levels",  
                'onclick' =>  new FlyoutFormCallback('git_repository_edited', array('width' => 'narrow'))
             ));
         }
      
-  } // project_exporter_handle_on_object_options
+  } // ac_gitolite_handle_on_object_options
  } 
-  
- /* 
-  function project_exporter_handle_on_object_options(&$object, &$user, &$options, $interface) {
-    if($object instanceof Project) {
-      $options->add('export_project', array(
-        'url' => Router::assemble('project_merger_merge', array('project_id' => $object->getSlug())),
-        'text' => lang('Merge this project into'),
-      	'onclick' => new FlyoutCallback('project_exported')
-      ));
-    } //
-  } // project_exporter_handle_on_object_options*/
+ 
