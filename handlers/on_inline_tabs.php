@@ -19,13 +19,19 @@
   function ac_gitolite_handle_on_inline_tabs(&$tabs, &$object, &$logged_user, $interface) {
     // populate user inline tabs
     if ($object instanceof User) {
-        
-        $tabs->add('view_keys', array(
-          'title' => lang('Public Keys'),
-           'url' => Router::assemble('get_public_keys', array('company_id' => $object->getCompanyId(),'user_id' => $object->getId())), 
-                
-        ));        
-      
+            
+        /*echo $object->getId();
+        echo "<br>";
+        echo $logged_user->getId();
+        die();*/
+        /*echo $object->isAdministrator();
+        die();*/
+        if ($object->getId() == $logged_user->getId() || $logged_user->isAdministrator() || $logged_user->isPeopleManager()) {   
+            $tabs->add('view_keys', array(
+             'title' => lang('Public Keys'),
+            'url' => Router::assemble('get_public_keys', array('company_id' => $object->getCompanyId(),'user_id' => $object->getId())), 
+            ));        
+        }
       if ($object->canViewActivities($logged_user)) {
         $tabs->add('user_recent_activities', array(
           'title' => lang('Recent Activities'),

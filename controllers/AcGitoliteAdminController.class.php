@@ -25,7 +25,7 @@ class AcGitoliteAdminController extends AdminController {
      * Save gitolite admin settings
      */
     function gitolite_admin() {
-       
+        //echo exec ("pwd");
         //var_dump( exec("git ls-remote --heads git@192.168.0.137:repositories/gitolite-admin.git",$output));
         
         /*$res =  shell_exec("git ls-remote --heads git@192.168.0.137:repositories/gitolite-admin.git");
@@ -38,7 +38,12 @@ class AcGitoliteAdminController extends AdminController {
        */
        
        //$array = array('1','2');
+        
+       
+       
        $settings = GitoliteAdmin :: get_admin_settings();
+       
+       $setup_script = GitoliteAdmin :: get_setup_path();
        
        $admins_access = @unserialize($settings['gitoliteadmins']);
        if($admins_access !== false || $admins_access === 'b:0;')
@@ -57,23 +62,24 @@ class AcGitoliteAdminController extends AdminController {
        $admins = @implode(",", $admins_array);
        
        $gitoliteadminpath = GitoliteAdmin :: get_admin_path();
+       
        $gitoliteadminpath = "$gitoliteadminpath/gitolite/";
-       /*if($settings['gitoliteserveradd'] != "")
-       {
-           $gitoliteadminpath = "~$gitoliteadminpath/".$settings['gitoliteserveradd']."/gitolite/";
-       }
-       else
-       {
-           $gitoliteadminpath = "No path set";
-       }*/
+       
+       
+       $server_name = array_shift(explode(".",$_SERVER['HTTP_HOST']));
+       preg_match('/^(?:www\.)?(?:(.+)\.)?(.+\..+)$/i', $_SERVER['HTTP_HOST'], $matches);
        
        $this->response->assign(
-                            array('gitoliteuser' =>      $settings['gitoliteuser'],
+                            array('gitoliteuser' =>      ($settings['gitoliteuser'] == "") ? "git" : $settings['gitoliteuser'],
                                   'gitoliteserveradd' => $settings['gitoliteserveradd'],
                                   'gitoliteadmins' =>    $admins,
                                   'webuser' =>           exec ("whoami"),
                                   'gitoliteadminpath' => $gitoliteadminpath,
-                                  'gitolite_repo_test_connection_url' => Router::assemble('gitolite_test_connection')
+                                  'gitolite_repo_test_connection_url' => Router::assemble('gitolite_test_connection'),
+                                  'setup_script' => $setup_script,
+                                  'web_user'    =>  $_SERVER['USER'],
+                                  'server_name' => $matches['2']
+                                  
                                 )
                             );
        if($this->request->isSubmitted()) // check for form submission
@@ -153,9 +159,11 @@ class AcGitoliteAdminController extends AdminController {
         
         if(!is_dir(array_var($_GET, 'dir')))
         {
+           
              //die('ok');
              if(mkdir (array_var($_GET, 'dir')))
              {
+                 
                  $comd = "cd ".array_var($_GET, 'dir')." &&  git clone ".array_var($_GET, 'user')."@".array_var($_GET, 'server').":gitolite-admin.git || pwd";
                  exec($comd,$output,$return);
                  if(count($output) > 1)
@@ -177,10 +185,32 @@ class AcGitoliteAdminController extends AdminController {
         {
            if(is_dir(array_var($_GET, 'dir')."gitolite-admin"))
            {
-               die("ok");
+               
+               die("gitolite-admin already exists");
+             
+               
+               /*$comd = "cd ".array_var($_GET,  'dir')." && mv gitolite-admin/ gitolite-admin-".time()."/";
+               exec($comd,$output);
+               $comd = "cd ".array_var($_GET, 'dir')." &&  git clone ".array_var($_GET, 'user')."@".array_var($_GET, 'server').":gitolite-admin.git || pwd";
+               exec($comd,$output);
+               if(count($output) > 1)
+               {
+                   die("Unable to connect to server");
+               }
+               else
+               {
+                  die("ok");
+               }
+               
+               die();*/
+               //exec($comd,$output);
            }
            else
            {
+                 /*$comd = exec ("ssh -T ".array_var($_GET, 'user')."@".array_var($_GET, 'server'),$output);
+                 print_r($output);
+                 die();*/
+                 
                 $comd = "cd ".array_var($_GET, 'dir')." &&  git clone ".array_var($_GET, 'user')."@".array_var($_GET, 'server').":gitolite-admin.git || pwd";
                 exec($comd,$output);
                 if(count($output) > 1)

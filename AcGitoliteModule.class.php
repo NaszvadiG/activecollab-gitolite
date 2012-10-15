@@ -42,6 +42,8 @@ class AcGitoliteModule extends AngieModule {
         // Repositories
         Router::map('add_git_repository', '/projects/:project_slug/repositories/add-git', array('controller'=>'project_tracking_gitolite', 'action'=>'add_git_repo'));
         Router::map('project_repositories', '/projects/:project_slug/repositories', array('controller'=>'project_tracking_gitolite', 'action'=>'index'));
+        //Router::map('repository_history', '/projects/:project_slug/repositories/:project_source_repository_id', array('controller'=>'project_tracking_gitolite', 'action'=>'history'));
+        Router::map('repository_history', '/projects/:project_slug/repositories/:project_source_repository_id', array('controller'=>'project_tracking_gitolite', 'action'=>'history'), array('project_source_repository_id'=>Router::MATCH_ID));
         //Router::map('get_public_keys', 'people/:user_id/public-keys', array('controller'=>'ac_gitolite', 'action'=>'index'));
         Router::map('get_public_keys', 'people/:company_id/users/:user_id/public-keys', array('controller'=>'ac_gitolite', 'action'=>'getpublickeys'));
         Router::map('add_public_keys', 'people/:company_id/users/:user_id/add-public-keys', array('controller'=>'ac_gitolite', 'action'=>'add_public_keys'));
@@ -49,6 +51,7 @@ class AcGitoliteModule extends AngieModule {
         Router::map('gitolite_admin', 'admin/gitolite_admin', array('controller'=> 'ac_gitolite_admin','action'=>'gitolite_admin'));
         Router::map('gitolite_test_connection', 'admin/test_connection', array('controller'=> 'ac_gitolite_admin','action'=>'test_connection'));
         Router::map('edit_git_repository', '/projects/:project_slug/repositories/:project_source_repository_id/edit-git', array('controller'=> 'project_tracking_gitolite','action'=>'edit_git_repo'));
+        //Router::map('repository_history', '/projects/:project_slug/repositories/:project_source_repository_id', array('controller'=>'project_tracking_gitolite', 'action'=>'history'));
     }
 
     
@@ -137,7 +140,7 @@ class AcGitoliteModule extends AngieModule {
             `key_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
             `user_id` INT(10) NOT NULL,
             `key_name`  varchar(255) NOT NULL,
-            `public_key` varchar(255) NOT NULL UNIQUE,
+            `public_key` varchar(255) NOT NULL,
             `pub_file_name` varchar(255) NOT NULL,
             `is_deleted`    ENUM('0', '1') not null default '0',
             `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

@@ -31,14 +31,10 @@
                            </tr>
                         {foreach from=$curr_users item=entry key=name} 
                               <tr>
-                                  <td>{$entry}
-                                      {if $user_detail_permissions[$name]['user_keys'] == 0}
-                                      <br><i><b>(No kyes added)</b></i></td>
-                                      {/if}
-                                  <td> <input type ="radio" name="access[{$name}]" value={$noaccess} {if !$user_detail_permissions[$name]['canaccess'] || !$user_detail_permissions[$name]['readaccess'] || !$user_detail_permissions[$name]['writeaccess']}checked="checked"{/if}></td>
-                                  <td><input type ="radio" name="access[{$name}]" value={$readaccess} {if $user_detail_permissions[$name]['canaccess'] || $user_detail_permissions[$name]['readaccess'] }checked="checked"{/if}></td>
-                                  <td><input type ="radio" name="access[{$name}]" value={$manageaccess} {if $user_detail_permissions[$name]['writeaccess'] }checked="checked"{/if}></td>
-                                  
+                                  <td>{$entry}</td>
+                                  <td> <input type ="radio" name="access[{$name}]" value={$noaccess} {if !$user_detail_permissions[$name]['readaccess'] || !$user_detail_permissions[$name]['writeaccess'] || !$user_detail_permissions[$name]['writeaccessplus']}checked="checked"{/if}></td>
+                                  <td><input type ="radio" name="access[{$name}]" value={$readaccess} {if $user_detail_permissions[$name]['readaccess']}checked="checked"{/if}></td>
+                                  <td><input type ="radio" name="access[{$name}]" value={$manageaccess} {if $user_detail_permissions[$name]['writeaccess'] || $user_detail_permissions[$name]['writeaccessplus']}checked="checked"{/if}></td>
                               </tr>
                         {/foreach}
                         </table>

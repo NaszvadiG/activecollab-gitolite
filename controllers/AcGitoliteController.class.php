@@ -44,7 +44,7 @@
      
      $user_public_keys = GitoliteAc::fetch_keys($active_user->getId());
      
-     $admin_settings  = 
+     //$admin_settings  = 
      
      $is_gitolite = GitoliteAdmin::is_gitolite();
      
@@ -70,9 +70,9 @@
        $active_user = $this->active_user;
        
         $this->response->assign(array(
-             'form_action' => Router::assemble('add_public_keys', array('company_id' => $active_user->getCompanyId(),'user_id' => $active_user->getId()))
-             
-           ));
+             'form_action' => Router::assemble('add_public_keys', array('company_id' => $active_user->getCompanyId(),'user_id' => $active_user->getId())),
+             'user_rmail' => $active_user->getEmail()
+           ));  
        //$this->smarty->assign();
        if($this->request->isSubmitted()) // check for form submission
        {
@@ -116,8 +116,7 @@
                              $errors->addError('Entered key is already added.');
                          }
                      }
-                     
-                    
+    
                  }
                  
                  // if errors found throw error exception
@@ -138,6 +137,7 @@
             try
             {
                 DB::beginWork('Adding a new public key @ ' . __CLASS__);
+                //print_r($post_data);
                 $save_data = GitoliteAc::add_keys($active_user->getId(),$pub_file_name,$post_data);
                 if($save_data)
                 {   
@@ -164,13 +164,16 @@
                     //file_put_contents(AC_GITOLITE_GIT_ADMIN_PATH.'keydir/'.$file, $post_data['public_keys']);
                     
                     /** Git Push Files **/
-                    $command = "cd ".$dirpath." && git add * && git commit -m 'added key for user' && git push";
+                    $command = "cd ".$dirpath." && git add * && git commit -am 'added key for user $file' && git push";
                     exec($command,$output,$return_var);
                     
                     DB::commit('Key added @ ' . __CLASS__);
                     //$this->response->redirectToUrl($this->active_user->getViewUrl());
-                   
-                    $this->response->ok();
+                   $show_data['key_name'] = $post_data['key_name'];
+                   $show_data['public_key'] = substr($post_data['public_keys'],0,25).".....".substr($post_data['public_keys'],-30);
+                   $show_data['delete_url'] = $this->active_user->getViewUrl()."/"."delete-keys"."/".$save_data;
+                   $this->response->respondWithData($show_data, array('as' => 'settings'));
+        
 
                 }
             }catch (Exception $e)
@@ -217,6 +220,8 @@
                              $dirpath  = $settings['gitoliteadminpath']."gitolite-admin/keydir/";
                              $path = $dirpath.$filename.".pub";
                              @unlink($path);
+                             $command = "cd ".$dirpath." && git add * && git commit -am 'deleted key $filename.pub' && git push  || echo 'Not found'";
+                             exec($command,$output,$return_var);
                              echo '<script type="text/javascript">window.location.href = "' . $this->active_user->getViewUrl() . '"</script>';
                         }   
                     }

@@ -987,3 +987,86 @@ table.user_keys th.status, table.user_keys td.status {
 }
 
 
+
+/******************************************************************
+Repositories
+*********************************************************************/
+
+.note_keys{
+    font-weight: bold;
+}
+
+/**********************************************
+Gitolite Admin
+***************************************************/
+/*
+label[for=gitoliteserveradd]
+{
+   float: right;
+   margin-top: -18px;
+   padding-right: 335px;
+   position: relative;
+}
+label[for=gitoliteuser]
+{
+    width: 80px;
+}
+
+#gitoliteserveradd {
+  float: right;
+  margin-right: 208px;
+  margin-top: 0;
+  position: absolute;
+}
+#aid_server{
+   float: right;
+    margin-left: 278px;
+    margin-top: -15px;
+    position:fixed;
+}*/
+.gl_user_ui_orphan .gl_user_ui_half{
+    float:right;
+}
+.gl_user_ui_orphan span#at{
+   display: block;
+   float: left;
+   margin-top: 20px;
+   width: 20px;
+   text-align: center;
+}
+.gl_user_ui_half{
+    float:left;
+}
+.gl_user_ui_orphan{
+    float:left;
+}
+.help_text{
+   font-size: 10px;
+   color: #B4B4B4;
+}
+.small_txt_area{
+   width: 330px;
+   height: 130px;
+}
+
+.key_field
+{
+    width: 330px;
+    float: left;
+}
+.key_help
+{
+    width: 397px;
+    float: right;
+    padding-top: 0px;
+    
+   
+}
+.ssh_code{
+    background-color: #cccccc;
+    padding-left: 0px;
+}
+
+.path_txt{
+  width: 600px;
+}

@@ -89,8 +89,8 @@
         
         public function get_admin_path()
         {
-            $whoami  = exec ("whoami");
-            return exec ("cd ~$whoami && pwd");
+            //$whoami  = exec ("whoami");
+            return exec ("cd ../work/git/ && pwd");
         }
         
         public function get_server_user_path()
@@ -119,6 +119,21 @@
             }
             
             return $is_gitolite;
+        }
+        
+        function get_setup_path($path = TRUE)
+        {
+            $path = exec("cd ../custom/modules/ac_gitolite/ && pwd");
+            $script = "<code>sudo bash $path/gitolite.sh</code> <span id = 'gituser'>git</span>".' '.$_SERVER['USER'];
+            /*if($path)
+            {
+                $return_str = exec("cd ../custom/modules/ac_gitolite/ && pwd");
+            }
+            else
+            {
+                $return_str = "sudo bash gitolite-setup.sh git".' '.$_SERVER['USER'];
+            }*/
+            return $script;
         }
  }
     

@@ -17,8 +17,9 @@
      * Add "Add New Git Repository" option under source tab.
      */
      function index() {
-         
+       
          parent::index();
+         
          //$this->wireframe->actions->add('add_git','Add New Git Repository' , Router::assemble('add_git_repository',array('project_slug' => $this->active_project->getSlug())));
          // check whether user have access to add repositories
         if(ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
@@ -28,12 +29,76 @@
              ));
         }
 
-          $can_add_repository = "true";
-
+          
+          /*if(ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project) && !$this->request->isMobileDevice()) {
+                    $can_add_repository = true;
+          }*/
           $repositories = ProjectSourceRepositories::findByProjectId($this->active_project->getId(), $this->logged_user->getMinVisibility());
+          
+          $get_admin_settings = GitoliteAdmin::get_admin_settings();
+          //print_r($get_admin_settings);
+          if(is_array($get_admin_settings) && count($get_admin_settings) > 0)
+          {
+                $cloneurls = array();
+                $gitolite_repos = array();
+                foreach ($repositories as $repository) {
+
+                    $repo_fk = $repository->getFieldValue("integer_field_1");
+                   
+                   
+                    $chk_gitolite = ProjectGitolite::is_gitolite_repo($repo_fk);
+                    //print_r($chk_gitolite);
+                    if(is_array($chk_gitolite) && sizeof($chk_gitolite) > 0 && $chk_gitolite['chk_gitolite'] > 0)
+                    {
+                        
+                        $permissions = @unserialize($chk_gitolite['permissions']);
+                        if($permissions !== false || $permissions === 'b:0;')
+                        {
+                           $permissions_array = $permissions;
+                        }
+                        else
+                        {
+                           $permissions_array = array();
+                        }
+                        //echo array_key_exists ($this->logged_user->getId(),$permissions_array);
+                       // print_r($permissions_array);
+                        //echo "<br>";
+                        if((array_key_exists($this->logged_user->getId(),$permissions_array) && $permissions_array[$this->logged_user->getId()] > 1)
+                           || $this->logged_user->isAdministrator() || $this->logged_user->isProjectManager() 
+                           || $this->active_project->isLeader($this->logged_user) 
+                           || $repository->canAdd($this->logged_user)
+                           )
+                        {
+                            $allowed_repos[] = $repository->getId();
+                        }
+                        //print_r($permissions_array);
+                        //echo $repository->getName();
+                       // echo "<br>";
+                       // print_r($permissions_array);
+                         //echo "<br>";
+                        
+                        /*$clone_url = $get_admin_settings['gitoliteuser']."@".$get_admin_settings['gitoliteserveradd'].":".$repository->getName();
+                        $cloneurls[$repository->getId()] = "git clone ".$clone_url.".git";*/
+                        
+                        $gitolite_repos[] = $repository->getId();
+                    }
+                    else
+                    {
+                         $allowed_repos[] = $repository->getId();
+                    }
+                   
+
+                }
+          }
+          //print_r($gitolite_repos);
+          //die();
+           
           $this->response->assign(array(
                     'repositories' => $repositories,
-                     'can_add_repository' => $can_add_repository
+                    'cloneurls' => $cloneurls,  
+                    'gitolite_repos' => $gitolite_repos,
+                    'can_add_repository' => $can_add_repository,
+                    'allowed_repos' => $allowed_repos
                      ));
                
      } // index
@@ -44,20 +109,11 @@
       */
      function add_git_repo()
      {
-      
-        /* $sever_user_path = GitoliteAdmin::get_server_user_path();
-                    echo $sever_user_path;
-                    die();*/
-         /*echo $repo_path = AC_GITOLITE_GIT_REPO_PATH."/";
-         die();*/
-         /*$response = ProjectGitolite::render_conf_file();
-         echo $response;
-         die();*/
          $is_gitolite  = GitoliteAdmin :: is_gitolite();
-          if(!ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
+         if(!ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
                  $this->response->forbidden();
           } // if
-         
+
          $project  = $this->active_project;
          $project_id = $project->getId();
          $logged_user = $this->logged_user;
@@ -75,41 +131,44 @@
           
           if($do_continue)
           {
-
-              $users_details = $this->active_project->users()->getIdNameMap();
+              //echo $this->active_project->getId();
+              //$users_details = $this->active_project->users()->getIdNameMap();
               
+              $project_users =  Projects::findById($project_id);
               
+              //$users_details = $project_users->users()->getIdNameMap(); // Prepare users map
+              $users_details = $this->active_project->users()->describe($this->logged_user, true, true, STATE_ARCHIVED);
               
-              /*print_r($users_details);
-              die();*/
               $user_detail_permissions = array();
-              
+
               if(is_foreachable($users_details))
               {    
                   
                   foreach ($users_details as $key => $value) 
                   {
+                      
                       //$userobj = new User($key);
                      // check key exists 
-                     $user_keys = GitoliteAc::check_keys_added($key);
-                      
-                              
-                      
-                      
-                      $objuser = new User($key);
-                      $repoobj = new ProjectSourceRepositories();
-                      $user_detail_permissions[$key] = 
-                                    array('canaccess' => $repoobj->canAccess($objuser, $project) ,
-                                          'readaccess' =>  $repoobj->canAdd($objuser, $project),
-                                          'writeaccess'=> $repoobj->canManage($objuser, $project),
-                                          'user_keys' => $user_keys);
+                     $user_keys = GitoliteAc::check_keys_added($value['user']['id']);
+                     
+                     if($user_keys > 0)
+                     {
+                        
+                        $objuser = new User($value['user']['id']);
+                        $repoobj = new ProjectSourceRepositories();
+                        $user_detail_permissions[$value['user']['id']] = 
+                                      array('readaccess' => $repoobj->canAccess($objuser, $project) ,
+                                            'writeaccess' =>  $repoobj->canAdd($objuser, $project),
+                                            'writeaccessplus'=> $repoobj->canManage($objuser, $project),
+                                            'user_keys' => $user_keys);
+                         $allowed_users[$value['user']['id']] = $value['user']['name'];
+                     }
                   } 
               }
               
-              
               $this->response->assign(
                             array(
-                                  'curr_users' => $users_details,
+                                  'curr_users' => $allowed_users,
                                   'user_detail_permissions' => $user_detail_permissions,
                                   'form_action' => Router::assemble('add_git_repository', array('project_slug' => $project->getSlug())),
                                   'noaccess' => GITOLITE_NOACCESS,
@@ -122,7 +181,6 @@
           }
           else
           {    
-             
               $this->response->assign(
                             array('add_error' => TRUE
                                 )
@@ -131,8 +189,8 @@
                      
               
          if($this->request->isSubmitted()) // check for form submission
-          {    
-                
+         {    
+
                 try {
                     //print_r($this->request->post());
                     //die();
@@ -237,13 +295,41 @@
                     $repo_fk = $this->active_repository->getId();
                     if($repo_fk)
                     {
+                        $clone_url = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'].":".$repo_name;
+                        $body = $clone_url;
+                        
+                        /*$body = "<h2>Git global setup</h2>";
+                        $body.= "<code>";
+                        $body.= "git config --global user.name '".$this->logged_user->getDisplayName()."'"."<br>";
+                        $body.= "git config --global user.email '".$this->logged_user->getEmail()."'"."<br>";
+                        $body.= "<h2>Create Repository:</h2>";
+                        $body.= "mkdir ".$this->active_repository->getName()."<br>";
+                        $body.= "cd ".$this->active_repository->getName()."<br>";
+                        $body.= "git init"."<br>";
+                        $body.= "touch README"."<br>";
+                        $body.= "git add README"."<br>";
+                        $body.= "git commit -m 'first commit'"."<br>";
+                        $body.= "git remote add origin ".$settings['gitoliteuser']."@".$settings['gitoliteserveradd'].":".$this->active_repository->getName().".git"."<br>";
+                        $body.= "git push -u origin master"."<br>";
+                        $body.= "</code>";
+                        $body.= "<h2>Existing Git Repo?</h2>";
+                        $body.= "<code>";
+                        $body.= "cd existing_git_repo";
+                        $body.= "git remote add origin ".$settings['gitoliteuser']."@".$settings['gitoliteserveradd'].":".$this->active_repository->getName().".git"."<br>";
+                        $body.= "git push -u origin master";
+                        $body.="</code>";*/
+                        //echo $body;
+                        
+                        
+                        
                         $this->project_object_repository->setName($this->active_repository->getName());
-                        $this->project_object_repository->setBody($this->active_repository->getRepositoryPathUrl());
+                        $this->project_object_repository->setBody($body);
                         $this->project_object_repository->setParentId($this->active_repository->getId());
                         $this->project_object_repository->setVisibility($repository_data['visibility']);
                         $this->project_object_repository->setProjectId($this->active_project->getId());
                         $this->project_object_repository->setCreatedBy($this->logged_user);
                         $this->project_object_repository->setState(STATE_VISIBLE);
+                        $this->project_object_repository->setVisibility(STATE_VISIBLE);
                         $this->project_object_repository->save();
                         
                         $repo_id = ProjectGitolite::add_repo_details($repo_fk,$project_id,$user_id,$repo_path,$repository_data);
@@ -268,7 +354,6 @@
                                 $command = "cd ".$settings['gitoliteadminpath']." && git clone ".$git_server.":".$repo_name;
                                 exec($command,$output,$return_var);*/
                                 
-                                
                                 //$this->response->exception($output);
                             }
                             else
@@ -288,7 +373,6 @@
                         throw $errors;
                     }
                     DB::commit('Repository created @ ' . __CLASS__);
-                    
                     $this->response->respondWithData($this->project_object_repository);
                  }
                 catch (Exception $e)
@@ -342,6 +426,7 @@
               $access_table_name = TABLE_PREFIX . 'gitolite_access_master';      
               
               $users_details = $this->active_project->users()->getIdNameMap();
+              //print_r($users_details);
               $result = DB::execute("SELECT a.repo_id,a.repo_name,a.git_repo_path,b.name FROM $repo_table_name a, $objects_table_name b 
                                 where a.`repo_fk` = b.integer_field_1 and b.type = 'ProjectSourceRepository'
                                 and b.id = '".$repo_id."'");
@@ -381,7 +466,7 @@
               }
               
               //print_r($permissions_array);
-              //die();
+              
               $user_detail_permissions = array();
               
               if(is_foreachable($users_details))
@@ -396,19 +481,22 @@
                      
                      if($user_keys > 0)
                      {
+                       
                         $repoobj = new ProjectSourceRepositories();
                         $user_detail_permissions[$key] = 
-                                    array('canaccess' => ($permissions_array[$key] == "2") ? TRUE : FALSE,
-                                          'readaccess' => ($permissions_array[$key] == "2") ? TRUE : FALSE,
-                                          'writeaccess'=> ($permissions_array[$key] == "3") ? TRUE : FALSE,
+                                    array('readaccess' => ($permissions_array[$key] == "2") ? TRUE : FALSE,
+                                          'writeaccess' => ($permissions_array[$key] == "3") ? TRUE : FALSE,
+                                          'writeaccessplus'=> ($permissions_array[$key] == "3") ? TRUE : FALSE,
                                           'user_keys' => $user_keys);
+                        
                         $allowed_users[$key] = $users_details[$key];
                      }
                      
                   } 
               }
               
-             
+              //print_r($user_detail_permissions);
+              //die();
               $this->response->assign(
                             array(
                                   'curr_users' => $allowed_users,
@@ -545,8 +633,9 @@
                         throw $errors;
                     }
                     DB::commit('Repository created @ ' . __CLASS__);
-                    $this->flash->success('Project ":name" has been created', array('name' => $repo_name));
+                    //$this->flash->success('Project ":name" has been created', array('name' => $repo_name));
                     //$this->response->redirectToUrl($project->getViewUrl());
+                    $this->response->ok();
                     //$this->response->respondWithData($this->project_object_repository);
                  }
                 catch (Exception $e)
@@ -564,7 +653,83 @@
              //$this->response->redirectTo("project_repositories",array('project_slug' => $this->active_project->getSlug()));
          } 
      }
-     /**
-     * List repositories
-     */
+     
+     function history() {
+         
+        
+          $repository = $this->active_repository;
+          
+          //$repositories = ProjectSourceRepositories::findByProjectId($this->active_project->getId(), $this->logged_user->getMinVisibility());
+          /*$repositories = ProjectSourceRepositories::findByIds(array($repository->getId()));
+          foreach ($repositories as $key => $value) {
+              print_r($value->getRowAt("0"));
+              
+          }*/
+          
+           
+         // echo $repository->getId();
+          $repo_fk = $repository->getId();
+          
+          
+          $chk_gitolite = ProjectGitolite::is_gitolite_repo($repo_fk);
+          
+          if(is_array($chk_gitolite) && sizeof($chk_gitolite) > 0 && $chk_gitolite['chk_gitolite'] > 0)
+          {
+                $permissions = @unserialize($chk_gitolite['permissions']);
+                if($permissions !== false || $permissions === 'b:0;')
+                {
+                   $permissions_array = $permissions;
+                }
+                else
+                {
+                   $permissions_array = array();
+                }
+                //echo array_key_exists ($this->logged_user->getId(),$permissions_array);
+               // print_r($permissions_array);
+                //echo "<br>";
+                if((array_key_exists($this->logged_user->getId(),$permissions_array) && $permissions_array[$this->logged_user->getId()] > 1)
+                   || $this->logged_user->isAdministrator() || $this->logged_user->isProjectManager() 
+                   || $this->active_project->isLeader($this->logged_user) 
+                   || $repository->canAdd($this->logged_user)
+                   )
+                {
+                        $settings = GitoliteAdmin :: get_admin_settings();
+                        $body = "<h2>Git global setup</h2>";
+                        $body.= "<code>";
+                        $body.= "git config --global user.name '".$this->logged_user->getDisplayName()."'"."<br>";
+                        $body.= "git config --global user.email '".$this->logged_user->getEmail()."'"."<br>";
+                        $body.= "</code>";
+                        $body.= "<h2>Create Repository:</h2>";
+                        $body.= "<code>";
+                        $body.= "mkdir ".$this->active_repository->getName()."<br>";
+                        $body.= "cd ".$this->active_repository->getName()."<br>";
+                        $body.= "git init"."<br>";
+                        $body.= "touch README"."<br>";
+                        $body.= "git add README"."<br>";
+                        $body.= "git commit -m 'first commit'"."<br>";
+                        $body.= "git remote add origin ".$settings['gitoliteuser']."@".$settings['gitoliteserveradd'].":".$this->active_repository->getName().".git"."<br>";
+                        $body.= "git push -u origin master"."<br>";
+                        $body.= "</code>";
+                        $body.= "<h2>Existing Git Repo?</h2>";
+                        $body.= "<code>";
+                        $body.= "cd existing_git_repo";
+                        $body.= "git remote add origin ".$settings['gitoliteuser']."@".$settings['gitoliteserveradd'].":".$this->active_repository->getName().".git"."<br>";
+                        $body.= "git push -u origin master";
+                        $body.="</code>";
+                        $body_text = $body;
+                }
+                else {
+                  
+                    $this->response->forbidden();
+                }
+        }
+        else
+        {
+            $body_text = $repository->getFieldValue("repository_path_url");
+        }
+        parent::history(); 
+        $this->response->assign(array(
+                       'body_text' => $body_text));
+     
+    }
   }

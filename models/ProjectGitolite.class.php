@@ -294,7 +294,35 @@
             return TRUE;
         }
         
-        
+        function is_gitolite_repo($repo_fk = 0)
+        {
+           
+           if(!is_numeric($repo_fk) || $repo_fk == 0)
+           {
+                return false;
+           }
+           $repo_table_name = TABLE_PREFIX . 'gitolite_repomaster';
+           $access_table_name = TABLE_PREFIX.'gitolite_access_master';
+           $result = DB::execute("SELECT count(repo_fk) as chk_gitolite, b.permissions from $repo_table_name a , 
+                                  $access_table_name b where a.repo_id = b.repo_id and
+                                   repo_fk = '$repo_fk'");
+          
+           if($result)
+           {
+               $cnt_array = $result->getRowAt("0");
+               if(is_array($cnt_array) && count($cnt_array) > 0)
+               {
+                   return $cnt_array;
+               }
+               
+           }
+           else
+           {
+               return false;
+           }
+          
+        }
+     
   }
     
     

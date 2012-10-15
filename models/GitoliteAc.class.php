@@ -23,7 +23,7 @@
         
         $keys_table_name = TABLE_PREFIX . 'gitolite_user_public_keys';
         $result = DB::execute("SELECT * from ".$keys_table_name. " where user_id = '".$active_user."' and is_deleted  = '0'");
-        
+       
         if (is_foreachable($result)) 
         {
             foreach ($result as $payments) 

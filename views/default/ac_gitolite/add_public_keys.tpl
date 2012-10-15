@@ -9,15 +9,29 @@
                   <b>Key Name</b>
 	      </div>
 	      <div class="content_stack_element_body" style="" >
-                  {text_field name="key_name" value=''} <strong style="font-size: 10px;color: #B4B4B4;">(eg . pc_name_office. This will be appeded by your email)</strong>
+                  {text_field name="key_name" value=''} <strong class="help_text">Only a-z, A-Z, 0-9 & hypen (-) are allowed.</strong>
              </div>
              
              
               <div class="content_stack_element_info">
-                  <b>Enter Key</b>
+                  <b>Public Key</b>
 	      </div>
-	      <div class="content_stack_element_body" style="" >
-                    {textarea_field name="public_keys"}{/textarea_field}
+	      <div class="content_stack_element_body">
+                  <div class="key_field">{textarea_field name="public_keys" class="small_txt_area"}{/textarea_field}</div>
+                  <div class ="key_help">
+                      <h3>To generate a new SSH key just open your terminal and use code below. </h3>
+                      <code class="ssh_code">ssh-keygen -t rsa -C "{$user_rmail}" <br>
+                             # Creates a new ssh key using the provided email <br>
+                             # Generating public/private rsa key pair... <br>
+                      </code>
+                      <h3>Use code below to dump your public key and paste it in Public Key</h3>
+                      <code class="ssh_code">
+                         cat ~/.ssh/id_rsa.pub<br>
+                         # ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC6eNtGpNGwstc....
+                      </code>
+                  </div>
+                  
+                 
              </div>
 	    </div>
   		<!-- /Enable Scheduled Requests -->
