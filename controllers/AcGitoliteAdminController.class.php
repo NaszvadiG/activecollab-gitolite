@@ -107,72 +107,60 @@ class AcGitoliteAdminController extends AdminController {
              die("Please enable `exec` on this sever");
         }
         
-        if(!is_dir(array_var($_GET, 'dir')))
+        $comd = "ssh -T ".array_var($_GET, 'user')."@".array_var($_GET, 'server')." | grep gitolite-admin | grep 'R W'";
+        exec($comd,$output);
+        
+        if(count($output) > 0)
         {
-           
-             
-             if(mkdir (array_var($_GET, 'dir')))
-             {
-                 
-                 $comd = "cd ".array_var($_GET, 'dir')." &&  git clone ".array_var($_GET, 'user')."@".array_var($_GET, 'server').":gitolite-admin.git || pwd";
-                 exec($comd,$output,$return);
-                 if(count($output) > 1)
-                 {
-                    die("Unable to connect to server");
-                 }
-                 else
-                 {
-                    die("ok");
-                 }
-                
-             }
-            else 
+            if (preg_match("/R W/",$output[0]) && preg_match("/gitolite-admin/",$output[0]))
             {
-                 die("Unable to create folder ".array_var($_GET, 'dir')); 
+               if(!is_dir(array_var($_GET, 'dir')))
+               {
+                    if(mkdir (array_var($_GET, 'dir')))
+                    {
+
+                        $comd = "cd ".array_var($_GET, 'dir')." &&  git clone ".array_var($_GET, 'user')."@".array_var($_GET, 'server').":gitolite-admin.git || pwd";
+                        exec($comd,$output,$return);
+                        if(count($output) > 1)
+                        {
+                           die("Unable to connect to server");
+                        }
+                        else
+                        {
+                           die("ok");
+                        }
+
+                    }
+                   else 
+                   {
+                        die("Unable to create folder ".array_var($_GET, 'dir')); 
+                   }
+            }
+            else
+            {
+               if(is_dir(array_var($_GET, 'dir')."gitolite-admin"))
+               {
+                   die("ok");
+               }
+              else
+               {
+                    $comd = "cd ".array_var($_GET, 'dir')." &&  git clone ".array_var($_GET, 'user')."@".array_var($_GET, 'server').":gitolite-admin.git || pwd";
+                    exec($comd,$output);
+                    die("ok");
+              }
+
             }
         }
         else
         {
-           if(is_dir(array_var($_GET, 'dir')."gitolite-admin"))
-           {
-               $comd = "ssh -T ac@rtcamp.info | grep gitolite-admin | grep 'R W'";
-               exec($comd,$output,$return_var);
-               if(count($output) > 1)
-               {
-                   if($output[0] == "R W gitolite-admin")
-                   {
-                       die("ok");
-                   }
-               }
-               else
-               {
-                   die("Unable to connect to server");
-               }
-               
-           }
-           else
-           {
-                 /*$comd = exec ("ssh -T ".array_var($_GET, 'user')."@".array_var($_GET, 'server'),$output);
-                 print_r($output);
-                 die();*/
-                 
-                $comd = "cd ".array_var($_GET, 'dir')." &&  git clone ".array_var($_GET, 'user')."@".array_var($_GET, 'server').":gitolite-admin.git || pwd";
-                exec($comd,$output);
-                if(count($output) > 1)
-                {
-                    die("Unable to connect to server");
-                }
-                else
-                {
-                   die("ok");
-                }
- 
-           }
-           //var_dump(exec($comd,$output)) ;
-           //die("ok");
+            die("Unable to connect to server");
         }
-      
     }
+    else
+    {
+        die("Unable to connect to server");
+    }
+  }
     
     /*  exec_enabled
      *  check whether exec is enabled on server
