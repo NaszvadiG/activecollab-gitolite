@@ -179,7 +179,7 @@ fi
 
 
 # Setup Gitolite Admin
-echo
+#echo
 echo -e "\033[34m Setup Gitolite Admin...  \e[0m" | tee -ai /var/log/gitolite.sh.log
 sudo cp $WEBUSERHOME/.ssh/rt_rsa.pub /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to copy $WEBUSER Pubkey" 
 sudo chown $GITUSER:$GITUSER /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to change ownership of $WEBUSER"
