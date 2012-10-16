@@ -117,7 +117,7 @@
               
               // Prepare users map
               $users_details = $this->active_project->users()->describe($this->logged_user, true, true, STATE_ARCHIVED);
-              
+             
               $user_detail_permissions = array();
 
               if(is_foreachable($users_details))
@@ -142,7 +142,18 @@
                      }
                   } 
               }
-              
+               // Add Administrator , Leaders and Project Manager in allowed people list
+              if($this->logged_user->isAdministrator() || $this->logged_user->isProjectManager())
+              {
+                  $objuser = new User($user_id);
+                  $user_keys = GitoliteAc::check_keys_added($user_id);
+                  $user_detail_permissions[$user_id] = 
+                                      array('readaccess' => $repoobj->canAccess($objuser, $project) ,
+                                            'writeaccess' =>  $repoobj->canAdd($objuser, $project),
+                                            'writeaccessplus'=> $repoobj->canManage($objuser, $project),
+                                            'user_keys' => $user_keys);
+                  $allowed_users[$user_id] = $logged_user->getName();
+              }
               $this->response->assign(
                             array(
                                   'curr_users' => $allowed_users,
@@ -234,7 +245,7 @@
                         $repository_path_url = array('repository_path_url' => $repo_path);
                     }
                     $repository_data = array_merge($repository_data,$repository_path_url);
-
+                    
                     $this->active_repository = new GitRepository();
                     $this->active_repository->setAttributes($repository_data);
                     $this->active_repository->setCreatedBy($this->logged_user);
@@ -266,7 +277,6 @@
                         $this->project_object_repository->setProjectId($this->active_project->getId());
                         $this->project_object_repository->setCreatedBy($this->logged_user);
                         $this->project_object_repository->setState(STATE_VISIBLE);
-                        $this->project_object_repository->setVisibility(STATE_VISIBLE);
                         $this->project_object_repository->save();
                         
                         $repo_id = ProjectGitolite::add_repo_details($repo_fk,$project_id,$user_id,$repo_path,$repository_data);
@@ -346,25 +356,22 @@
           if($do_continue)
           {
               
-              $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
-              $objects_table_name = TABLE_PREFIX . 'project_objects';
-              $access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';      
-              
-              $users_details = $this->active_project->users()->getIdNameMap();
              
-              $result = DB::execute("SELECT a.repo_id,a.repo_name,a.git_repo_path,b.name FROM $repo_table_name a, $objects_table_name b 
-                                where a.`repo_fk` = b.integer_field_1 and b.type = 'ProjectSourceRepository'
-                                and b.id = '".$repo_id."'");
               
-              if($result)
+              $users_details = $this->active_project->users()->describe($this->logged_user, true, true, STATE_ARCHIVED);
+             
+              $repo_details = ProjectGitolite::get_repo_details($repo_id);
+              
+              
+              
+              if(is_array($repo_details) && count($repo_details) > 0)
               {
-                  $repo_details = $result->getRowAt("0");
                   // repository id from integer_field_1 in project_objects , we are saving this id in our tables.
                   $git_repo_id = $repo_details['repo_id']; 
-                  $result_access = DB::execute("SELECT * from $access_table_name where repo_id = '".$repo_details['repo_id']."'");
-                  if($result_access)
+                  $access_array = ProjectGitolite::get_access_levels($git_repo_id);
+                  //$result_access = DB::execute("SELECT * from $access_table_name where repo_id = '".$repo_details['repo_id']."'");
+                  if(is_array($access_array) && count($access_array) > 0)
                   {
-                      $access_array =  $result_access->getRowAt("0");
                       $access = $access_array['permissions'];
                       
                       $permissions = @unserialize($access);
@@ -400,20 +407,20 @@
                       
                      // check key exists
                      
-                     $user_keys = GitoliteAc::check_keys_added($key);
+                     $user_keys = GitoliteAc::check_keys_added($value['user']['id']);
                      $objuser = new User($key);
                      
                      if($user_keys > 0)
                      {
                        
                         $repoobj = new ProjectSourceRepositories();
-                        $user_detail_permissions[$key] = 
-                                    array('readaccess' => ($permissions_array[$key] == "2") ? TRUE : FALSE,
-                                          'writeaccess' => ($permissions_array[$key] == "3") ? TRUE : FALSE,
-                                          'writeaccessplus'=> ($permissions_array[$key] == "3") ? TRUE : FALSE,
+                        $user_detail_permissions[$value['user']['id']] = 
+                                    array('readaccess' => ($permissions_array[$value['user']['id']] == "2") ? TRUE : FALSE,
+                                          'writeaccess' => ($permissions_array[$value['user']['id']] == "3") ? TRUE : FALSE,
+                                          'writeaccessplus'=> ($permissions_array[$value['user']['id']] == "3") ? TRUE : FALSE,
                                           'user_keys' => $user_keys);
                         
-                        $allowed_users[$key] = $users_details[$key];
+                         $allowed_users[$value['user']['id']] = $value['user']['name'];
                      }
                      
                   } 
@@ -542,9 +549,12 @@
                         throw $errors;
                     }
                     DB::commit('Repository created @ ' . __CLASS__);
-
-                   
-                    $this->response->respondWithData($this->project_object_repository);
+                    $this->response->redirectToReferer();
+                     // $this->response->ok();
+                    //echo urldecode($this->active_repository->getViewUrl());
+                    //die();
+                     //$this->response->redirectTo($this->active_repository->getViewUrl());
+                    //$this->response->respondWithData($this->project_object_repository);
                  }
                 catch (Exception $e)
                 {  
@@ -567,8 +577,29 @@
       */
      function history() {
          
-        
+          $project = $this->active_project;
           $repository = $this->active_repository;
+          
+         $repo_details = ProjectGitolite::get_repo_details($repository->getId());
+         if(is_array($repo_details) && count($repo_details) > 0)
+         {
+            if ($repository->canEdit($this->logged_user)) {
+                echo "d adadasd";
+                die();
+                $this->wireframe->actions->add('manage_access', lang('Manage Access'),
+                                           Router::assemble('deleted_gitolite_repo', 
+                                           array('project_slug' => $project->getSlug(),
+                                           'project_source_repository_id' => $repository->getId()))
+                                           , array(
+                                               'id'=> 'update_access_levels',
+                                               'onclick'=> new FlyoutCallback(array('width' => 'narrow')),
+                                               'success_event' => "access_updated"
+                   ));
+                } //if
+         }
+                                       
+          
+         
           $repo_path = $repository->getRepositoryPathUrl();
          
           $repo_fk = $repository->getId();
@@ -593,7 +624,7 @@
                    )
                 {
                         $settings = GitoliteAdmin :: get_admin_settings();
-                        $body = "<h2>Git global setup</h2>";
+                        $body = "<h2>Git Global Setup</h2>";
                         $body.= "<code>";
                         $body.= "git config --global user.name '".$this->logged_user->getDisplayName()."'"."<br>";
                         $body.= "git config --global user.email '".$this->logged_user->getEmail()."'"."<br>";
@@ -632,4 +663,36 @@
                         'repo_path' => $repo_path));
      
     }
+    
+    function delete_gitolite_repository()
+    {
+        
+      if($this->request->isSubmitted()) {
+          
+        if($this->project_object_repository->canDelete($this->logged_user)) {
+          try {
+            $this->project_object_repository->delete();
+            //delete gitolite repo
+                ProjectGitolite::delete_git_repo($this->project_object_repository->getId());
+                
+            if($this->request->isApiCall()) {
+              $this->response->ok();
+            } else {
+              $this->response->respondWithData($this->active_repository, array(
+                'detailed' => true
+              ));
+            } // if
+          } catch(Exception $e) {
+            DB::rollback('Failed to delete repository');
+      			$this->response->exception($e);
+          } // try
+        } else {
+          $this->response->forbidden();
+        } // if
+      } else {
+        $this->response->badRequest();
+      } // if
+    
+    }
+    
   }
