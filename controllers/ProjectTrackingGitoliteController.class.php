@@ -388,15 +388,13 @@
                   }
                   else
                   { 
-                      echo "da asd";
-                      die();
+                      
                       $this->response->forbidden();
                   }
               }
               else
               {
-                   echo "11111";
-                      die();
+                  
                   $this->response->forbidden();
               }
               
@@ -553,12 +551,12 @@
                         throw $errors;
                     }
                     DB::commit('Repository created @ ' . __CLASS__);
-                    $this->response->redirectToReferer();
+                    //$this->response->redirectToReferer();
                      // $this->response->ok();
                     //echo urldecode($this->active_repository->getViewUrl());
                     //die();
                      //$this->response->redirectTo($this->active_repository->getViewUrl());
-                    //$this->response->respondWithData($this->project_object_repository);
+                    $this->response->respondWithData($this->project_object_repository);
                  }
                 catch (Exception $e)
                 {  
