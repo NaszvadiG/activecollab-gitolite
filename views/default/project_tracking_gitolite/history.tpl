@@ -48,6 +48,11 @@ App.Config.set('commit_history_offset', 1);
   App.Wireframe.Events.bind('project_source_repository_deleted', function (event, repository) {
     App.Wireframe.Content.setFromUrl(project_repositories_url);
   });
+  
+ App.Wireframe.Events.bind('gitolite_repo_deleted', function (event, repository) {
+    
+    App.Wireframe.Content.setFromUrl(project_repositories_url);
+  });
 
   /**
    * Initialize commits
