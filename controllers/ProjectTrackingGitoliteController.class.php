@@ -580,7 +580,24 @@
           $project = $this->active_project;
           $repository = $this->active_repository;
           
-         $repo_details = ProjectGitolite::get_repo_details($repository->getId());
+         //$repo_details = ProjectGitolite::get_repo_details($repository->getId());
+         /*if(is_array($repo_details) && count($repo_details) > 0)
+         {
+            if ($repository->canEdit($this->logged_user)) {
+               
+                $this->wireframe->actions->add('manage_access', lang('Manage Access'),
+                                           Router::assemble('deleted_gitolite_repo', 
+                                           array('project_slug' => $project->getSlug(),
+                                           'project_source_repository_id' => $repository->getId()))
+                                           , array(
+                                               'id'=> 'update_access_levels',
+                                               'onclick'=> new FlyoutCallback(array('width' => 'narrow')),
+                                               'success_event' => "access_updated"
+                   ));
+                } //if
+         }*/
+                                       
+          
          
           $repo_path = $repository->getRepositoryPathUrl();
          
