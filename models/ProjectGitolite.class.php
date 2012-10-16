@@ -307,6 +307,53 @@
            }
           
         }
+        
+        
+        function get_repo_details($repo_id = 0)
+        {
+           if(!is_numeric($repo_id) || $repo_id == 0)
+           {
+                return false;
+           }
+           
+           $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
+           $objects_table_name = TABLE_PREFIX . 'project_objects';
+           $access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';
+           
+           $result = DB::execute("SELECT a.repo_id,a.repo_name,a.git_repo_path,b.name FROM $repo_table_name a, $objects_table_name b 
+                                where a.`repo_fk` = b.integer_field_1 and b.type = 'ProjectSourceRepository'
+                                and b.id = '".$repo_id."'");
+              
+            if($result)
+            {
+                $repo_details = $result->getRowAt("0");
+                return $repo_details;
+            }
+            else
+            {
+                return array();
+            }
+        }
+        
+        function get_access_levels($repo_id = 0)
+        {
+           if(!is_numeric($repo_id) || $repo_id == 0)
+           {
+                return false;
+           }
+           
+           $access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';
+           $result =  DB::execute("SELECT * from $access_table_name where repo_id = '".$repo_id."'");
+           if($result)
+           {
+               $access_array = $result->getRowAt("0");
+               return $access_array;
+           }
+           else
+           {
+               return array();
+           }
+        }
      
   }
     
