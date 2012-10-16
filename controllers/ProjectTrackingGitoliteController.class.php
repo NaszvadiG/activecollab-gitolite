@@ -360,7 +360,7 @@
               
               $users_details = $this->active_project->users()->describe($this->logged_user, true, true, STATE_ARCHIVED);
              
-              //$repo_details = ProjectGitolite::get_repo_details($repo_id);
+              $repo_details = ProjectGitolite::get_repo_details($repo_id);
               
               
               
@@ -387,12 +387,16 @@
                       
                   }
                   else
-                  {
+                  { 
+                      echo "da asd";
+                      die();
                       $this->response->forbidden();
                   }
               }
               else
               {
+                   echo "11111";
+                      die();
                   $this->response->forbidden();
               }
               
