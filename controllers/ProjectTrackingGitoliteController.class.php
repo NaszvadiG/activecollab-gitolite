@@ -584,8 +584,7 @@
          if(is_array($repo_details) && count($repo_details) > 0)
          {
             if ($repository->canEdit($this->logged_user)) {
-                echo "d adadasd";
-                die();
+               
                 $this->wireframe->actions->add('manage_access', lang('Manage Access'),
                                            Router::assemble('deleted_gitolite_repo', 
                                            array('project_slug' => $project->getSlug(),
