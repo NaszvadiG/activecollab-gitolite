@@ -164,16 +164,16 @@ then
 	read -p "Enter the home dir path for $WEBUSER: " WEBUSERHOME
 fi
 
-# Checks Weather rt_rsa Key Exist
-sudo ls  $WEBUSERHOME/.ssh/rt_rsa &>> /var/log/gitolite.sh.log
+# Checks Weather id_rsa Key Exist
+sudo ls  $WEBUSERHOME/.ssh/id_rsa &>> /var/log/gitolite.sh.log
 if [ $? -eq 0 ]
 then
-	echo -e "\033[34m The ssh key rt_rsa already exist... \e[0m"
+	echo -e "\033[34m The ssh key id_rsa already exist... \e[0m"
 else
 	# Generate SSH Keys For Web User
 	#echo
 	echo -e "\033[34m Generating ssh keys for $WEBUSER \e[0m" | tee -ai /var/log/gitolite.sh.log
-	sudo -H -u $WEBUSER ssh-keygen -q -N '' -f $WEBUSERHOME/.ssh/rt_rsa || OwnError "Unable to create ssh keys for $WEBUSER"
+	sudo -H -u $WEBUSER ssh-keygen -q -N '' -f $WEBUSERHOME/.ssh/id_rsa || OwnError "Unable to create ssh keys for $WEBUSER"
 fi
 
 
@@ -181,7 +181,7 @@ fi
 # Setup Gitolite Admin
 #echo
 echo -e "\033[34m Setup Gitolite Admin...  \e[0m" | tee -ai /var/log/gitolite.sh.log
-sudo cp $WEBUSERHOME/.ssh/rt_rsa.pub /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to copy $WEBUSER Pubkey" 
+sudo cp $WEBUSERHOME/.ssh/id_rsa.pub /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to copy $WEBUSER Pubkey" 
 sudo chown $GITUSER:$GITUSER /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to change ownership of $WEBUSER"
 cd /home/$GITUSER
 sudo -H -u $GITUSER /home/$GITUSER/bin/gitolite setup -pk $WEBUSER.pub &>> /var/log/gitolite.sh.log || OwnError "Unable to setup Gitolite Admin (Key)"
