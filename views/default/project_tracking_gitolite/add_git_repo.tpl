@@ -18,15 +18,15 @@
 		<div class="clear"></div>
 		
 		{wrap field=users}
-		  {label}{lang}Peoples on project{/lang}{/label}
-                   <table>
+		  {label}{lang}People on project{/lang}{/label}
+                  <table>
                    {if $curr_users}
                       
                            <tr>
-                               <td>People Name</td>
-                               <td>No Access</td>
-                               <td>Read Access</td>
-                               <td>Write Access</td>
+                               <th>People Name</th>
+                               <th>No Access</th>
+                               <th>Read Access</th>
+                               <th>Write Access</th>
                            </tr>
                         {foreach from=$curr_users item=entry key=name} 
                               <tr>
@@ -38,11 +38,9 @@
                               </tr>
                         {/foreach}
                         
+                       
                         <tr>
                             <td colspan="4" class="note_keys">&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td colspan="4" class="note_keys">Note:&nbsp;&nbsp;Some users may not be visible here because public keys for that users is not added.</td>
                         </tr>
                  {else} 
                      
@@ -54,6 +52,24 @@
                   </table>
 		{/wrap}
                 
+                {wrap field=type}
+                <select name='repository[update_type]'>
+                    <option value="1">Frequently</option>
+                    <option value="2">Hourly</option>
+                    <option value="3">Daily</option>
+                </select>
+		{/wrap}
+			
+		{if $logged_user->canSeePrivate()}
+		  {wrap field=visibility}
+		    {label for=repositoryVisibility}Visibility{/label}
+		    {select_visibility name='repository[visibility]' value=$repository_data.visibility}
+		  {/wrap}
+		{else}
+		  <input type="hidden" name="repository[visibility]" value="1"/>
+		{/if}
+                
+                <div class="note_keys"> Note:&nbsp;&nbsp;Some users may not be visible here because public keys for that users is not added.</div>
   </div>
      {wrap_buttons}
           {submit}Add Repository{/submit}
