@@ -27,14 +27,7 @@ class AcGitoliteAdminController extends AdminController {
         /**
        * fetch current data
        */
-       $options = ConfigOptions::getValue(array(
-        'last_frequently_activity', 
-        'last_hourly_activity', 
-        'last_daily_activity'
-      ));
-       print_r($options);
-       die();
-         
+     
        $settings = GitoliteAdmin :: get_admin_settings();
        
        $setup_script = GitoliteAdmin :: get_setup_path();
@@ -75,15 +68,15 @@ class AcGitoliteAdminController extends AdminController {
                             );
        if($this->request->isSubmitted()) // check for form submission
        {
+           
            $errors = new ValidationErrors();    
            $post_data = $this->request->post("gitoliteadmin"); 
-           
+          
            try
            {
                
                DB::beginWork('Save admin settings @ ' . __CLASS__);
                $setting_exists = GitoliteAdmin :: setting_exists();
-               
                if($setting_exists['cnt_settings'] == 0)
                {    
                     $settings_add = GitoliteAdmin :: insert_settings($post_data,$this->logged_user->getId());
@@ -98,8 +91,7 @@ class AcGitoliteAdminController extends AdminController {
                      $settings_update = GitoliteAdmin :: update_settings($post_data,$this->logged_user->getId());
                 }
                 DB::commit('Admin Settings Saved @ ' . __CLASS__);
-
-                $this->flash->success("Settings saved successfully");
+               
                 $this->response->ok();
            }
             catch (Exception $e)

@@ -19,8 +19,10 @@
 		<div class="clear"></div>
 		
 		{wrap field=users}
-		  {label}{lang}Peoples on project{/lang}{/label}
-                  
+		  {label}{lang}People On Project{/lang}{/label}
+                  {if $no_key_warning == 1}
+                      <span class="pubkey_warning">Please <a target="_blank" href="{$view_url}">add your SSH key here</a> to set permission for yourself.</span>
+                  {/if}
                    {if $curr_users}
                        <table>
                            <tr>

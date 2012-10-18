@@ -25,16 +25,16 @@
         if(ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
          $this->wireframe->actions->add('add_git', 'Add New Git Repository', Router::assemble('add_git_repository',array('project_slug' => $this->active_project->getSlug())), array(
                  'onclick' => new FlyoutFormCallback('repository_created', array('width' => 'narrow')),
-                 'icon' => AngieApplication::getImageUrl('layout/button-add.png', ENVIRONMENT_FRAMEWORK, AngieApplication::getPreferedInterface()),        	
-             ));
+                 'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
+             );
         }
           
           $repositories = ProjectSourceRepositories::findByProjectId($this->active_project->getId(), $this->logged_user->getMinVisibility());
           
           $get_admin_settings = GitoliteAdmin::get_admin_settings();
           //print_r($get_admin_settings);
-          if(is_array($get_admin_settings) && count($get_admin_settings) > 0)
-          {
+          //if(is_array($get_admin_settings) && count($get_admin_settings) > 0)
+          //{
                 $cloneurls = array();
                 $gitolite_repos = array();
                 foreach ($repositories as $repository) {
@@ -76,7 +76,7 @@
                    
 
                 }
-          }
+          //}
          
           $this->response->assign(array(
                     'repositories' => $repositories,
@@ -94,7 +94,9 @@
       */
      function add_git_repo()
      {
+      
          $is_gitolite  = GitoliteAdmin :: is_gitolite();
+         
          if(!ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
                  $this->response->forbidden();
           } // if
@@ -103,7 +105,8 @@
          $project_id = $project->getId();
          $logged_user = $this->logged_user;
          $user_id = $logged_user->getId();
-
+         $no_key_warning = FALSE;
+         $view_url = "";
          if(AngieApplication::isModuleLoaded("source") && $this->getControllerName() == 'project_tracking_gitolite')
          { 
              
@@ -147,12 +150,20 @@
               {
                   $objuser = new User($user_id);
                   $user_keys = GitoliteAc::check_keys_added($user_id);
-                  $user_detail_permissions[$user_id] = 
+                  if($user_keys)
+                  {
+                    $user_detail_permissions[$user_id] = 
                                       array('readaccess' => $repoobj->canAccess($objuser, $project) ,
                                             'writeaccess' =>  $repoobj->canAdd($objuser, $project),
                                             'writeaccessplus'=> $repoobj->canManage($objuser, $project),
                                             'user_keys' => $user_keys);
-                  $allowed_users[$user_id] = $logged_user->getName();
+                    $allowed_users[$user_id] = $logged_user->getName();
+                  }
+                  else
+                  {
+                      $no_key_warning = TRUE;
+                      $view_url = $this->logged_user->getViewUrl();
+                  }
               }
               $this->response->assign(
                             array(
@@ -162,7 +173,9 @@
                                   'noaccess' => GITOLITE_NOACCESS,
                                   'readaccess' => GITOLITE_READACCESS,
                                   'manageaccess' => GITOLITE_MANAGEACCESS,
-                                  'is_gitolite' => $is_gitolite
+                                  'is_gitolite' => $is_gitolite,
+                                  'no_key_warning' => $no_key_warning,
+                                  'view_url' => $view_url
                                 )
                             );
         
@@ -252,7 +265,7 @@
                     
                     
                     
-                    $result = true;
+                    /*$result = true;
                     if ($result !== true) {
                         if ($result === false) {
                             $message = 'Please check URL or login parameters.';
@@ -262,7 +275,8 @@
                         } //if
                         $errors->addError('Failed to connect to repository: :message', array('message'=>$message));
                         throw $errors;
-                    } //if
+                    } //if*/
+                    
                     $this->active_repository->save();
                     $repo_fk = $this->active_repository->getId();
                     if($repo_fk)
@@ -334,7 +348,6 @@
      
      function edit_git_repo()
      {
-        
          $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
          
          $is_gitolite  = GitoliteAdmin :: is_gitolite();
@@ -346,7 +359,7 @@
          $project_id = $project->getId();
          $logged_user = $this->logged_user;
          $user_id = $logged_user->getId();
-
+         $no_key_warning = FALSE;   // to give warning if logged in user has not added his public key
          if(AngieApplication::isModuleLoaded("source") && $this->getControllerName() == 'project_tracking_gitolite')
          { 
              
@@ -355,8 +368,6 @@
           
           if($do_continue)
           {
-              
-             
               
               $users_details = $this->active_project->users()->describe($this->logged_user, true, true, STATE_ARCHIVED);
              
@@ -427,6 +438,27 @@
                      
                   } 
               }
+              
+              if($this->logged_user->isAdministrator() || $this->logged_user->isProjectManager())
+              {
+                  
+                  $objuser = new User($user_id);
+                  $user_keys = GitoliteAc::check_keys_added($user_id);
+                  if($user_keys)
+                  {
+                        $user_detail_permissions[$user_id] = 
+                                            array('readaccess' => $repoobj->canAccess($objuser, $project) ,
+                                                  'writeaccess' =>  $repoobj->canAdd($objuser, $project),
+                                                  'writeaccessplus'=> $repoobj->canManage($objuser, $project),
+                                                  'user_keys' => $user_keys);
+                        $allowed_users[$user_id] = $logged_user->getName();
+                  }
+                  else
+                  {
+                      $no_key_warning = TRUE;
+                  }
+              }
+              
               $this->response->assign(
                             array(
                                   'curr_users' => $allowed_users,
@@ -436,7 +468,8 @@
                                   'noaccess' => GITOLITE_NOACCESS,
                                   'readaccess' => GITOLITE_READACCESS,
                                   'manageaccess' => GITOLITE_MANAGEACCESS,
-                                  'is_gitolite' => $is_gitolite
+                                  'is_gitolite' => $is_gitolite,
+                                  'no_key_warning' => $no_key_warning
                                 )
                             );
         
@@ -556,7 +589,8 @@
                     //echo urldecode($this->active_repository->getViewUrl());
                     //die();
                      //$this->response->redirectTo($this->active_repository->getViewUrl());
-                    $this->response->respondWithData($this->project_object_repository);
+                    $this->response->ok();
+                    //$this->response->respondWithData($this->project_object_repository);
                  }
                 catch (Exception $e)
                 {  
@@ -581,25 +615,26 @@
          
           $project = $this->active_project;
           $repository = $this->active_repository;
-          
-         //$repo_details = ProjectGitolite::get_repo_details($repository->getId());
-         /*if(is_array($repo_details) && count($repo_details) > 0)
+         
+          $repo_details = ProjectGitolite::get_repo_details($repository->getId());
+         
+         if(is_array($repo_details) && count($repo_details) > 0)
          {
             if ($repository->canEdit($this->logged_user)) {
                
                 $this->wireframe->actions->add('manage_access', lang('Manage Access'),
-                                           Router::assemble('deleted_gitolite_repo', 
+                                           Router::assemble('edit_git_repository', 
                                            array('project_slug' => $project->getSlug(),
                                            'project_source_repository_id' => $repository->getId()))
                                            , array(
                                                'id'=> 'update_access_levels',
-                                               'onclick'=> new FlyoutCallback(array('width' => 'narrow')),
-                                               'success_event' => "access_updated"
+                                               'onclick'=> new FlyoutFormCallback("access_updated",array('width' => 'narrow')),
+                                               'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE),
                    ));
                 } //if
-         }*/
+         }
                                        
-          
+           
          
           $repo_path = $repository->getRepositoryPathUrl();
          
@@ -608,6 +643,8 @@
           
           if(is_array($chk_gitolite) && sizeof($chk_gitolite) > 0 && $chk_gitolite['chk_gitolite'] > 0)
           {
+                $settings = GitoliteAdmin :: get_admin_settings();
+                $clone_url = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'].":".$this->active_repository->getName().".git";
                 $permissions = @unserialize($chk_gitolite['permissions']);
                 if($permissions !== false || $permissions === 'b:0;')
                 {
@@ -624,7 +661,7 @@
                    || $repository->canAdd($this->logged_user)
                    )
                 {
-                        $settings = GitoliteAdmin :: get_admin_settings();
+                        
                         $body = "<h2>Git Global Setup</h2>";
                         $body.= "<code>";
                         $body.= "git config --global user.name '".$this->logged_user->getDisplayName()."'"."<br>";
@@ -638,13 +675,13 @@
                         $body.= "touch README"."<br>";
                         $body.= "git add README"."<br>";
                         $body.= "git commit -m 'first commit'"."<br>";
-                        $body.= "git remote add origin ".$settings['gitoliteuser']."@".$settings['gitoliteserveradd'].":".$this->active_repository->getName().".git"."<br>";
+                        $body.= "git remote add origin ".$clone_url."<br>";
                         $body.= "git push -u origin master"."<br>";
                         $body.= "</code>";
                         $body.= "<h2>Existing Git Repo?</h2>";
                         $body.= "<code>";
-                        $body.= "cd existing_git_repo";
-                        $body.= "git remote add origin ".$settings['gitoliteuser']."@".$settings['gitoliteserveradd'].":".$this->active_repository->getName().".git"."<br>";
+                        $body.= "cd existing_git_repo"."<br>";
+                        $body.= "git remote add origin ".$clone_url."<br>";
                         $body.= "git push -u origin master";
                         $body.="</code>";
                         $body_text = $body;
@@ -657,11 +694,13 @@
         else
         {
             $body_text = $repository->getFieldValue("repository_path_url");
+            
         }
         parent::history(); 
         $this->response->assign(array(
                        'body_text' => $body_text,
-                        'repo_path' => $repo_path));
+                       'repo_path' => $repo_path,
+                       'clone_url' => $clone_url ));
      
     }
     

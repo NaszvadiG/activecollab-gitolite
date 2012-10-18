@@ -18,7 +18,11 @@
 		<div class="clear"></div>
 		
 		{wrap field=users}
-		  {label}{lang}People on project{/lang}{/label}
+		  {label}{lang}People On Project{/lang}{/label}
+                  
+                  {if $no_key_warning == 1}
+                      <span class="pubkey_warning">Please <a target="_blank" href="{$view_url}">add your SSH key here</a> to set permission for yourself.</span>
+                  {/if}
                   <table>
                    {if $curr_users}
                       
@@ -40,7 +44,9 @@
                         
                        
                         <tr>
-                            <td colspan="4" class="note_keys">&nbsp;</td>
+                            <td colspan="4">&nbsp;</td>
+                        </tr><tr>
+                            <td colspan="4"><em> Note:&nbsp;&nbsp;Some users may not be visible here because public keys for that users is not added.</em></td>
                         </tr>
                  {else} 
                      
@@ -52,24 +58,34 @@
                   </table>
 		{/wrap}
                 
-                {wrap field=type}
-                <select name='repository[update_type]'>
-                    <option value="1">Frequently</option>
-                    <option value="2">Hourly</option>
-                    <option value="3">Daily</option>
-                </select>
-		{/wrap}
-			
-		{if $logged_user->canSeePrivate()}
-		  {wrap field=visibility}
-		    {label for=repositoryVisibility}Visibility{/label}
-		    {select_visibility name='repository[visibility]' value=$repository_data.visibility}
-		  {/wrap}
-		{else}
-		  <input type="hidden" name="repository[visibility]" value="1"/>
-		{/if}
                 
-                <div class="note_keys"> Note:&nbsp;&nbsp;Some users may not be visible here because public keys for that users is not added.</div>
+                <div id="sourceAuthenticateWrapper">
+                    <div class="col">
+                    {wrap field=type}
+                        {label for=repositoryUpdateType}{lang}Commit History Update Type{/lang}{/label}
+                        <select name='repository[update_type]'>
+                            <option value="1">Frequently</option>
+                            <option value="2">Hourly</option>
+                            <option value="3">Daily</option>
+                        </select>
+                    {/wrap}
+                    </div>
+                   
+                    <div class="col">
+                    {if $logged_user->canSeePrivate()}
+                        {wrap field=visibility}
+                            {label for=repositoryVisibility}Visibility{/label}
+                            {select_visibility name='repository[visibility]' value=$repository_data.visibility}
+                        {/wrap}
+                    {else}
+                        <input type="hidden" name="repository[visibility]" value="1"/>
+                    {/if}
+                    </div>
+            </div>
+        
+		
+                
+                
   </div>
      {wrap_buttons}
           {submit}Add Repository{/submit}

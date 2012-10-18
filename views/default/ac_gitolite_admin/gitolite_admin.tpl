@@ -1,9 +1,11 @@
 {title}Gitolite Admin{/title}
 
 <div id="gitolite_admin">
+    
   {form action=Router::assemble('gitolite_admin')}
   <input type="hidden" value= "{$setup_script}" id="script_path_default">
   <input type = "hidden" value = "{$gitoliteuser}" id="old_value"> 
+  <input type="hidden" value = "{$is_enable}" id = "is_enabled">
     <div class="content_stack_wrapper">
       
         
@@ -15,7 +17,12 @@
         <div class="content_stack_element_body">
             {wrap field=gitoliteuser}
             <div class="gl_user_ui_half">
-            {text_field name="gitoliteadmin[gitoliteuser]" id=gitoliteuser  class="text_field" value = "{$gitoliteuser}"  label="Gitolite User" required=true}
+             {if $is_enable == 0}
+                {text_field name="gitoliteadmin[gitoliteuser]" id=gitoliteuser class="text_field" value = "{$gitoliteuser}"  label="Gitolite User" required=true}
+             {else}
+                 {text_field name="gitoliteuser" id=gitoliteuser class="text_field" value = "{$gitoliteuser}"  label="Gitolite User" required=true}
+                 <input type="hidden" name="gitoliteadmin[gitoliteuser]" value="{$gitoliteuser}">
+             {/if}
             <p class="aid">e.g. git</p>
             </div>
             <div class="gl_user_ui_orphan">
@@ -47,17 +54,6 @@
         </div>
         
       </div>
-
-      <!--<div class="content_stack_element">
-        <div class="content_stack_element_info">
-          <h3>{lang}Clone gitolite-admin{/lang}</h3>
-        </div>
-        <div class="content_stack_element_body">
-          {wrap field=clone_admin}
-            Clone gitolite-admin with PHP's user i.e. {$web_user}
-          {/wrap}
-        </div>
-      </div>-->
       
       <div class="content_stack_element">
         <div class="content_stack_element_info">
@@ -83,95 +79,46 @@
 	  {/wrap_buttons}
   {/form}
 </div>
-<!--<div id="">
-	{form action=Router::assemble('gitolite_admin') class='big_form' name ="git_admin"}
-                <input type = "hidden" name = "admins" value = "{$gitoliteadmins}" id = "admins">
-		<script type="text/javascript">
-                    App.widgets.FlyoutDialog.front().setAutoSize(false);
-		</script>
-                
-		<div class="big_form_wrapper one_form_sidebar">
-		  <div class="main_form_column">
-                      <h2>Gitolite Server</h2>
-                    {wrap field=gitoliteuser}
-                           {text_field name="gitoliteadmin[gitoliteuser]" id=gitoliteuser  value = {$gitoliteuser} class='title' label="Gitolite User" required=true}
-                           <i>e.g. git</i>
-                    {/wrap}
-
-                    {wrap field=gitoliteserveradd}
-			    {text_field name="gitoliteadmin[gitoliteserveradd]" value = {$gitoliteserveradd} id=gitoliteserveradd class='title' label="Gitolite Server Address" required=true}
-                             <i>e.g.domain.com or 115.110.210.123</i>
-                    {/wrap}
-                    
-                    <h2>Gitolite Admin Path</h2>
-                     {wrap field=gitoliteadminpath}
-                          {text_field name="gitoliteadminpath" value = {$gitoliteadminpath} id=gitoliteadminpath class='title'  disabled = "disabled"}
-                           
-                     {/wrap}
-                     <h2 style="color: red;">Note : </h2>
-                     <div>Before Testing your connection please verify your public key (e.g id_rsa.pub) exists on Gitolite server with the {$webuser}.pub name and be sure that following command is executed on Gitolite server
-                         <br><i>gitolite setup -pk {$webuser}.pub</i>
-                     </div>
-		  </div>
-		 
-		</div>
-                  
-	  {wrap_buttons}
-          {submit id="save_settings"}Save Settings{/submit}
-            <input type="hidden" value="{$gitolite_repo_test_connection_url}" id="gitolite_repo_test_connection_url" />
-            <input type="hidden" value="{$gitoliteadminpath}" id="gitolite_test_dir" name="gitoliteadmin[gitoliteadminpath]" />
-            <button type="button" id="test_gitolite_connection" class="default"><span><span>{lang}Test Connection{/lang}</span></span></button>
-            <img id="test_connection_loading_img" src="{image_url name="layout/bits/indicator-loading-normal.gif" module=$smarty.const.ENVIRONMENT_FRAMEWORK}" alt='' />    
-	  {/wrap_buttons}
-	{/form}
-</div> -->
 
    {literal}
 <script type="text/javascript">
 
-
     $(document).ready (function () {
-         $("#gitoliteadminpath").width(450);
+        
+        if($('#is_enabled').val() == 1)
+        {
+              $("#gitoliteuser").attr("disabled", "disabled");
+        }
+        $("#gitoliteadminpath").width(450);
          
-         if($('#gitoliteuser').val() != "")
-         {
-             var git_user = $('#old_value').val();
-             var oldhtml = $('#script_path').html();
-             var newhtml = oldhtml.replace(/ git/g," "+$('#gitoliteuser').val());
-             $('#script_path').html(newhtml)
-         }
-         $('#gitoliteuser').blur(function() {
-               var git_user = $('#gitoliteuser').val();
-               var oldhtml = $('#script_path').html();
-               var newhtml = oldhtml.replace(' '+$('#old_value').val()," "+$('#gitoliteuser').val());
-               $('#script_path').html(newhtml)
-               $('#old_value').val($('#gitoliteuser').val())
+        if($('#gitoliteuser').val() != "")
+        {
+            var git_user = $('#old_value').val();
+            var oldhtml = $('#script_path').html();
+            var newhtml = oldhtml.replace(/ git/g," "+$('#gitoliteuser').val());
+            $('#script_path').html(newhtml)
+        }
+        $('#gitoliteuser').blur(function() {
+              var git_user = $('#gitoliteuser').val();
+              var oldhtml = $('#script_path').html();
+              var newhtml = oldhtml.replace(' '+$('#old_value').val()," "+$('#gitoliteuser').val());
+              $('#script_path').html(newhtml)
+              $('#old_value').val($('#gitoliteuser').val())
         });
-         /*$("#button_cancel").click(function(event) {
-             App.widgets.FlyoutDialog = function () {
-                    var do_close_dialog = function (instance) {
-                    var instance_data = instance.data("flyout_data");
-                   var flyout_id = instance_data.id;
-                   $(window).unbind("keydown." + flyout_id);
-                   $(window).unbind(".flyout_dialog");
-                   if (instance_data && $.isFunction(instance_data.settings.close)) {
-                       instance_data.settings.close.apply(instance_data.content.children(":first")[0])
-                   }
-               App.Wireframe.Events.unbind(".flyout");
-               instance.remove()
-                   };
-          }();
-        });*/
-            
-        //$('#gitoliteadminpath').css('display', 'none');
-	$('#test_connection_loading_img').hide();
-	//$('.submit_repository').hide();
-            $('#save_settings').hide();
-            
+
+        $('#test_connection_loading_img').hide();
+
+        $('#save_settings').hide();
+        
+         App.Wireframe.Events.bind('gitolite_admin_data', function (event, admin) {
+                App.Wireframe.Flash.success(App.lang('Admin settings updated successfully'));
+            });
+  
 	
 	$('#test_gitolite_connection').click(function (event) {
 		var test_connection_url = $('#gitolite_repo_test_connection_url').val();
                 var gitoliteuser = $('#gitoliteuser').val();
+                   
                 var serveraddress = $('#gitoliteserveradd').val();
 		//var repository_url = $('#repositoryUrl').val();
                 //var repository_url = "/opt/lampp/htdocs/gitsource3/ac3-tweaks";
