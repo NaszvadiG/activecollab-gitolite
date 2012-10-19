@@ -1,7 +1,7 @@
 {title}Gitolite Admin{/title}
 
 <div id="gitolite_admin">
-    
+   
   {form action=Router::assemble('gitolite_admin')}
   <input type="hidden" value= "{$setup_script}" id="script_path_default">
   <input type = "hidden" value = "{$gitoliteuser}" id="old_value"> 

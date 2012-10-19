@@ -375,6 +375,15 @@
               
               
               
+              
+               $repository_data = $this->request->post('repository');
+               if (!is_array($repository_data)) {
+                  $repository_data = array(
+                          'updatetype'      		=> $this->active_repository->getUpdateType(),
+                          'visibility'      		=> $this->project_object_repository->getVisibility()
+                  );
+                } // if
+              
               if(is_array($repo_details) && count($repo_details) > 0)
               {
                   // repository id from integer_field_1 in project_objects , we are saving this id in our tables.
@@ -469,7 +478,8 @@
                                   'readaccess' => GITOLITE_READACCESS,
                                   'manageaccess' => GITOLITE_MANAGEACCESS,
                                   'is_gitolite' => $is_gitolite,
-                                  'no_key_warning' => $no_key_warning
+                                  'no_key_warning' => $no_key_warning,
+                                  'repository_data' => $repository_data
                                 )
                             );
         
@@ -551,6 +561,12 @@
                 // save reponame
                  try {
                     DB::beginWork('Update repository @ ' . __CLASS__);
+                    $this->active_repository->setAttributes($repository_data);
+                    $this->project_object_repository->setVisibility($repository_data['visibility']);
+                    $this->project_object_repository->setName($repository_data['name']);
+
+                    $this->active_repository->save();
+                    $this->project_object_repository->save();
                     
                     $repo_fk = $this->active_repository->getId();
                     

@@ -18,7 +18,7 @@ class AcGitoliteAdminController extends AdminController {
         parent::__before();
         
     }
-
+    
     /** gitolite_admin
      * Save gitolite admin settings
      */
@@ -27,7 +27,7 @@ class AcGitoliteAdminController extends AdminController {
         /**
        * fetch current data
        */
-     
+       
        $settings = GitoliteAdmin :: get_admin_settings();
        
        $setup_script = GitoliteAdmin :: get_setup_path();
@@ -181,5 +181,5 @@ class AcGitoliteAdminController extends AdminController {
          $disabled = explode(', ', ini_get('disable_functions'));
         return !in_array('exec', $disabled);
 }
-
+ 
 }

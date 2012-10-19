@@ -10,7 +10,7 @@
 		{wrap field=name}
 		  {label for=repositoryName required=yes}{lang}Name{/lang}{/label}
 		  {text_field name='repository[name]' id=repositoryName class='title required' maxlength="150"}
-                   <p class="aid">{lang}Only a-z, A-Z, hypens(-), numbers(1,2..) are allowed (eg. wordpress-project).{/lang}</p>
+                   <p class="aid">{lang}Only a-z, A-Z, hypens(-), numbers(1,2..) are allowed (eg. wordpress-project12).{/lang}</p>
 		{/wrap}
 		
 		
@@ -18,7 +18,7 @@
 		<div class="clear"></div>
 		
 		{wrap field=users}
-		  {label}{lang}People On Project{/lang}{/label}
+		  {label}{lang}People In Project{/lang}{/label}
                   
                   {if $no_key_warning == 1}
                       <span class="pubkey_warning">Please <a target="_blank" href="{$view_url}">add your SSH key here</a> to set permission for yourself.</span>
@@ -27,10 +27,10 @@
                    {if $curr_users}
                       
                            <tr>
-                               <th>People Name</th>
+                               <th>Name</th>
                                <th>No Access</th>
-                               <th>Read Access</th>
-                               <th>Write Access</th>
+                               <th>Read Only</th>
+                               <th>Read/Write</th>
                            </tr>
                         {foreach from=$curr_users item=entry key=name} 
                               <tr>
@@ -46,7 +46,7 @@
                         <tr>
                             <td colspan="4">&nbsp;</td>
                         </tr><tr>
-                            <td colspan="4"><em> Note:&nbsp;&nbsp;Some users may not be visible here because public keys for that users is not added.</em></td>
+                            <td colspan="4"><em> Note:&nbsp;&nbsp;Some users may not be visible here because public keys are not added.</em></td>
                         </tr>
                  {else} 
                      

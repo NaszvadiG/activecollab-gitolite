@@ -40,7 +40,7 @@
             }
             
             App.Wireframe.Events.bind('access_updated', function (event, repository) {
-                App.Wireframe.Flash.success(App.lang('Access levels updated successfully'));
+                App.Wireframe.Flash.success(App.lang('Repository updated successfully'));
             });
   
         });
