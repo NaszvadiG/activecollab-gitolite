@@ -638,7 +638,7 @@
            if(is_array($repo_details) && count($repo_details) > 0)
            {
                
-              if ($repository->canEdit($this->logged_user)) {
+              //if ($repository->canEdit($this->logged_user)) {
 
                   $this->wireframe->actions->add('manage_access', lang('Manage Access'),
                                              Router::assemble('edit_git_repository', 
@@ -649,7 +649,7 @@
                                                  'onclick'=> new FlyoutFormCallback("access_updated",array('width' => 'narrow')),
                                                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE),
                      ));
-                } //if
+                //} //if
             }
                                        
           
