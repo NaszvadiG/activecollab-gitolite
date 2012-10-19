@@ -649,7 +649,7 @@
                   $this->wireframe->actions->add('manage_access', lang('Manage Access'),
                                              Router::assemble('edit_git_repository', 
                                              array('project_slug' => $project->getSlug(),
-                                             'project_source_repository_id' => $repository->getId()))
+                                             'project_source_repository_id' => $repo_id))
                                              , array(
                                                  'id'=> 'update_access_levels',
                                                  'onclick'=> new FlyoutFormCallback("access_updated",array('width' => 'narrow')),
