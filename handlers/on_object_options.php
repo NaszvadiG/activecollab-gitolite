@@ -25,27 +25,6 @@
         $result = DB::execute("SELECT * FROM $repo_table_name a, $objects_table_name b 
                                 where a.`repo_fk` = b.integer_field_1 and b.type = 'ProjectSourceRepository'
                                 and b.id = '".$object->getId()."'");
-        if($result)
-        {
-            /*$options->add('edit_git', array(
-              'url' => Router::assemble('edit_git_repository', array('project_slug' => $object->getProject()->getSlug(),'project_source_repository_id' => $object->getId())),
-              'text' => "Edit Access Levels",  
-               'onclick' =>  new FlyoutFormCallback('git_repository_edited', array('width' => 'narrow'))
-            ));*/
-            if($object->canDelete($user)) {
-                $options->add('delete_gitolie_repository', array(
-                    'text' => lang('Remove Gitolite Repository'),
-                    'url' => Router::assemble('deleted_gitolite_repo', array('project_slug' => $object->getProject()->getSlug(), 'project_source_repository_id' => $object->getId()), array('id' => 'deleted_gitolite_repo')),
-					'onclick' => new AsyncLinkCallback(array(
-                        'confirmation' => lang('Are you sure that you want to permanently remove this repository?'), 
-                        'success_message' => lang('Repository has been successfully removed'), 
-                        'success_event' => "gitolite_repo_deleted"
-              )),
-        ), true);
-      } // if
-            
-            
-        }
      
   } // ac_gitolite_handle_on_object_options
  } 
