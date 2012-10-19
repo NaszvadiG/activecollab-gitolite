@@ -319,10 +319,6 @@
            
            $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
            $objects_table_name = TABLE_PREFIX . 'project_objects';
-           echo "SELECT a.repo_id,a.repo_name,a.git_repo_path,b.name FROM $repo_table_name a, $objects_table_name b 
-                                  where a.`repo_fk` = b.integer_field_1 and b.type = 'ProjectSourceRepository'
-                                  and b.integer_field_1 = '".$repo_id."'";
-           
            
            $result = DB::execute("SELECT a.repo_id,a.repo_name,a.git_repo_path,b.name FROM $repo_table_name a, $objects_table_name b 
                                   where a.`repo_fk` = b.integer_field_1 and b.type = 'ProjectSourceRepository'
@@ -330,20 +326,15 @@
               
             //print_r($result);
             
-           
-            $repo_details =$result->getRowAt("0");
-            print_r($repo_details);
             if($result)
             {
-                echo "111111";
-                die();
+                
                 $repo_details =$result->getRowAt("0");
                 return $repo_details;
             }
             else
             {
-              echo "22222";
-                die();
+             
                 return array();
             }
             
