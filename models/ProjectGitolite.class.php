@@ -321,12 +321,12 @@
            $objects_table_name = TABLE_PREFIX . 'project_objects';
            echo "SELECT a.repo_id,a.repo_name,a.git_repo_path,b.name FROM $repo_table_name a, $objects_table_name b 
                                   where a.`repo_fk` = b.integer_field_1 and b.type = 'ProjectSourceRepository'
-                                  and b.id = '".$repo_id."'";
+                                  and b.integer_field_1 = '".$repo_id."'";
            
            
            $result = DB::execute("SELECT a.repo_id,a.repo_name,a.git_repo_path,b.name FROM $repo_table_name a, $objects_table_name b 
                                   where a.`repo_fk` = b.integer_field_1 and b.type = 'ProjectSourceRepository'
-                                  and b.id = '".$repo_id."'");
+                                  and b.integer_field_1 = '".$repo_id."'");
               
             //print_r($result);
             
