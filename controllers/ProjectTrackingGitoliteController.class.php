@@ -649,7 +649,7 @@
                                                  'onclick'=> new FlyoutFormCallback("access_updated",array('width' => 'narrow')),
                                                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE),
                      ));
-                //} //if
+                } //if
             }
                                        
           
