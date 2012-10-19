@@ -634,8 +634,7 @@
           $repository = $this->active_repository;
          
            $repo_details = ProjectGitolite::get_repo_details($repository->getId());
-           print_r($repo_details);
-           die();
+           
            if(is_array($repo_details) && count($repo_details) > 0)
            {
                
