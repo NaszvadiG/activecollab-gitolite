@@ -378,10 +378,10 @@
                 
                $repository_data = $this->request->post('repository');
                if (!is_array($repository_data)) {
-                  $repository_data = array(
+                  /*$repository_data = array(
                           'updatetype'      => $this->active_repository->getFieldValue("update_type"),
                           'visibility'      => $this->project_object_repository->getVisibility()
-                  );
+                  );*/
                 } // if
               
               if(is_array($repo_details) && count($repo_details) > 0)
