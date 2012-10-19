@@ -3,7 +3,7 @@
 
 
 # Variables
-BASEPATH=$(pwd)
+BASEPATH=$(dirname $0 )
 LOGFILE=/var/log/gitolite.sh.log
 
 echo -e "\033[34m Gitolite admin installation started at `date` \e[0m" | tee -ai $LOGFILE
@@ -57,6 +57,7 @@ OPENSSH=$(echo $?)
 dpkg --list | grep git-core &>> $LOGFILE
 GITCORE=$(echo $?)
 dpkg --list | grep curl &>> $LOGFILE
+CURL=$(echo $?)
 #echo $GITCORE $OPENSSH $CURL
 
 # Install Open SSH & Git Core If It Not Installed
@@ -89,7 +90,7 @@ else
 	echo GITUSER = $GITUSER &>> $LOGFILE
 fi
 
-grep ^$GITUSER$ /etc/passwd &>> $LOGFILE
+grep ^$GITUSER: /etc/passwd &>> $LOGFILE
 if [ $? -eq 0 ]
 then
 	echo -e "\033[31m The $GITUSER user is already exist !! \e[0m" | tee -ai $LOGFILE
@@ -102,29 +103,32 @@ fi
 #echo
 echo -e "\033[34m Creating System User [$GITUSER]...  \e[0m" | tee -ai $LOGFILE
 sudo adduser --system --home /home/$GITUSER --shell /bin/bash --group --disabled-login --disabled-password --gecos 'git version control' $GITUSER &>> $LOGFILE || OwnError "Unable to create $GITUSER"
-echo -e "\033[34m Coping skeleton for [$GITUSER]...  \e[0m" | tee -ai $LOGFILE
-sudo -H -u $GITUSER cp -v /etc/skel/.* /home/$GITUSER/ &>> tee -ai $LOGFILE
+
+# Copy Skeleton Contents
+#echo -e "\033[34m Copying skeleton contents for [$GITUSER]...  \e[0m" | tee -ai $LOGFILE
+sudo -H -u $GITUSER cp /etc/skel/.profile /etc/skel/.bashrc /etc/skel/.bash_logout /home/$GITUSER
+
 
 # Create a bin Directory For Git User
 #echo
-echo -e "\033[34m Creating bin directory...  \e[0m" | tee -ai $LOGFILE
+echo -e "\033[34m Creating bin directory \e[0m" | tee -ai $LOGFILE
 sudo -H -u $GITUSER mkdir /home/$GITUSER/bin || OwnError "Unable to create bin directory"
 
 # Create a setup Directory For Gitolite Repository
 #echo
-echo -e "\033[34m Creating setup directory  \e[0m" | tee -ai $LOGFILE
+echo -e "\033[34m Creating setup directory \e[0m" | tee -ai $LOGFILE
 sudo -H -u $GITUSER mkdir /home/$GITUSER/setup || OwnError "Unable to create setup directory"
 
 cd /home/$GITUSER/setup || OwnError " Unable to change directory"
 
 #echo
-echo -e "\033[34m Cloning Gitolite...  \e[0m" | tee -ai $LOGFILE
+echo -e "\033[34m Cloning Gitolite... \e[0m" | tee -ai $LOGFILE
 sudo -H -u $GITUSER git clone git://github.com/sitaramc/gitolite &>> $LOGFILE || OwnError "Unable to clone gitolote repository"
 
 # Create a Symbolic Link For Gitolite in /home/git/bin Directory
 #sudo -H -u $GITUSER PATH=/home/$GITUSER/bin:$PATH || OwnError " Unable to updat PATH:("
 #echo
-echo -e "\033[34m Creating Gitolite symbolic link...  \e[0m" | tee -ai $LOGFILE
+echo -e "\033[34m Creating Gitolite symbolic link  \e[0m" | tee -ai $LOGFILE
 sudo -H -u $GITUSER gitolite/install -to /home/$GITUSER/bin || OwnError "Unable to create symbolic link for Gitolite"
 
 
@@ -151,7 +155,7 @@ fi
 
 # Add Web User to Git Group
 #echo
-echo -e "\033[34m Adding $WEBUSER to $GITUSER group...  \e[0m" | tee -ai $LOGFILE
+echo -e "\033[34m Adding $WEBUSER to $GITUSER group  \e[0m" | tee -ai $LOGFILE
 sudo adduser $WEBUSER $GITUSER &>> $LOGFILE
 
 # Get The Web User Home Dir Path
@@ -167,7 +171,7 @@ fi
 sudo ls  $WEBUSERHOME/.ssh/id_rsa &>> $LOGFILE
 if [ $? -eq 0 ]
 then
-	echo -e "\033[34m The ssh key id_rsa already exist... \e[0m"
+	echo -e "\033[34m The ssh key id_rsa already exist \e[0m"
 else
 	# Generate SSH Keys For Web User
 	#echo
@@ -187,17 +191,19 @@ sudo -H -u $GITUSER /home/$GITUSER/bin/gitolite setup -pk $WEBUSER.pub &>> $LOGF
 
 # Change UMASK Value
 #echo
-echo -e "\033[34m Changing umask value...  \e[0m" | tee -ai $LOGFILE
+echo -e "\033[34m Changing umask value  \e[0m" | tee -ai $LOGFILE
 sudo -H -u $GITUSER sed -i 's/0077/0007/g' /home/$GITUSER/.gitolite.rc || OwnError "Unable to change UMASK"
 
 
 # Installing Post Receive Hooks
+echo -e "\033[34m Creating post-receive hooks \e[0m" | tee -ai $LOGFILE
 cd $BASEPATH
+#pwd
 cd ../../../public/ || OwnError "Unable to change directory for hookspath"
 if [ -f .hookspath.rt ]
 then
 	HOOKSPATH=$(cat .hookspath.rt)
-        echo $HOOKSPATH | tee -ai $LOGFILE
+        #echo $HOOKSPATH | tee -ai $LOGFILE
 	#cd /home/$GITUSER/.gitolite/hooks/common/
 	
 	CURLPATH=$(whereis curl | cut -d' ' -f2)
@@ -210,12 +216,14 @@ else
 	echo
 fi
 
+# Log Messages
+echo
+echo -e "\033[34m For detailed installation messages use the following command \e[0m" 
+echo -e "\033[34m cat $LOGFILE \e[0m" 
 
 # Success Message
 #echo
 echo
 echo -e "\033[34m Gitolite Admin is successfully setup at `date` \e[0m" | tee -ai $LOGFILE
-echo -e "\033[34m For detailed installation messages use the following command \e[0m" 
-echo -e "\033[34m cat $LOGFILE \e[0m" 
 echo -e "\033[34m Please go back to Gitolite Admin, test connection and save settings. \e[0m" | tee -ai $LOGFILE
 
