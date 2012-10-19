@@ -565,12 +565,12 @@
                  try {
                     DB::beginWork('Update repository @ ' . __CLASS__);
                     
-                    /*$this->active_repository->setAttributes($repository_data);
+                    $this->active_repository->setAttributes($repository_data);
                     $this->project_object_repository->setVisibility($repository_data['visibility']);
                     $this->project_object_repository->setName($repository_data['name']);
 
                     $this->active_repository->save();
-                    $this->project_object_repository->save();*/
+                    $this->project_object_repository->save();
                    
                     
                     $repo_fk = $this->active_repository->getId();
