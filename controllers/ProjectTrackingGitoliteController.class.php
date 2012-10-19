@@ -638,7 +638,7 @@
            if(is_array($repo_details) && count($repo_details) > 0)
            {
                
-              //if ($repository->canEdit($this->logged_user)) {
+              if ($this->logged_user->isAdministrator() || $this->logged_user->isProjectManager() || $project->isLeader($this->logged_user)) {
 
                   $this->wireframe->actions->add('manage_access', lang('Manage Access'),
                                              Router::assemble('edit_git_repository', 
