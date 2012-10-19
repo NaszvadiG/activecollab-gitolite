@@ -375,12 +375,12 @@
               
               
               
-              
+                
                $repository_data = $this->request->post('repository');
                if (!is_array($repository_data)) {
                   $repository_data = array(
-                          'updatetype'      		=> $this->active_repository->getUpdateType(),
-                          'visibility'      		=> $this->project_object_repository->getVisibility()
+                          'updatetype'      => $this->active_repository->getFieldValue("update_type"),
+                          'visibility'      => $this->project_object_repository->getVisibility()
                   );
                 } // if
               
