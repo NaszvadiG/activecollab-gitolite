@@ -313,26 +313,40 @@
         {
            if(!is_numeric($repo_id) || $repo_id == 0)
            {
+                
                 return false;
            }
            
            $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
            $objects_table_name = TABLE_PREFIX . 'project_objects';
-           $access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';
+           echo "SELECT a.repo_id,a.repo_name,a.git_repo_path,b.name FROM $repo_table_name a, $objects_table_name b 
+                                  where a.`repo_fk` = b.integer_field_1 and b.type = 'ProjectSourceRepository'
+                                  and b.id = '".$repo_id."'";
+           
            
            $result = DB::execute("SELECT a.repo_id,a.repo_name,a.git_repo_path,b.name FROM $repo_table_name a, $objects_table_name b 
-                                where a.`repo_fk` = b.integer_field_1 and b.type = 'ProjectSourceRepository'
-                                and b.id = '".$repo_id."'");
+                                  where a.`repo_fk` = b.integer_field_1 and b.type = 'ProjectSourceRepository'
+                                  and b.id = '".$repo_id."'");
               
+            //print_r($result);
+            
+           
+            $repo_details =$result->getRowAt("0");
+            print_r($repo_details);
             if($result)
             {
-                $repo_details = $result->getRowAt("0");
+                echo "111111";
+                die();
+                $repo_details =$result->getRowAt("0");
                 return $repo_details;
             }
             else
             {
+              echo "22222";
+                die();
                 return array();
             }
+            
         }
         
         function get_access_levels($repo_id = 0)
