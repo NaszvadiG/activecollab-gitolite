@@ -635,11 +635,11 @@
       */
      function history() {
          
-         
+          $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
           $project = $this->active_project;
           $repository = $this->active_repository;
          
-           $repo_details = ProjectGitolite::get_repo_details($repository->getId());
+           $repo_details = ProjectGitolite::get_repo_details($repo_id);
            
            if(is_array($repo_details) && count($repo_details) > 0)
            {
