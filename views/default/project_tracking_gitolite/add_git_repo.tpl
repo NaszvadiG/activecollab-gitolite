@@ -10,7 +10,7 @@
 		{wrap field=name}
 		  {label for=repositoryName required=yes}{lang}Name{/lang}{/label}
 		  {text_field name='repository[name]' id=repositoryName class='title required' maxlength="150"}
-                   <p class="aid">{lang}Only a-z, A-Z, hypens(-), numbers(1,2..) are allowed (eg. wordpress-project).{/lang}</p>
+                   <p class="aid">{lang}Only a-z, A-Z, hypens(-), numbers(1,2..) are allowed (eg. wordpress-project12).{/lang}</p>
 		{/wrap}
 		
 		
@@ -18,15 +18,19 @@
 		<div class="clear"></div>
 		
 		{wrap field=users}
-		  {label}{lang}Peoples on project{/lang}{/label}
-                   <table>
+		  {label}{lang}People In Project{/lang}{/label}
+                  
+                  {if $no_key_warning == 1}
+                      <span class="pubkey_warning">Please <a target="_blank" href="{$view_url}">add your SSH key here</a> to set permission for yourself.</span>
+                  {/if}
+                  <table>
                    {if $curr_users}
                       
                            <tr>
-                               <td>People Name</td>
-                               <td>No Access</td>
-                               <td>Read Access</td>
-                               <td>Write Access</td>
+                               <th>Name</th>
+                               <th>No Access</th>
+                               <th>Read Only</th>
+                               <th>Read/Write</th>
                            </tr>
                         {foreach from=$curr_users item=entry key=name} 
                               <tr>
@@ -38,11 +42,11 @@
                               </tr>
                         {/foreach}
                         
+                       
                         <tr>
-                            <td colspan="4" class="note_keys">&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td colspan="4" class="note_keys">Note:&nbsp;&nbsp;Some users may not be visible here because public keys for that users is not added.</td>
+                            <td colspan="4">&nbsp;</td>
+                        </tr><tr>
+                            <td colspan="4"><em> Note:&nbsp;&nbsp;Some users may not be visible here because public keys are not added.</em></td>
                         </tr>
                  {else} 
                      
@@ -53,6 +57,34 @@
                  {/if}
                   </table>
 		{/wrap}
+                
+                
+                <div id="sourceAuthenticateWrapper">
+                    <div class="col">
+                    {wrap field=type}
+                        {label for=repositoryUpdateType}{lang}Commit History Update Type{/lang}{/label}
+                        <select name='repository[update_type]'>
+                            <option value="1">Frequently</option>
+                            <option value="2">Hourly</option>
+                            <option value="3">Daily</option>
+                        </select>
+                    {/wrap}
+                    </div>
+                   
+                    <div class="col">
+                    {if $logged_user->canSeePrivate()}
+                        {wrap field=visibility}
+                            {label for=repositoryVisibility}Visibility{/label}
+                            {select_visibility name='repository[visibility]' value=$repository_data.visibility}
+                        {/wrap}
+                    {else}
+                        <input type="hidden" name="repository[visibility]" value="1"/>
+                    {/if}
+                    </div>
+            </div>
+        
+		
+                
                 
   </div>
      {wrap_buttons}

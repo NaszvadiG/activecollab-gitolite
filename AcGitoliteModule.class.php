@@ -45,6 +45,8 @@ class AcGitoliteModule extends AngieModule {
         Router::map('gitolite_admin', 'admin/gitolite_admin', array('controller'=> 'ac_gitolite_admin','action'=>'gitolite_admin'));
         Router::map('gitolite_test_connection', 'admin/test_connection', array('controller'=> 'ac_gitolite_admin','action'=>'test_connection'));
         Router::map('edit_git_repository', '/projects/:project_slug/repositories/:project_source_repository_id/edit-git', array('controller'=> 'project_tracking_gitolite','action'=>'edit_git_repo'));
+        Router::map('deleted_gitolite_repo', '/projects/:project_slug/repositories/:project_source_repository_id/delete-repo', array('controller'=> 'project_tracking_gitolite','action'=>'delete_gitolite_repository'));
+        
     }// defineRoutes
 
     function defineHandlers() 
@@ -96,8 +98,36 @@ class AcGitoliteModule extends AngieModule {
 	  $this->close_db();
 	
 	  $this->build_db();
+          if(defined('PROTECT_SCHEDULED_TASKS') && PROTECT_SCHEDULED_TASKS) {
+                  $url_params = array(
+                      'code' => substr(LICENSE_KEY, 0, 5)
+                  );
+                  $task = "frequently";
+           } else {
+              $url_params = null;
+              $task = "";
+            } // if
+            
+            
+            if($task && in_array($task, array(SCHEDULED_TASK_FREQUENTLY, SCHEDULED_TASK_HOURLY, SCHEDULED_TASK_DAILY))) {
+              $path =  Router::assemble($task, $url_params);
+              $path.="\n";
+              $filename = ".hookspath.rt";
+              $newfh = fopen($filename, 'w+');
+              fwrite($newfh,$path);
+              
+            } else {
+              $path = '';
+            } // if   
+          
+         
+          
 	  //create
 	  parent::install($position, $bulk);
+          
+          
+          
+          
           Router::cleanUpCache(true);
           cache_clear();
     } // install

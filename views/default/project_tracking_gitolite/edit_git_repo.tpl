@@ -11,7 +11,7 @@
 		  {label for=repositoryName required=yes }{lang}Name{/lang}{/label}
 		  {text_field name= 'name' disabled = true value = {$repo_details['repo_name']} id=repositoryName class='title required' maxlength="150"}
                   <input type = "hidden" name = 'repository[name]' value="{$repo_details['repo_name']}">
-                   <p class="aid">{lang}Only hypens(-), numbers(1,2..) are allowed (eg. wordpress-project).{/lang}</p>
+                   <p class="aid">{lang}Only hypens(-), numbers(1,2..) are allowed (eg. wordpress-project12).{/lang}</p>
 		{/wrap}
 		
 		
@@ -19,15 +19,17 @@
 		<div class="clear"></div>
 		
 		{wrap field=users}
-		  {label}{lang}Peoples on project{/lang}{/label}
-                  
+		  {label}{lang}People In Project{/lang}{/label}
+                  {if $no_key_warning == 1}
+                      <span class="pubkey_warning">Please <a target="_blank" href="{$view_url}">add your SSH key here</a> to set permission for yourself.</span>
+                  {/if}
                    {if $curr_users}
                        <table>
-                           <tr>
-                               <td>People Name</td>
-                               <td>No Access</td>
-                               <td>Read Access</td>
-                               <td>Write Access</td>
+                            <tr>
+                               <th>Name</th>
+                               <th>No Access</th>
+                               <th>Read Only</th>
+                               <th>Read/Write</th>
                            </tr>
                         {foreach from=$curr_users item=entry key=name} 
                               <tr>
@@ -37,9 +39,44 @@
                                   <td><input type ="radio" name="access[{$name}]" value={$manageaccess} {if $user_detail_permissions[$name]['writeaccess'] || $user_detail_permissions[$name]['writeaccessplus']}checked="checked"{/if}></td>
                               </tr>
                         {/foreach}
-                        </table>
-                  {/if}
+                        <tr>
+                            <td colspan="4">&nbsp;</td>
+                        </tr><tr>
+                            <td colspan="4"><em> Note:&nbsp;&nbsp;Some users may not be visible here because public keys are not added.</em></td>
+                        </tr>
+                  {else} 
+                     <tr>
+                         <td colspan="4" style="text-align: center;">No users with public keys found.</td>
+                       
+                     </tr>
+                 {/if}      
+                    </table>
+                 
 		{/wrap}
+                
+                <div id="sourceAuthenticateWrapper">
+                    <div class="col">
+                    {wrap field=type}
+                        {label for=repositoryUpdateType}{lang}Commit History Update Type{/lang}{/label}
+                        <select name='repository[update_type]'>
+                            <option value="1" {if $repository_data['updatetype'] == "1"} selected {/if}>Frequently</option>
+                            <option value="2"  {if $repository_data['updatetype'] == "2"} selected {/if}>Hourly</option>
+                            <option value="3"  {if $repository_data['updatetype'] == "3"} selected {/if}>Daily</option>
+                        </select>
+                    {/wrap}
+                    </div>
+                   
+                    <div class="col">
+                    {if $logged_user->canSeePrivate()}
+                        {wrap field=visibility}
+                            {label for=repositoryVisibility}Visibility{/label}
+                            {select_visibility name='repository[visibility]' value=$repository_data.visibility}
+                        {/wrap}
+                    {else}
+                        <input type="hidden" name="repository[visibility]" value="1"/>
+                    {/if}
+                    </div>
+            </div>
 		
   </div>
      {wrap_buttons}

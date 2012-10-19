@@ -48,6 +48,7 @@
      */
     function add_public_keys()
     {
+      
        $active_user = $this->active_user;
        
         $this->response->assign(array(
@@ -109,7 +110,7 @@
            }
            
             // insert key details in database.
-            $pub_file_name  = $key_name."-".$this->logged_user->getId();
+            $pub_file_name  = $key_name."-".$this->request->get("user_id");
 
             try
             {

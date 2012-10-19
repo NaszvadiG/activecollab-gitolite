@@ -31,16 +31,21 @@
     
         $(document).ready(function() {
             if ($(".empty_page").length  == 0 ){
-                 $('.object_body.object_body_default').html('{$repo_path nofilter}');
+                 $('.object_body.object_body_default').html('<pre><code>{$repo_path nofilter}<br><br>{$clone_url nofilter}</code></pre>');
             }
             else
             {   
                   var htmlStr = "{$body_text nofilter}";
                   $('.object_body.object_body_default').html(htmlStr);
             }
+            
+            App.Wireframe.Events.bind('access_updated', function (event, repository) {
+                App.Wireframe.Flash.success(App.lang('Repository updated successfully'));
+            });
+  
         });
    
-    
+
 App.Config.set('commit_history_offset', 1);
   $('.repository_ajax_update').flyout();
   var project_repositories_url = '{$project_repositories_url nofilter}';
@@ -48,6 +53,13 @@ App.Config.set('commit_history_offset', 1);
   App.Wireframe.Events.bind('project_source_repository_deleted', function (event, repository) {
     App.Wireframe.Content.setFromUrl(project_repositories_url);
   });
+  
+ /*App.Wireframe.Events.bind('gitolite_repo_deleted', function (event, repository) {
+    
+    App.Wireframe.Content.setFromUrl(project_repositories_url);
+  });*/
+
+
 
   /**
    * Initialize commits

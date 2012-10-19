@@ -38,7 +38,7 @@
         <table  class="active_projects common" cellspacing="5" cellpadding = "10">
            
              <tr>
-                 <th class="name" colspan="3" style="text-align: center;">Can't find gitolite admin.</th>
+                 <th class="name" colspan="3" style="text-align: center;"> Can't find gitolite admin</th>
 	    </tr>
         
         </table>
@@ -61,7 +61,7 @@
   });
    $(document).ready (function () {
 	$('.delete').click (function () {
-		return confirm ("Are you sure you want to delete this key") ;
+		return confirm ("Are you sure you want to delete this key?") ;
 	}) ; 
 }) ;
 </script>

@@ -18,7 +18,7 @@ class AcGitoliteAdminController extends AdminController {
         parent::__before();
         
     }
-
+    
     /** gitolite_admin
      * Save gitolite admin settings
      */
@@ -35,13 +35,25 @@ class AcGitoliteAdminController extends AdminController {
        $gitoliteadminpath = GitoliteAdmin :: get_admin_path();
        
        $gitoliteadminpath = "$gitoliteadminpath/gitolite/";
-       
+      
        
        $server_name = array_shift(explode(".",$_SERVER['HTTP_HOST']));
        preg_match('/^(?:www\.)?(?:(.+)\.)?(.+\..+)$/i', $_SERVER['HTTP_HOST'], $matches);
-       
+       if($settings['gitoliteuser'] == "")
+       {
+           $gitoliteuser = "git";
+           $is_enable = FALSE;
+          
+       }
+       else
+       {
+            
+            $gitoliteuser = $settings['gitoliteuser'];
+            $is_enable = TRUE;
+       }
+    
        $this->response->assign(
-                            array('gitoliteuser' =>      ($settings['gitoliteuser'] == "") ? "git" : $settings['gitoliteuser'],
+                            array('gitoliteuser' =>      $gitoliteuser,
                                   'gitoliteserveradd' => $settings['gitoliteserveradd'],
                                   'gitoliteadmins' =>    $admins,
                                   'webuser' =>           exec ("whoami"),
@@ -49,21 +61,22 @@ class AcGitoliteAdminController extends AdminController {
                                   'gitolite_repo_test_connection_url' => Router::assemble('gitolite_test_connection'),
                                   'setup_script' => $setup_script,
                                   'web_user'    =>  $_SERVER['USER'],
-                                  'server_name' => $matches['2']
+                                  'server_name' => $matches['2'],
+                                  'is_enable' => $is_enable
                                   
                                 )
                             );
        if($this->request->isSubmitted()) // check for form submission
        {
+           
            $errors = new ValidationErrors();    
            $post_data = $this->request->post("gitoliteadmin"); 
-           
+          
            try
            {
                
                DB::beginWork('Save admin settings @ ' . __CLASS__);
                $setting_exists = GitoliteAdmin :: setting_exists();
-               
                if($setting_exists['cnt_settings'] == 0)
                {    
                     $settings_add = GitoliteAdmin :: insert_settings($post_data,$this->logged_user->getId());
@@ -78,8 +91,7 @@ class AcGitoliteAdminController extends AdminController {
                      $settings_update = GitoliteAdmin :: update_settings($post_data,$this->logged_user->getId());
                 }
                 DB::commit('Admin Settings Saved @ ' . __CLASS__);
-
-                $this->flash->success("Settings saved successfully");
+               
                 $this->response->ok();
            }
             catch (Exception $e)
@@ -120,16 +132,16 @@ class AcGitoliteAdminController extends AdminController {
                     {
 
                         $comd = "cd ".array_var($_GET, 'dir')." &&  git clone ".array_var($_GET, 'user')."@".array_var($_GET, 'server').":gitolite-admin.git || pwd";
-                        exec($comd,$output,$return);
-                        if(count($output) > 1)
-                        {
-                           die("Unable to connect to server");
+                        unset($output);
+                        exec($comd,$output);
+                        if(count($output))
+                        {  
+                           die("ok");
                         }
                         else
                         {
-                           die("ok");
+                           die("Unable to connect to server 222"); 
                         }
-
                     }
                    else 
                    {
@@ -143,7 +155,7 @@ class AcGitoliteAdminController extends AdminController {
                    die("ok");
                }
               else
-               {
+              {
                     $comd = "cd ".array_var($_GET, 'dir')." &&  git clone ".array_var($_GET, 'user')."@".array_var($_GET, 'server').":gitolite-admin.git || pwd";
                     exec($comd,$output);
                     die("ok");
@@ -169,5 +181,5 @@ class AcGitoliteAdminController extends AdminController {
          $disabled = explode(', ', ini_get('disable_functions'));
         return !in_array('exec', $disabled);
 }
-
+ 
 }

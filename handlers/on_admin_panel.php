@@ -14,7 +14,7 @@
    * @param AdminPanel $admin_panel
    */
   function ac_gitolite_handle_on_admin_panel(AdminPanel &$admin_panel) {
-      $admin_panel->addToProjects("gitolite_admin","Gitolite Admin", Router::assemble('gitolite_admin'), AngieApplication::getImageUrl('module.png', AC_GITOLITE_MODULE), array(
+      $admin_panel->addToProjects("gitolite_admin","Gitolite Settings", Router::assemble('gitolite_admin'), AngieApplication::getImageUrl('module.png', AC_GITOLITE_MODULE), array(
         'onclick' => new FlyoutFormCallback('gitolite_admin_data')
           ));
   } // ac_gitolite_handle_on_admin_panel
