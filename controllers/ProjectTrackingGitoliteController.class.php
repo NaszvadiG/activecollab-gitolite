@@ -634,9 +634,11 @@
           $repository = $this->active_repository;
          
           $repo_details = ProjectGitolite::get_repo_details($repository->getId());
+          print_r($repo_details);
           
            if(is_array($repo_details) && count($repo_details) > 0)
            {
+               echo "here";
               //if ($repository->canEdit($this->logged_user)) {
 
                   $this->wireframe->actions->add('manage_access', lang('Manage Access'),
@@ -651,7 +653,7 @@
                   //} //if
             }
                                        
-           
+           die();
          
           $repo_path = $repository->getRepositoryPathUrl();
          
