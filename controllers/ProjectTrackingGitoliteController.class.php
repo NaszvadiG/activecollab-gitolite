@@ -372,10 +372,10 @@
               $users_details = $this->active_project->users()->describe($this->logged_user, true, true, STATE_ARCHIVED);
              
               $repo_details = ProjectGitolite::get_repo_details($repo_id);
+               
               
               
-              
-                
+               
                $repository_data = $this->request->post('repository');
                if (!is_array($repository_data)) {
                   /*$repository_data = array(
@@ -465,6 +465,8 @@
                   else
                   {
                       $no_key_warning = TRUE;
+                     
+                      $view_url = $this->logged_user->getViewUrl();
                   }
               }
               
@@ -479,7 +481,8 @@
                                   'manageaccess' => GITOLITE_MANAGEACCESS,
                                   'is_gitolite' => $is_gitolite,
                                   'no_key_warning' => $no_key_warning,
-                                  'repository_data' => $repository_data
+                                  'repository_data' => $repository_data,
+                                  'view_url' => $view_url
                                 )
                             );
         
@@ -568,8 +571,10 @@
 
                     $this->active_repository->save();
                     $this->project_object_repository->save();*/
+                   
                     
                     $repo_fk = $this->active_repository->getId();
+                    
                     
                     if($repo_id)
                     {
