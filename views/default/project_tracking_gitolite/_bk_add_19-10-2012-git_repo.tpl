@@ -89,11 +89,9 @@
   </div>
      {wrap_buttons}
           {submit}Add Repository{/submit}
-          <!--<button type="button" id="add_repo" class="default"><span>{lang}Add Repository{/lang}</span></button>-->
    {/wrap_buttons}
 	{/form}
 </div>
-        <div id="show_steps"></div>
 {else}
     <div id="repository_create_git">
         <div class="fields_wrapper">
@@ -107,28 +105,59 @@
   App.widgets.RepositoryForm.init('repository_create_git');
   
   
-  /*$(document).ready(function(){
-    $('#show_steps').hide();
+  
+  
+  
+  
+  
+  
+  
+  jQuery(document).ready(function(){
     var str = $("form").serialize();
-    
     var step = 0;
-    $("#add_repo").click(function() {
-        $('#repository_create_git').hide();
-        $('#show_steps').show();
-         
-          $("input:radio").each(function(){
-            if($(this).is(':checked')) 
-            {
-               alert(this.name + " "+ this.value)
+    jQuery(".button").click(function() {
+        var button = this;
+        jQuery.ajax({
+            url:  "{$form_action}",
+            type: 'POST', 
+            data: {
+                params: str,
+                action: "addrepo"
+            },
+            success: function(result) {
+                if (jQuery.trim(data) == 'ok') {
+                    step++
+                    alert(str)
+               }
             }
-         });
-      
-       $.post("{$form_action}", { access: access, action: "add" },
-            function(data) {
-            
-            alert("Data Loaded: " + data);
-   });
+        });
     });
-   });*/
-
+});
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  $.ajax({
+    url: "page1.php",
+    cache: false,
+    success: function(html) {
+        // Make another call here
+        $.ajax({
+            url: "page1.php",
+            cache: false,
+            success: function(html) {
+                // and so on
+            }
+        });
+    }
+});
 </script>

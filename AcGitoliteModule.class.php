@@ -46,6 +46,7 @@ class AcGitoliteModule extends AngieModule {
         Router::map('gitolite_test_connection', 'admin/test_connection', array('controller'=> 'ac_gitolite_admin','action'=>'test_connection'));
         Router::map('edit_git_repository', '/projects/:project_slug/repositories/:project_source_repository_id/edit-git', array('controller'=> 'project_tracking_gitolite','action'=>'edit_git_repo'));
         Router::map('deleted_gitolite_repo', '/projects/:project_slug/repositories/:project_source_repository_id/delete-repo', array('controller'=> 'project_tracking_gitolite','action'=>'delete_gitolite_repository'));
+        Router::map('add_gitolite_steps', '/projects/:project_slug/repositories/:project_source_repository_id/action/:action/params/:params', array('controller'=> 'project_tracking_gitolite','action'=>'add_git_repo'));
         
     }// defineRoutes
 
@@ -54,7 +55,8 @@ class AcGitoliteModule extends AngieModule {
 
        EventsManager::listen('on_inline_tabs', 'on_inline_tabs');   
        EventsManager::listen('on_admin_panel', 'on_admin_panel');   
-       EventsManager::listen('on_object_options', 'on_object_options');   
+       EventsManager::listen('on_object_options', 'on_object_options');
+       
         
     }// defineHandlers
 

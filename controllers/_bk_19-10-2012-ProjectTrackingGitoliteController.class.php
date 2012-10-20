@@ -94,7 +94,7 @@
       */
      function add_git_repo()
      {
-               
+      
          $is_gitolite  = GitoliteAdmin :: is_gitolite();
          
          if(!ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
@@ -191,6 +191,7 @@
               
          if($this->request->isSubmitted()) // check for form submission
          {    
+
                 try {
                    
                     /* Check form with validation error */
