@@ -168,11 +168,12 @@ then
 fi
 
 # Checks .ssh Directory Exist
-ls $WEBUSERHOME/.ssh
-if [ $? -ne o ]
+ls $WEBUSERHOME/.ssh &> tee -ai $LOGFILE
+if [ $? -ne 0 ]
 then
 	echo -e "\033[34m Creating .ssh directory \e[0m"
-	sudo -H -u $WEBUSER mkdir $WEBUSERHOME/.ssh
+	sudo mkdir $WEBUSERHOME/.ssh
+	sudo chown -R $WEBUSER:$WEBUSER $WEBUSERHOME/.ssh
 fi
 
 # Checks Weather id_rsa Key Exist
