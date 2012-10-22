@@ -129,6 +129,7 @@
                     }
                     
                     $dirpath  = $admin_settings['gitoliteadminpath']."gitolite-admin/keydir/";
+                    $adminrepo  = $admin_settings['gitoliteadminpath']."gitolite-admin/";
                     $path = $dirpath.$file;
                     
                     $newfh = fopen($path, 'w+');
@@ -139,11 +140,15 @@
                     }
                     $res = fwrite($newfh,$post_data['public_keys']);
                     fclose($fh);
+                    
+                    $res = ProjectGitolite::render_conf_file();
+                    
                     /** Git Push Files **/
-                    $command = "cd ".$dirpath." && git add * && git commit -am 'added key for user $file' && git push";
+                    $command = "cd ".$adminrepo." && git add * && git commit -am 'added key for user $file' && git push";
                     exec($command,$output,$return_var);
                     
-                   DB::commit('Key added @ ' . __CLASS__);
+                    
+                    DB::commit('Key added @ ' . __CLASS__);
                    
                    $show_data['key_name'] = $post_data['key_name'];
                    $show_data['public_key'] = substr($post_data['public_keys'],0,25).".....".substr($post_data['public_keys'],-30);

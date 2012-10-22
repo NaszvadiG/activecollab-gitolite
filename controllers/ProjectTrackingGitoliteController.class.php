@@ -94,7 +94,7 @@
       */
      function add_git_repo()
      {
-      
+               
          $is_gitolite  = GitoliteAdmin :: is_gitolite();
          
          if(!ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
@@ -191,7 +191,6 @@
               
          if($this->request->isSubmitted()) // check for form submission
          {    
-
                 try {
                    
                     /* Check form with validation error */
@@ -372,15 +371,15 @@
               $users_details = $this->active_project->users()->describe($this->logged_user, true, true, STATE_ARCHIVED);
              
               $repo_details = ProjectGitolite::get_repo_details($repo_id);
+               
               
               
-              
-              
+               
                $repository_data = $this->request->post('repository');
                if (!is_array($repository_data)) {
                   $repository_data = array(
-                          'updatetype'      		=> $this->active_repository->getUpdateType(),
-                          'visibility'      		=> $this->project_object_repository->getVisibility()
+                          'updatetype'      => $this->active_repository->getFieldValue("update_type"),
+                          'visibility'      => $this->project_object_repository->getVisibility()
                   );
                 } // if
               
@@ -465,6 +464,8 @@
                   else
                   {
                       $no_key_warning = TRUE;
+                     
+                      $view_url = $this->logged_user->getViewUrl();
                   }
               }
               
@@ -479,7 +480,8 @@
                                   'manageaccess' => GITOLITE_MANAGEACCESS,
                                   'is_gitolite' => $is_gitolite,
                                   'no_key_warning' => $no_key_warning,
-                                  'repository_data' => $repository_data
+                                  'repository_data' => $repository_data,
+                                  'view_url' => $view_url
                                 )
                             );
         
@@ -561,14 +563,17 @@
                 // save reponame
                  try {
                     DB::beginWork('Update repository @ ' . __CLASS__);
+                    
                     $this->active_repository->setAttributes($repository_data);
                     $this->project_object_repository->setVisibility($repository_data['visibility']);
                     $this->project_object_repository->setName($repository_data['name']);
 
                     $this->active_repository->save();
                     $this->project_object_repository->save();
+                   
                     
                     $repo_fk = $this->active_repository->getId();
+                    
                     
                     if($repo_id)
                     {
@@ -629,28 +634,30 @@
       */
      function history() {
          
+          $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
           $project = $this->active_project;
           $repository = $this->active_repository;
          
-          $repo_details = ProjectGitolite::get_repo_details($repository->getId());
-         
-         if(is_array($repo_details) && count($repo_details) > 0)
-         {
-            if ($repository->canEdit($this->logged_user)) {
-               
-                $this->wireframe->actions->add('manage_access', lang('Manage Access'),
-                                           Router::assemble('edit_git_repository', 
-                                           array('project_slug' => $project->getSlug(),
-                                           'project_source_repository_id' => $repository->getId()))
-                                           , array(
-                                               'id'=> 'update_access_levels',
-                                               'onclick'=> new FlyoutFormCallback("access_updated",array('width' => 'narrow')),
-                                               'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE),
-                   ));
-                } //if
-         }
-                                       
+           $repo_details = ProjectGitolite::get_repo_details($repo_id);
            
+           if(is_array($repo_details) && count($repo_details) > 0)
+           {
+               
+              if ($this->logged_user->isAdministrator() || $this->logged_user->isProjectManager() || $project->isLeader($this->logged_user)) {
+
+                  $this->wireframe->actions->add('manage_access', lang('Manage Access'),
+                                             Router::assemble('edit_git_repository', 
+                                             array('project_slug' => $project->getSlug(),
+                                             'project_source_repository_id' => $repo_id))
+                                             , array(
+                                                 'id'=> 'update_access_levels',
+                                                 'onclick'=> new FlyoutFormCallback("access_updated",array('width' => 'narrow')),
+                                                 'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE),
+                     ));
+                } //if
+            }
+                                       
+          
          
           $repo_path = $repository->getRepositoryPathUrl();
          
@@ -718,37 +725,6 @@
                        'repo_path' => $repo_path,
                        'clone_url' => $clone_url ));
      
-    }
-    
-    function delete_gitolite_repository()
-    {
-        
-      if($this->request->isSubmitted()) {
-          
-        if($this->project_object_repository->canDelete($this->logged_user)) {
-          try {
-            $this->project_object_repository->delete();
-            //delete gitolite repo
-                ProjectGitolite::delete_git_repo($this->project_object_repository->getId());
-                
-            if($this->request->isApiCall()) {
-              $this->response->ok();
-            } else {
-              $this->response->respondWithData($this->active_repository, array(
-                'detailed' => true
-              ));
-            } // if
-          } catch(Exception $e) {
-            DB::rollback('Failed to delete repository');
-      			$this->response->exception($e);
-          } // try
-        } else {
-          $this->response->forbidden();
-        } // if
-      } else {
-        $this->response->badRequest();
-      } // if
-    
     }
     
   }

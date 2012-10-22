@@ -55,7 +55,7 @@
         
       </div>
       
-      <div class="content_stack_element">
+      <div class="content_stack_element last">
         <div class="content_stack_element_info">
           <h3>{lang}Gitolite Admin Path{/lang}</h3>
         </div>
@@ -68,15 +68,13 @@
      </div>
       
     </div>
-    
-   {wrap_buttons}
+       {wrap_buttons}
           {submit id="save_settings"}Save Settings{/submit}
             <input type="hidden" value="{$gitolite_repo_test_connection_url}" id="gitolite_repo_test_connection_url" />
             <input type="hidden" value="{$gitoliteadminpath}" id="gitolite_test_dir" name="gitoliteadmin[gitoliteadminpath]" />
-            <button type="button" id="test_gitolite_connection" class="default"><span><span>{lang}Test Connection{/lang}</span></span></button>
+            <button type="button" id="test_gitolite_connection" class="default"><span>{lang}Test Connection{/lang}</span></button>
             <img id="test_connection_loading_img" src="{image_url name="layout/bits/indicator-loading-normal.gif" module=$smarty.const.ENVIRONMENT_FRAMEWORK}" alt='' />    
-            <!--<button type="button" id="button_cancel" class="default"><span><span>{lang}Cancel{/lang}</span></span></button>-->
-	  {/wrap_buttons}
+       {/wrap_buttons}
   {/form}
 </div>
 
