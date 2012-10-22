@@ -218,6 +218,7 @@ then
 	CURLPATH=$(whereis curl | cut -d' ' -f2)
 	sudo -H -u $GITUSER echo "$CURLPATH -s -L \"$HOOKSPATH\" > /dev/null " &>> /home/$GITUSER/.gitolite/hooks/common/post-receive
 	sudo chmod a+x /home/$GITUSER/.gitolite/hooks/common/post-receive
+	sudo chown $GITUSER:$GITUSER /home/$GITUSER/.gitolite/hooks/common/post-receive
 	sudo -H -u $GITUSER /home/$GITUSER/bin/gitolite setup --hooks-only
 else
 	echo
