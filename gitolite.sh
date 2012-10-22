@@ -101,7 +101,7 @@ fi
 
 # Create Git User
 #echo
-echo -e "\033[34m Creating System User [$GITUSER]...  \e[0m" | tee -ai $LOGFILE
+echo -e "\033[34m Creating System User [$GITUSER]  \e[0m" | tee -ai $LOGFILE
 sudo adduser --system --home /home/$GITUSER --shell /bin/bash --group --disabled-login --disabled-password --gecos 'git version control' $GITUSER &>> $LOGFILE || OwnError "Unable to create $GITUSER"
 
 # Copy Skeleton Contents
@@ -121,7 +121,7 @@ sudo -H -u $GITUSER mkdir /home/$GITUSER/setup || OwnError "Unable to create set
 
 cd /home/$GITUSER/setup || OwnError " Unable to change directory"
 
-#echo
+echo
 echo -e "\033[34m Cloning Gitolite... \e[0m" | tee -ai $LOGFILE
 sudo -H -u $GITUSER git clone git://github.com/sitaramc/gitolite &>> $LOGFILE || OwnError "Unable to clone gitolote repository"
 
@@ -167,6 +167,14 @@ then
 	read -p "Enter the home dir path for $WEBUSER: " WEBUSERHOME
 fi
 
+# Checks .ssh Directory Exist
+ls $WEBUSERHOME/.ssh
+if [ $? -ne o ]
+then
+	echo -e "\033[34m Creating .ssh directory \e[0m"
+	sudo -H -u $WEBUSER mkdir $WEBUSERHOME/.ssh
+fi
+
 # Checks Weather id_rsa Key Exist
 sudo ls  $WEBUSERHOME/.ssh/id_rsa &>> $LOGFILE
 if [ $? -eq 0 ]
@@ -182,7 +190,7 @@ fi
 
 
 # Setup Gitolite Admin
-#echo
+echo
 echo -e "\033[34m Setup Gitolite Admin...  \e[0m" | tee -ai $LOGFILE
 sudo cp $WEBUSERHOME/.ssh/id_rsa.pub /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to copy $WEBUSER Pubkey" 
 sudo chown $GITUSER:$GITUSER /home/$GITUSER/$WEBUSER.pub || OwnError "Unable to change ownership of $WEBUSER"
@@ -207,7 +215,7 @@ then
 	#cd /home/$GITUSER/.gitolite/hooks/common/
 	
 	CURLPATH=$(whereis curl | cut -d' ' -f2)
-	sudo -H -u $GITUSER echo "$CURLPATH -s -L \"$HOOKSPATH\"" &>> /home/$GITUSER/.gitolite/hooks/common/post-receive
+	sudo -H -u $GITUSER echo "$CURLPATH -s -L \"$HOOKSPATH\" > /dev/null " &>> /home/$GITUSER/.gitolite/hooks/common/post-receive
 	sudo chmod a+x /home/$GITUSER/.gitolite/hooks/common/post-receive
 	sudo -H -u $GITUSER /home/$GITUSER/bin/gitolite setup --hooks-only
 else
