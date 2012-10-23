@@ -188,6 +188,16 @@ else
 	sudo -H -u $WEBUSER ssh-keygen -q -N '' -f $WEBUSERHOME/.ssh/id_rsa || OwnError "Unable to create ssh keys for $WEBUSER"
 fi
 
+# Add Server SSH Fingerprint To known_hosts
+
+# Create known_hosts file if not exist
+# Or if known_hosts exist update timestamp 
+sudo -H -u $WEBUSER touch $WEBUSERHOME/.ssh/known_hosts
+
+# Give 666 Permission To Add SSH Server Fingerprint
+sudo chmod 666 $WEBUSERHOME/.ssh/known_hosts
+sudo ssh-keyscan -H $3 >> $WEBUSERHOME/.ssh/known_hosts
+sudo chmod 644 $WEBUSERHOME/.ssh/known_hosts
 
 
 # Setup Gitolite Admin
