@@ -51,9 +51,9 @@
      * Check whether added key already exists
      * @param type $active_user
      * @param type $post_data
-     * @return type
+     * @return array
      */
-    function check_duplication($active_user = 0,$post_data = array())
+    function check_duplication($active_user = 0,$post_data = array(),$actual_key = "")
     {
        if(!is_numeric($active_user) || count($post_data) == 0)
        {
@@ -61,11 +61,12 @@
        }
        $keys_table_name = TABLE_PREFIX . 'rt_gitolite_user_public_keys';
        
+       
        $result = DB::execute("SELECT COUNT(user_id) as dup_name_cnt from ".$keys_table_name."
-                                where user_id = '".$active_user."' and key_name = '".$post_data['key_name']."' and is_deleted = '0'
+                                where  key_name = '".$post_data['key_name']."' and is_deleted = '0'
                                 UNION
                                 SELECT COUNT(user_id) as dup_key_cnt from ".$keys_table_name."
-                                where user_id = '".$active_user."' and public_key = '".$post_data['public_keys']."' and is_deleted = '0'");
+                                where  public_key LIKE '%".trim($actual_key)."%' and is_deleted = '0'");
        if($result)
        {
             $dup_key_name[] = $result->getRowAt(0);
@@ -94,7 +95,7 @@
        
         
         DB::execute("INSERT INTO $keys_table_name (user_id, key_name,pub_file_name, public_key) VALUES (?, ?, ?, ?)",
-              $active_user, $post_data['key_name'],$pub_file_name,$post_data['public_keys']
+              $active_user, $post_data['key_name'],$pub_file_name,trim($post_data['public_keys'])
          );
          return DB::lastInsertId() ;
     }
@@ -102,6 +103,7 @@
     /**
      * Remove keys of user.
      * @param type $key_id
+     * @return boolean
      */
     function remove_keys($key_id = 0)
     {
@@ -129,7 +131,7 @@
      * get_filename 
      * Get public file name
      * @param type $key_id
-     * @return boolean
+     * @return array
      */
     function get_filename($key_id = 0)
     {

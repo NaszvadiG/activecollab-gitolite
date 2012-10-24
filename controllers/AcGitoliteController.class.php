@@ -7,11 +7,12 @@
    * 
    * @package activeCollab.modules.ac_gitolite
    * @subpackage controllers
+   * @author rtCamp Solutions Pvt Ltd
    */
   class AcGitoliteController extends UsersController {
   
     
-   
+ 
     
     /**
      * getpublickeys
@@ -20,25 +21,25 @@
     function getpublickeys()
     {
       
-     $active_user = $this->active_user;
-     
-     $user_public_keys = GitoliteAc::fetch_keys($active_user->getId());
-     
-     
-     
-     $is_gitolite = GitoliteAdmin::is_gitolite();
-     
-     
-      
-      $this->smarty->assign(array(
-        'user_public_keys' => $user_public_keys,
-        'icon' => AngieApplication::getImageUrl('layout/button-add.png', ENVIRONMENT_FRAMEWORK, AngieApplication::getPreferedInterface()),
-        'delete_icon' => AngieApplication::getImageUrl('icons/12x12/delete.png', ENVIRONMENT_FRAMEWORK, AngieApplication::getPreferedInterface()),
-        'add_url' => Router::assemble('add_public_keys', array('company_id' => $active_user->getCompanyId(),'user_id' => $active_user->getId())),
-        'del_url' => $this->active_user->getViewUrl(),
-        'is_gitolite' => $is_gitolite
-        
-      ));
+        $active_user = $this->active_user;
+
+        $user_public_keys = GitoliteAc::fetch_keys($active_user->getId());
+
+
+
+        $is_gitolite = GitoliteAdmin::is_gitolite();
+
+
+
+         $this->smarty->assign(array(
+           'user_public_keys' => $user_public_keys,
+           'icon' => AngieApplication::getImageUrl('layout/button-add.png', ENVIRONMENT_FRAMEWORK, AngieApplication::getPreferedInterface()),
+           'delete_icon' => AngieApplication::getImageUrl('icons/12x12/delete.png', ENVIRONMENT_FRAMEWORK, AngieApplication::getPreferedInterface()),
+           'add_url' => Router::assemble('add_public_keys', array('company_id' => $active_user->getCompanyId(),'user_id' => $active_user->getId())),
+           'del_url' => $this->active_user->getViewUrl(),
+           'is_gitolite' => $is_gitolite
+
+         ));
     
     }
     
@@ -73,7 +74,7 @@
                  if($public_keys == "") {
                    $errors->addError('Please enter key', 'public_keys');
                  } 
-                
+                 
                  /* Check for duplications Key name and Key */
                  if(!$errors->hasErrors())
                  {
@@ -81,7 +82,10 @@
                       {
                         $errors->addError('Please enter valid key name.', 'public_keys');
                       }
-                     $dup_cnt = GitoliteAc::check_duplication($active_user->getId(),$post_data);
+                      
+                     $fetch_actual_key = explode(" ", $public_keys);
+                     $actual_key = $fetch_actual_key[1];
+                     $dup_cnt = GitoliteAc::check_duplication($active_user->getId(),$post_data,$actual_key);
                      if(count($dup_cnt) == 0)
                      {
                           $errors->addError('Problem occured while saving data, please try again.', 'public_keys');

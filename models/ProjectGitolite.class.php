@@ -20,12 +20,12 @@
            {
                 return array();
            }
-           $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
+           $objects_table_name = TABLE_PREFIX . 'project_objects';
            $source_table_name = TABLE_PREFIX . 'source_repositories';
-           
-           $result = DB::execute("SELECT a.*, COUNT(repo_id) as dup_name_cnt ,b.id FROM ".$repo_table_name." a 
-                                  JOIN ".$source_table_name." b ON a.repo_fk = b.id 
-                                  where project_id = '".$active_project."' and repo_name = '".$post_data['name']."'");
+            	
+           $result = DB::execute("SELECT a.*, COUNT(b.id) as dup_name_cnt ,b.id FROM ".$objects_table_name." a 
+                                  JOIN ".$source_table_name." b ON a.integer_field_1 = b.id 
+                                  where b.name = '".$post_data['name']."'");
            if($result)
            {
                 $dup_repo_name[] = $result->getRowAt(0);

@@ -32,6 +32,8 @@
                                 'gitoliteserveradd'=> $config_settings['gitoliteserveradd'],
                                 'gitoliteadminpath' => $config_settings['gitoliteadminpath']
                         );
+               //'initialize_repo' => $config_settings['initialize_repo'],
+               //'ignore_files' => $config_settings['ignore_files']
               
            }
            else
@@ -91,7 +93,6 @@
          */
         function update_settings($post_data = array(),$active_user = 0)
         {
-
             if(count($post_data) == 0 || $active_user == 0)
             {
                 return FALSE;
@@ -165,6 +166,57 @@
             return $script;
         }
         
+        /**
+         * get_server_name
+         * Get server name
+         * @return type
+         */
+        function get_server_name()
+        {
+            $server_name = array_shift(explode(".",$_SERVER['HTTP_HOST']));
+            preg_match('/^(?:www\.)?(?:(.+)\.)?(.+\..+)$/i', $_SERVER['HTTP_HOST'], $matches);
+            if(is_array($matches) && count($matches) > 0)
+            {
+                return $matches[2];
+            }
+        }
+        
+        function get_empty_repositories()
+        {
+            
+            $source_table_name = TABLE_PREFIX . 'source_repositories';
+            $objects_table_name = TABLE_PREFIX . 'project_objects';
+            $commits_table_name = TABLE_PREFIX . 'source_commits';
+            
+            $empty_array = array();
+            
+            $result = DB::execute("SELECT src.`id` as src_repo_id , src.`name` as repo_name ,comm.id,pro.project_id,pro.id as obj_id
+            FROM $source_table_name src LEFT JOIN $objects_table_name pro on pro.integer_field_1 = src.id 
+            LEFT JOIN $commits_table_name comm ON src.id = comm.repository_id and comm.type = 'GitCommit' 
+            WHERE src.type = 'GitRepository' group by src.`id` having comm.id IS NULL");
+            
+            if($result)
+            {
+                foreach ($result  as $empty_repos) 
+                 {
+                    $empty_array[] = array(
+                            'repo_name'=> $empty_repos['repo_name'],
+                            'src_repo_id'=> $empty_repos['src_repo_id'],
+                            'obj_id' => $empty_repos['obj_id']
+                    );
+                }
+            }
+            
+            return $empty_array;
+
+            /*echo "SELECT src.`id` as repo_id , src.`name` as repo_name ,comm.id,pro.project_id 
+            FROM $source_table_name src LEFT JOIN $objects_table_name pro on pro.integer_field_1 = src.id 
+            LEFT JOIN $commits_table_name comm ON src.id = comm.repository_id and comm.type = 'GitCommit' 
+            WHERE pro.type = 'ProjectSourceRepository' group by src.`id` having comm.id IS NULL";
+            die();*/
+            
+            
+        }
  }
     
     
