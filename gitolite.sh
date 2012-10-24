@@ -200,13 +200,13 @@ fi
 
 # Create known_hosts file if not exist
 # Or if known_hosts exist update timestamp 
-sudo touch $WEBUSERHOME/.ssh/known_hosts
+sudo touch $WEBUSERHOME/.ssh/known_hosts || OwnError "Unable to create known_hosts"
 
 # Give 666 Permission To Add SSH Server Fingerprint
-sudo chmod 666 $WEBUSERHOME/.ssh/known_hosts
-sudo ssh-keyscan -H $GITSERVER >> $WEBUSERHOME/.ssh/known_hosts 2>/dev/null
-sudo chmod 644 $WEBUSERHOME/.ssh/known_hosts
-sudo chown $WEBUSER:$WEBUSER $WEBUSERHOME/.ssh/known_hosts
+sudo chmod 666 $WEBUSERHOME/.ssh/known_hosts || OwnError "Unable to chmod 666 known_hosts"
+sudo ssh-keyscan -H $GITSERVER >> $WEBUSERHOME/.ssh/known_hosts 2>/dev/null || OwnError "Unable to add ssh-keyscan for $GITSERVER"
+sudo chmod 644 $WEBUSERHOME/.ssh/known_hosts || OwnError "Unable to chmod 644 known_hosts"
+sudo chown $WEBUSER:$WEBUSER $WEBUSERHOME/.ssh/known_hosts || OwnError "Unable to chown known_hosts"
 
 
 # Setup Gitolite Admin
@@ -255,5 +255,4 @@ echo -e "\033[34m cat $LOGFILE \e[0m"
 echo
 echo -e "\033[34m Gitolite Admin is successfully setup at `date` \e[0m" | tee -ai $LOGFILE
 echo -e "\033[34m Please go back to Gitolite Admin, test connection and save settings. \e[0m" | tee -ai $LOGFILE
-
 
