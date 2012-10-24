@@ -22,7 +22,8 @@
 		          <div class="label">{lang}Admin Path{/lang}</div>
 		          <div class="data">{$gitoliteadminpath}</div>
 		        </div>
-                         <div class="property" id="gitolite_auto_initialize">
+                        
+                         <!--<div class="property" id="gitolite_auto_initialize">
 		          <div class="label">{lang}Auto Initialize{/lang}</div>
 		          <div class="data" id="show_auto_init">
                           {if $is_auto == "No"}
@@ -31,8 +32,9 @@
                               Yes
                           {/if}
                           </div>
-		        </div>
-                        <br />
+		        </div>-->
+                          
+                        <!--<br />
                         <h2>{lang}Setup Script{/lang}</h2>
                         <div class="property" id="gitolite_setup_script">
 		          <div class="label">{lang}Setup Script{/lang}</div>
@@ -41,7 +43,7 @@
                                   {$setup_script nofilter}
                             </code>
                           </div>
-		        </div>
+		        </div>-->
                         
 		      </div>
           <ul class="settings_panel_header_cell_actions">
@@ -84,9 +86,9 @@
             </table>
       </div>
       {else}           
-        <div id="invoice_log">
+        <div id="no_repos">
                 <p class="empty_page" style="">
-                There are no empty repositories logs to display
+                There are no empty repositories to display
                 </p>
         </div>
     {/if}
@@ -100,29 +102,26 @@
      
       $("#g_user").html(settings['gitoliteuser']); 
       $("#g_server").html(settings['gitoliteserveradd']); 
-      if(settings['initialize_repo'])
+      /*if(settings['initialize_repo'])
       {
             $("#show_auto_init").html(settings['initialize_repo']); 
       }
       else
       {
              $("#show_auto_init").html("No"); 
-      }
-      
-    
-     
-  	App.Wireframe.Flash.success(App.lang('Gitolite settings has been changed successfully'));
+      }*/
+      App.Wireframe.Flash.success(App.lang('Gitolite settings has been changed successfully'));
   });
   
   
   $(document).ready (function () {  
  
-    if($('#gitoliteuser_index').val() != "")
+   /* if($('#gitoliteuser_index').val() != "")
         {
             var oldhtml = $('#script_path_index').html();
             var newhtml = oldhtml.replace(/ git/g," "+$('#gitoliteuser_index').val());
             $('#script_path_index').html(newhtml)
-        }
+        }*/
         
         $('table#repo_list').on('click','a.delete_repo',function(e){
             
@@ -143,7 +142,12 @@
                     //$('#delete_loading_img').hide();
                     //$("#" + id).html
                     if (jQuery.trim(data) == 'ok') {
-                             $("#row_" + id).hide();
+                             $("#row_" + id).remove();
+                             if ($(".delete_repo").length == 0 )
+                             {
+                                 $("#empty_repos").hide(); 
+                                 $(".settings_panel_body").html('<div id="no_repos"><p class="empty_page" style="">There are no empty repositories to display</p></div>'); 
+                             }
                              App.Wireframe.Flash.success(App.lang("Repository deleted successfully"));
                     } else {
                             App.Wireframe.Flash.error(App.lang(data));
@@ -154,10 +158,6 @@
         
           
     });
-
-  
-  
-
 
 </script>
 {/literal} 

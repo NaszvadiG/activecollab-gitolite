@@ -72,3 +72,8 @@ Gitolite Admin
     color: #CC5646;
     font-style: italic;
 }
+.ln_hght
+{
+    vertical-align:middle;
+    position: relative;
+}

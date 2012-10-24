@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Ac Gitolite module defintiion
+ * Ac Gitolite module defination
  *
  * @package activeCollab.modules.ac_gitolite
  * @subpackage models
@@ -22,14 +22,6 @@ class AcGitoliteModule extends AngieModule {
     
 
 
-    function getCheckVersionUrl() {
-        return $this->check_version_url;
-    }
-
-    function getInternalId() {
-        return $this->module_id;
-    }
-
     /**
      * Define module routes
      */
@@ -49,6 +41,7 @@ class AcGitoliteModule extends AngieModule {
         Router::map('deleted_gitolite_repo', '/projects/:project_slug/repositories/:project_source_repository_id/delete-repo', array('controller'=> 'project_tracking_gitolite','action'=>'delete_gitolite_repository'));
         Router::map('add_gitolite_steps', '/projects/:project_slug/repositories/:project_source_repository_id/action/:action/params/:params', array('controller'=> 'project_tracking_gitolite','action'=>'add_git_repo'));
         Router::map('delele_repo_url', 'admin/gitolite_admin/delete', array('controller'=> 'ac_gitolite_admin','action'=>'delete_repo'));
+        Router::map('need_help_path', 'admin/gitolite_admin/help', array('controller'=> 'ac_gitolite_admin','action'=>'need_help'));
         
     }// defineRoutes
 
@@ -138,7 +131,10 @@ class AcGitoliteModule extends AngieModule {
     
     
     
-   
+    /**
+     * build_db
+     * Create tables in database
+     */
     function build_db()
     {
         $storage_engine  = defined('DB_CAN_TRANSACT') && DB_CAN_TRANSACT ? 'ENGINE=InnoDB' : '';
@@ -212,6 +208,10 @@ class AcGitoliteModule extends AngieModule {
          
     }
     
+    /**
+     * uninstall
+     * Uninstall module
+     */
     function uninstall() {
         parent::uninstall();
         Router::cleanUpCache(true);

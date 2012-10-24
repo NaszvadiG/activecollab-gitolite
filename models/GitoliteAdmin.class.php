@@ -30,10 +30,10 @@
                $results = array(
                                 'gitoliteuser'=> $config_settings['gitoliteuser'],
                                 'gitoliteserveradd'=> $config_settings['gitoliteserveradd'],
-                                'gitoliteadminpath' => $config_settings['gitoliteadminpath'],
-                                'initialize_repo' => $config_settings['initialize_repo'],
-                                'ignore_files' => $config_settings['ignore_files']
+                                'gitoliteadminpath' => $config_settings['gitoliteadminpath']
                         );
+               //'initialize_repo' => $config_settings['initialize_repo'],
+               //'ignore_files' => $config_settings['ignore_files']
               
            }
            else
@@ -93,7 +93,6 @@
          */
         function update_settings($post_data = array(),$active_user = 0)
         {
-
             if(count($post_data) == 0 || $active_user == 0)
             {
                 return FALSE;
@@ -194,7 +193,7 @@
             $result = DB::execute("SELECT src.`id` as src_repo_id , src.`name` as repo_name ,comm.id,pro.project_id,pro.id as obj_id
             FROM $source_table_name src LEFT JOIN $objects_table_name pro on pro.integer_field_1 = src.id 
             LEFT JOIN $commits_table_name comm ON src.id = comm.repository_id and comm.type = 'GitCommit' 
-            WHERE pro.type = 'ProjectSourceRepository' group by src.`id` having comm.id IS NULL");
+            WHERE src.type = 'GitRepository' group by src.`id` having comm.id IS NULL");
             
             if($result)
             {

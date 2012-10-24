@@ -7,6 +7,7 @@
    *
    * @package custom.modules.ac_gitolite
    * @subpackage controllers
+   * @author rtCamp Solutions Pvt Ltd
    * 
    * 
    */
@@ -119,7 +120,7 @@
               $project_users =  Projects::findById($project_id);
               
               // Prepare users map
-              $users_details = $this->active_project->users()->describe($this->logged_user, true, true, STATE_ARCHIVED);
+              $users_details = $this->active_project->users()->describe($this->logged_user, true, true,STATE_VISIBLE);
              
               $user_detail_permissions = array();
 
@@ -261,19 +262,6 @@
                     $this->active_repository = new GitRepository();
                     $this->active_repository->setAttributes($repository_data);
                     $this->active_repository->setCreatedBy($this->logged_user);
-                    
-                    
-                    /*$result = true;
-                    if ($result !== true) {
-                        if ($result === false) {
-                            $message = 'Please check URL or login parameters.';
-                        } else {
-                            
-                            $message = $result;
-                        } //if
-                        $errors->addError('Failed to connect to repository: :message', array('message'=>$message));
-                        throw $errors;
-                    } //if*/
                     
                     $this->active_repository->save();
                     $repo_fk = $this->active_repository->getId();

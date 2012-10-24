@@ -1,23 +1,18 @@
 <?php
 
   /**
-   * Merger
-   *
+   * Ac Gitolite
+   * @license GPL
+   * @license http://opensource.org/licenses/gpl-license.php GNU Public License
    * @package activeCollab.modules.ac_gitolite
    */
-
-  define('AC_GITOLITE_MODULE', 'ac_gitolite');
-  define('AC_GITOLITE_MODULE_PATH', CUSTOM_PATH . '/modules/ac_gitolite');
   
- //define('AC_GITOLITE_GIT_ADMIN_PATH', '/opt/lampp/htdocs/gitadmin/gitolite-admin/');
+  // Define module name and module path
+  define('AC_GITOLITE_MODULE', 'ac_gitolite');  // Define module name
+  define('AC_GITOLITE_MODULE_PATH', CUSTOM_PATH . '/modules/ac_gitolite');  // Define module path
   
-  //define('AC_GITOLITE_GIT_ADMIN_PATH', '/var/www/gitolite/gitolite-admin/');
-  
-  //define('AC_GITOLITE_GIT_REPO_PATH', GIT_FILES_PATH.DIRECTORY_SEPARATOR."repositories");
-  //define('AC_GITOLITE_GIT_REPO_PATH',"/var/www/gitolite");
-  
-  //define('GIT_SERVER', "git@192.168.0.137");
-  
+ 
+  // Autoload the following models
   AngieApplication::setForAutoload(array(
 	'GitoliteAc' => AC_GITOLITE_MODULE_PATH.'/models/GitoliteAc.class.php',
         'GitoliteAdmin' => AC_GITOLITE_MODULE_PATH.'/models/GitoliteAdmin.class.php',

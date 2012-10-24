@@ -8,6 +8,7 @@ AngieApplication::useController('admin', ENVIRONMENT_FRAMEWORK_INJECT_INTO);
  *
  * @package activeCollab.modules.ac_gitolite
  * @subpackage controllers
+ * @author rtCamp Solutions Pvt Ltd
  */
 class AcGitoliteAdminController extends AdminController {
 
@@ -16,12 +17,20 @@ class AcGitoliteAdminController extends AdminController {
      */
     function __before() {
         parent::__before();
+         $this->wireframe->actions->add('need_help', 'Need Help?', Router::assemble('need_help_path'), array(
+                 'onclick' => new FlyoutFormCallback('repository_created'),
+                 'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
+             );
         
     }
     
+    /**
+     * index
+     * 
+     */
     function index() 
     {
-       
+        
         $gitoliteadminpath = GitoliteAdmin :: get_admin_path();
         $setup_script = GitoliteAdmin :: get_setup_path();
         $settings = GitoliteAdmin :: get_admin_settings();
@@ -29,7 +38,7 @@ class AcGitoliteAdminController extends AdminController {
         $domain_name = GitoliteAdmin :: get_server_name();
         $server_name = ($settings['gitoliteserveradd'] == "") ? $domain_name : $settings['gitoliteserveradd'];
         $gitoliteuser = ($settings['gitoliteuser'] == "") ? "git" : $settings['gitoliteuser'];
-        $is_auto = ($settings['initialize_repo'] == "") ? "No" : $settings['initialize_repo'];
+        //$is_auto = ($settings['initialize_repo'] == "") ? "No" : $settings['initialize_repo'];
         if($settings['gitoliteuser'] == "")
         {
             $gitoliteuser = "git";
@@ -62,10 +71,10 @@ class AcGitoliteAdminController extends AdminController {
                   'gitoliteuser' => $gitoliteuser,
                   'gitoliteadminpath' => $gitoliteadminpath,
                   'server_name' => $server_name,
-                  'is_auto' => $is_auto,
+                  
                   'delete_url' => $delete_url
     		));
-         
+         //'is_auto' => $is_auto,
     }
     
     /** gitolite_admin
@@ -73,11 +82,8 @@ class AcGitoliteAdminController extends AdminController {
      */
     function gitolite_admin() {
     
-        /**
-       * fetch current data
-       */
-       /*$empty_repositoris = GitoliteAdmin :: get_empty_repositories();
-       die();*/
+       //fetch current data
+        
        $settings = GitoliteAdmin :: get_admin_settings();
        
        $setup_script = GitoliteAdmin :: get_setup_path();
@@ -163,6 +169,11 @@ class AcGitoliteAdminController extends AdminController {
        }
     }
     
+    /*
+     * test_connection
+     * Test connection with gitolite server
+     * @return string
+     */
     
     function test_connection()
     {
@@ -250,6 +261,23 @@ class AcGitoliteAdminController extends AdminController {
           die("Problem occured while deleting repository");
       }
   }
+  
+    /**
+     * 
+     */
+     function need_help()
+     {
+         $setup_script = GitoliteAdmin :: get_setup_path();
+         $settings = GitoliteAdmin :: get_admin_settings();
+         if(isset($settings["gitoliteuser"]) && $settings["gitoliteuser"] != "")
+         {
+            $setup_script = str_replace(" git"," ".$settings["gitoliteuser"],$setup_script);
+         }
+         
+         $this->response->assign(
+                            array('setup_script' => $setup_script)
+          );
+     }
   
     /*  exec_enabled
      *  check whether exec is enabled on server

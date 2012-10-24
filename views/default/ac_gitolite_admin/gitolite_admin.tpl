@@ -55,7 +55,7 @@
         
         </div>
             
-         <div class="content_stack_element">
+      <!-- <div class="content_stack_element">
         <div class="content_stack_element_info">
           <h3>{lang}Initialize Repository{/lang}</h3>
           <p class="aid">{lang}Initialize repository with .gitignore file{/lang}</p>
@@ -72,7 +72,7 @@
             
           {/wrap}
         </div>
-      </div>
+      </div>-->
             
             
       
@@ -101,7 +101,7 @@
 
    {literal}
 <script type="text/javascript">
-    $('#gitolite_admin').each(function() {
+   /* $('#gitolite_admin').each(function() {
     var wrapper = $(this);
     var ignore_file_contents = wrapper.find('#ignore_file_contents');
 
@@ -109,9 +109,8 @@
         ignore_file_contents.hide();
     } // if 
 
-    /*wrapper.find('#is_initialize').click(function() {
-      ignore_file_contents.slideUp('fast');
-    });*/
+   
+   
 
     wrapper.find('#is_initialize').click(function() {
         if(wrapper.find('#is_initialize').prop('checked')) {
@@ -126,12 +125,12 @@
            
         }
     });
-  });
+  });*/
     $(document).ready (function () {
         
         
-         $("#ignore_files").width("200");
-         $("#ignore_files").height("100");
+        /* $("#ignore_files").width("200");
+         $("#ignore_files").height("100");*/
         if($('#is_enabled').val() == 1)
         {
               $("#gitoliteuser").attr("disabled", "disabled");
