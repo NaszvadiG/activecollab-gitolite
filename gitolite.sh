@@ -23,7 +23,7 @@ if [ $Permission -ne 0 ]
 then
 	echo
         echo -e "\033[31m Root Privilege Required... \e[0m" | tee -ai $LOGFILE
-	echo -e "\033[31m Uses: sudo bash $0 {git-username} {php-username} \e[0m" | tee -ai $LOGFILE
+	echo -e "\033[31m Uses: sudo bash $0 [git-username] [php-username] [git-server-addres] \e[0m" | tee -ai $LOGFILE
         exit 100 
 fi
 
@@ -122,7 +122,7 @@ sudo -H -u $GITUSER mkdir /home/$GITUSER/setup || OwnError "Unable to create set
 cd /home/$GITUSER/setup || OwnError " Unable to change directory"
 
 echo
-echo -e "\033[34m Cloning Gitolite... \e[0m" | tee -ai $LOGFILE
+echo -e "\033[34m Cloning Gitolite Server Repository... \e[0m" | tee -ai $LOGFILE
 sudo -H -u $GITUSER git clone git://github.com/sitaramc/gitolite &>> $LOGFILE || OwnError "Unable to clone gitolote repository"
 
 # Create a Symbolic Link For Gitolite in /home/git/bin Directory
@@ -189,15 +189,24 @@ else
 fi
 
 # Add Server SSH Fingerprint To known_hosts
+if [ $# -lt 3 ]
+then
+	echo -e "\033[34m The Gitolite Server Address is given at Gitolite Settings \e[0m" | tee -ai $LOGFILE
+	read -p " Enter the Gitoliter Server Address: " GITSERVER
+
+else
+	GITSERVER=$3
+fi
 
 # Create known_hosts file if not exist
 # Or if known_hosts exist update timestamp 
-sudo -H -u $WEBUSER touch $WEBUSERHOME/.ssh/known_hosts
+sudo touch $WEBUSERHOME/.ssh/known_hosts
 
 # Give 666 Permission To Add SSH Server Fingerprint
 sudo chmod 666 $WEBUSERHOME/.ssh/known_hosts
-sudo ssh-keyscan -H $3 >> $WEBUSERHOME/.ssh/known_hosts
+sudo ssh-keyscan -H $GITSERVER >> $WEBUSERHOME/.ssh/known_hosts 2>/dev/null
 sudo chmod 644 $WEBUSERHOME/.ssh/known_hosts
+sudo chown $WEBUSER:$WEBUSER $WEBUSERHOME/.ssh/known_hosts
 
 
 # Setup Gitolite Admin
@@ -246,4 +255,5 @@ echo -e "\033[34m cat $LOGFILE \e[0m"
 echo
 echo -e "\033[34m Gitolite Admin is successfully setup at `date` \e[0m" | tee -ai $LOGFILE
 echo -e "\033[34m Please go back to Gitolite Admin, test connection and save settings. \e[0m" | tee -ai $LOGFILE
+
 
