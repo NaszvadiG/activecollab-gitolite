@@ -210,20 +210,20 @@
                                                     {
                                                         fwrite($fh, $access ."\t"."="."\t".$rowkeys['pub_file_name']."\n");
                                                     }
-                                                }
+                                                } // while
                                                
-                                            }
-                                        }
-                                    }
-                            }
+                                            }// if public keys added
+                                        } // foreach 
+                                    } // if project user exists
+                            } // while
                             
-                    }
+                    } // repo exists
                 } catch (Exception $e) {
                     echo $e;
                 }
                 
                 return true;
-            }
+            }   // if file exists
             else 
             {
                return "can't write file";
@@ -308,7 +308,11 @@
           
         }
         
-        
+        /**
+         * Get repository details
+         * @param integer $repo_id
+         * @return array repo details
+         */
         function get_repo_details($repo_id = 0)
         {
            if(!is_numeric($repo_id) || $repo_id == 0)
@@ -340,6 +344,11 @@
             
         }
         
+        /**
+         * Get access levels of user
+         * @param integer $repo_id
+         * @return array access
+         */
         function get_access_levels($repo_id = 0)
         {
            if(!is_numeric($repo_id) || $repo_id == 0)

@@ -11,7 +11,7 @@
         /**
          * get_admin_settings
          * Get admin settings from database
-         * @return type
+         * @return void
          */
         public function get_admin_settings()
         {
@@ -47,7 +47,7 @@
         /**
          * setting_exists
          * Check whether settings are already added.
-         * @return type
+         * @return boolean
          */
         function setting_exists()
         {
@@ -65,8 +65,8 @@
         /**
          * insert_settings
          * Insert module settings.
-         * @param type $post_data
-         * @param type $active_user
+         * @param array $post_data
+         * @param integer $active_user
          * @return boolean
          */
         function insert_settings($post_data = array(),$active_user = 0)
@@ -87,8 +87,8 @@
         /**
          * update_settings
          * Update admin settings.
-         * @param type $post_data
-         * @param type $active_user
+         * @param array $post_data
+         * @param integer $active_user
          * @return boolean
          */
         function update_settings($post_data = array(),$active_user = 0)
@@ -108,7 +108,7 @@
         
         /**
          * Get gitolite admin path.
-         * @return type
+         * @return string path
          */
         public function get_admin_path()
         {
@@ -137,7 +137,6 @@
         }
 
         /**
-         * is_gitolite
          * Check whether is gitolite settings added.
          * @return boolean
          */
@@ -154,9 +153,8 @@
         }
         
         /**
-         * get_setup_path
          * Get gitolite setup script path.
-         * @param type $path
+         * @param boolean $path
          * @return string
          */
         function get_setup_path($path = TRUE)
@@ -167,9 +165,8 @@
         }
         
         /**
-         * get_server_name
          * Get server name
-         * @return type
+         * @return string server name
          */
         function get_server_name()
         {
@@ -181,6 +178,10 @@
             }
         }
         
+        /**
+         * Get empty git repositories
+         * @return array $empty_array
+         */
         function get_empty_repositories()
         {
             
@@ -208,12 +209,6 @@
             }
             
             return $empty_array;
-
-            /*echo "SELECT src.`id` as repo_id , src.`name` as repo_name ,comm.id,pro.project_id 
-            FROM $source_table_name src LEFT JOIN $objects_table_name pro on pro.integer_field_1 = src.id 
-            LEFT JOIN $commits_table_name comm ON src.id = comm.repository_id and comm.type = 'GitCommit' 
-            WHERE pro.type = 'ProjectSourceRepository' group by src.`id` having comm.id IS NULL";
-            die();*/
             
             
         }

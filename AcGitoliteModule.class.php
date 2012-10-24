@@ -14,13 +14,7 @@ class AcGitoliteModule extends AngieModule {
      * @var string
      */
     protected $name = 'ac_gitolite';
-    /**
-     * Module version
-     *
-     * @var string
-     */
     
-
 
     /**
      * Define module routes
@@ -44,7 +38,10 @@ class AcGitoliteModule extends AngieModule {
         Router::map('need_help_path', 'admin/gitolite_admin/help', array('controller'=> 'ac_gitolite_admin','action'=>'need_help'));
         
     }// defineRoutes
-
+    
+     /**
+     * Define handlers
+     */
     function defineHandlers() 
     {
 
@@ -107,14 +104,13 @@ class AcGitoliteModule extends AngieModule {
             
             
             if($task && in_array($task, array(SCHEDULED_TASK_FREQUENTLY, SCHEDULED_TASK_HOURLY, SCHEDULED_TASK_DAILY))) {
-              $path =  Router::assemble($task, $url_params);
-              $path.="\n";
-              $filename = ".hookspath.rt";
-              $newfh = fopen($filename, 'w+');
-              fwrite($newfh,$path);
-              
+                $path =  Router::assemble($task, $url_params);
+                $path.="\n";
+                $filename = ".hookspath.rt";
+                $newfh = fopen($filename, 'w+');
+                fwrite($newfh,$path);
             } else {
-              $path = '';
+                $path = '';
             } // if   
           
          

@@ -3,13 +3,13 @@
   // Build on top of system module
  AngieApplication::useController('repository', SOURCE_MODULE);
 /**
-   * Project Tracking Gitolite Controller controller implementation
-   *
-   * @package custom.modules.ac_gitolite
-   * @subpackage controllers
-   * @author rtCamp Solutions Pvt Ltd
-   * 
-   * 
+* Project Tracking Gitolite Controller controller implementation
+*
+* @package custom.modules.ac_gitolite
+* @subpackage controllers
+* @author Kasim Badami <kasim.badami@rtcamp.com>
+* @author  Mitesh Shah <mitesh.shah@rtcamp.com>
+* 
    */
   class ProjectTrackingGitoliteController extends RepositoryController {
     
@@ -90,11 +90,9 @@
      } // index
      
      /**
-      * add_git_repo 
       * Add new gitolite repository
       */
-     function add_git_repo()
-     {
+     function add_git_repo(){
                
          $is_gitolite  = GitoliteAdmin :: is_gitolite();
          
@@ -333,8 +331,7 @@
              
      }
      
-     function edit_git_repo()
-     {
+     function edit_git_repo(){
          $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
          
          $is_gitolite  = GitoliteAdmin :: is_gitolite();
@@ -593,15 +590,9 @@
                         throw $errors;
                     }
                     DB::commit('Repository created @ ' . __CLASS__);
-                    //$this->response->redirectToReferer();
-                     // $this->response->ok();
-                    //echo urldecode($this->active_repository->getViewUrl());
-                    //die();
-                     //$this->response->redirectTo($this->active_repository->getViewUrl());
                     $this->response->ok();
-                    //$this->response->respondWithData($this->project_object_repository);
-                 }
-                catch (Exception $e)
+                    
+                 }catch (Exception $e)
                 {  
                     DB::rollback('Failed to create a repository @ ' . __CLASS__);
                     $this->response->exception($e);
@@ -617,7 +608,6 @@
      }
 
      /**
-      * history
       * Check repository access and add repository help on history page
       */
      function history() {

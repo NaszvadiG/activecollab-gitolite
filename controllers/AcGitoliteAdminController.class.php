@@ -4,11 +4,11 @@
 AngieApplication::useController('admin', ENVIRONMENT_FRAMEWORK_INJECT_INTO);
 
 /**
- * Ac Gitolite Admin Controller controller
- *
+ * Ac Gitolite Admin Controller 
  * @package activeCollab.modules.ac_gitolite
  * @subpackage controllers
- * @author rtCamp Solutions Pvt Ltd
+ * @author Kasim Badami <kasim.badami@rtcamp.com>
+ * @author  Mitesh Shah <mitesh.shah@rtcamp.com>
  */
 class AcGitoliteAdminController extends AdminController {
 
@@ -21,16 +21,14 @@ class AcGitoliteAdminController extends AdminController {
                  'onclick' => new FlyoutFormCallback('repository_created'),
                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
              );
-        
     }
     
     /**
-     * index
      * 
+     * Display gitolite admin page
+     * @return void
      */
-    function index() 
-    {
-        
+    function index() {
         $gitoliteadminpath = GitoliteAdmin :: get_admin_path();
         $setup_script = GitoliteAdmin :: get_setup_path();
         $settings = GitoliteAdmin :: get_admin_settings();
@@ -77,8 +75,9 @@ class AcGitoliteAdminController extends AdminController {
          //'is_auto' => $is_auto,
     }
     
-    /** gitolite_admin
+    /** 
      * Save gitolite admin settings
+     * @return void
      */
     function gitolite_admin() {
     
@@ -170,14 +169,11 @@ class AcGitoliteAdminController extends AdminController {
     }
     
     /*
-     * test_connection
      * Test connection with gitolite server
-     * @return string
+     * @return string message
      */
     
-    function test_connection()
-    {
-      
+    function test_connection(){
         if (!(array_var($_GET, 'dir')) || !(array_var($_GET, 'user')) || !(array_var($_GET, 'server'))) {
             die(lang('Please fill in all the connection parameters'));     
         } 
@@ -244,11 +240,12 @@ class AcGitoliteAdminController extends AdminController {
         die("Unable to connect to server");
     }
   }
-    
-  function delete_repo()
-  {
-      //echo array_var($_GET, 'repoid');
-      //echo array_var($_GET, 'repoid');
+  
+  /**
+   * Delete repository from system
+   * @return string message
+   */
+  function delete_repo(){
       $repoid = array_var($_GET, 'repoid');
       if($repoid != "")
       {
@@ -263,10 +260,10 @@ class AcGitoliteAdminController extends AdminController {
   }
   
     /**
-     * 
+     * Show help for gitolite settings.
+     * @return void
      */
-     function need_help()
-     {
+     function need_help(){
          $setup_script = GitoliteAdmin :: get_setup_path();
          $settings = GitoliteAdmin :: get_admin_settings();
          if(isset($settings["gitoliteuser"]) && $settings["gitoliteuser"] != "")
@@ -279,8 +276,9 @@ class AcGitoliteAdminController extends AdminController {
           );
      }
   
-    /*  exec_enabled
-     *  check whether exec is enabled on server
+    /* 
+     * check whether exec is enabled on server
+     * @return void
      */
     function exec_enabled() {
          $disabled = explode(', ', ini_get('disable_functions'));

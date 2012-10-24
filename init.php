@@ -5,9 +5,13 @@
    * @license GPL
    * @license http://opensource.org/licenses/gpl-license.php GNU Public License
    * @package activeCollab.modules.ac_gitolite
+   * @author Kasim Badami <kasim.badami@rtcamp.com>
    */
   
-  // Define module name and module path
+  /**
+    * @const  AC_GITOLITE_MODULE
+    * @const  AC_GITOLITE_MODULE_PATH
+  */
   define('AC_GITOLITE_MODULE', 'ac_gitolite');  // Define module name
   define('AC_GITOLITE_MODULE_PATH', CUSTOM_PATH . '/modules/ac_gitolite');  // Define module path
   
@@ -20,7 +24,11 @@
   );
    
    
-  /** Gitolite access leveles */
+  /**
+    * @const  GITOLITE_NOACCESS
+    * @const  GITOLITE_READACCESS
+    * @const  GITOLITE_MANAGEACCESS
+  */
   define('GITOLITE_NOACCESS', '1');
   define('GITOLITE_READACCESS', '2');
   define('GITOLITE_MANAGEACCESS', '3');

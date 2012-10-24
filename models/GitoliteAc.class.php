@@ -10,7 +10,7 @@
 
      /**
       * Used to fetch all public keys under a user.
-      * @param type $active_user
+      * @param integer $active_user
       * @return array
       */
     function fetch_keys($active_user = 0)
@@ -49,8 +49,8 @@
     
     /**
      * Check whether added key already exists
-     * @param type $active_user
-     * @param type $post_data
+     * @param integer $active_user
+     * @param array $post_data
      * @return array
      */
     function check_duplication($active_user = 0,$post_data = array(),$actual_key = "")
@@ -79,9 +79,9 @@
     
     /**
      * Add public keys.
-     * @param type $active_user
-     * @param type $pub_file_name
-     * @param type $post_data
+     * @param integer $active_user
+     * @param string $pub_file_name
+     * @param array $post_data
      * @return boolean
      */
     function add_keys($active_user = 0,$pub_file_name = "",$post_data = array())
@@ -102,7 +102,7 @@
 
     /**
      * Remove keys of user.
-     * @param type $key_id
+     * @param integer $key_id
      * @return boolean
      */
     function remove_keys($key_id = 0)
@@ -130,8 +130,8 @@
     /**
      * get_filename 
      * Get public file name
-     * @param type $key_id
-     * @return array
+     * @param integer $key_id
+     * @return string file name
      */
     function get_filename($key_id = 0)
     {
@@ -158,7 +158,7 @@
    /**
     * check_keys_added 
     * Check whether keys are added for particular user
-    * @param type $user_id
+    * @param integer $user_id
     * @return boolean
     */
     function check_keys_added ($user_id = 0)
