@@ -105,8 +105,8 @@ echo -e "\033[34m Creating System User [$GITUSER]  \e[0m" | tee -ai $LOGFILE
 sudo adduser --system --home /home/$GITUSER --shell /bin/bash --group --disabled-login --disabled-password --gecos 'git version control' $GITUSER &>> $LOGFILE || OwnError "Unable to create $GITUSER"
 
 # Copy Skeleton Contents
-#echo -e "\033[34m Copying skeleton contents for [$GITUSER]...  \e[0m" | tee -ai $LOGFILE
-sudo -H -u $GITUSER cp /etc/skel/.profile /etc/skel/.bashrc /etc/skel/.bash_logout /home/$GITUSER
+echo -e "\033[34m Copying system files...  \e[0m" | tee -ai $LOGFILE
+sudo -H -u $GITUSER cp /etc/skel/.profile /etc/skel/.bashrc /etc/skel/.bash_logout /home/$GITUSER/
 
 
 # Create a bin Directory For Git User
@@ -171,16 +171,16 @@ fi
 ls $WEBUSERHOME/.ssh &> tee -ai $LOGFILE
 if [ $? -ne 0 ]
 then
-	echo -e "\033[34m Creating .ssh directory \e[0m"
-	sudo mkdir $WEBUSERHOME/.ssh
-	sudo chown -R $WEBUSER:$WEBUSER $WEBUSERHOME/.ssh
+	echo -e "\033[34m Creating .ssh directory \e[0m" | tee -ai $LOGFILE
+	sudo mkdir $WEBUSERHOME/.ssh || OwnError "Unable to crate $WEBUSERHOME/.ssh"
+	sudo chown -R $WEBUSER:$WEBUSER $WEBUSERHOME/.ssh || OwnError "Unable to chown .ssh"
 fi
 
 # Checks Weather id_rsa Key Exist
 sudo ls  $WEBUSERHOME/.ssh/id_rsa &>> $LOGFILE
 if [ $? -eq 0 ]
 then
-	echo -e "\033[34m The ssh key id_rsa already exist \e[0m"
+	echo -e "\033[34m The ssh key id_rsa already exist \e[0m" | tee -ai $LOGFILE
 else
 	# Generate SSH Keys For Web User
 	#echo
@@ -193,9 +193,11 @@ if [ $# -lt 3 ]
 then
 	echo -e "\033[34m The Gitolite Server Address is given at Gitolite Settings \e[0m" | tee -ai $LOGFILE
 	read -p " Enter the Gitoliter Server Address: " GITSERVER
+	echo GITSERVER = $GITSERVER &>> $LOGFILE
 
 else
 	GITSERVER=$3
+	echo GITSERVER = $GITSERVER &>> $LOGFILE
 fi
 
 # Create known_hosts file if not exist
@@ -241,7 +243,7 @@ then
 	sudo -H -u $GITUSER /home/$GITUSER/bin/gitolite setup --hooks-only
 else
 	echo
-	echo -e "\033[31m 	Can't create post-receive hooks...  \e[0m" | tee -ai $LOGFILE
+	echo -e "\033[31m Can't create post-receive hooks...  \e[0m" | tee -ai $LOGFILE
 	echo
 fi
 
