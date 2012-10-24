@@ -2,7 +2,7 @@
 
 <div id="gitolite_admin">
    
-  {form action=Router::assemble('gitolite_admin')}
+  {form action=Router::assemble('gitolite_admin_change')}
   <input type="hidden" value= "{$setup_script}" id="script_path_default">
   <input type = "hidden" value = "{$gitoliteuser}" id="old_value"> 
   <input type="hidden" value = "{$is_enable}" id = "is_enabled">
@@ -39,21 +39,42 @@
       </div>
         
         <div class="content_stack_element">
-        <div class="content_stack_element_info">
-          <h3>{lang}Need Help?{/lang}</h3>
-        </div>
+            <div class="content_stack_element_info">
+              <h3>{lang}Need Help?{/lang}</h3>
+            </div>
+
+            <div class="content_stack_element_body">
+                {wrap field=title}
+                {label for=pageTitle}Gitolite Setup Script{/label}
+                <code id="script_path">
+                  {$setup_script nofilter}
+              </code>
+              <p class="aid">{lang}Please login to your remote server and run the above command.{/lang}</p>
+              {/wrap}
+            </div>
         
+        </div>
+            
+         <div class="content_stack_element">
+        <div class="content_stack_element_info">
+          <h3>{lang}Initialize Repository{/lang}</h3>
+          <p class="aid">{lang}Initialize repository with .gitignore file{/lang}</p>
+        </div>
         <div class="content_stack_element_body">
-            {wrap field=title}
-            {label for=pageTitle}Gitolite Setup Script{/label}
-            <code id="script_path">
-              {$setup_script nofilter}
-          </code>
-          <p class="aid">{lang}Please login to your remote server and run the above command.{/lang}</p>
+          {wrap field=on_logout_url}
+            {label}Check To Initialize{/label}
+            <div><input type="checkbox" name="gitoliteadmin[initialize_repo]" class="auto input_checkbox" value="Yes" id="is_initialize" {if $is_auto == "Yes"}checked="checked"{/if} /> {label for=is_initialize class=inline main_label=false after_text=''}Yes{/label}</div>
+            <div id="ignore_file_contents">
+                {textarea_field name="gitoliteadmin[ignore_files]" id="ignore_files"}{$ignore_files}{/textarea_field}
+              <p class="details block">{lang}Specify file names that should be ignored, e.g. (Thumbs.db){/lang}</p>
+            </div>
+            
+            
           {/wrap}
         </div>
-        
       </div>
+            
+            
       
       <div class="content_stack_element last">
         <div class="content_stack_element_info">
@@ -80,9 +101,37 @@
 
    {literal}
 <script type="text/javascript">
+    $('#gitolite_admin').each(function() {
+    var wrapper = $(this);
+    var ignore_file_contents = wrapper.find('#ignore_file_contents');
 
+    if(!wrapper.find('#is_initialize').prop('checked')) {
+        ignore_file_contents.hide();
+    } // if 
+
+    /*wrapper.find('#is_initialize').click(function() {
+      ignore_file_contents.slideUp('fast');
+    });*/
+
+    wrapper.find('#is_initialize').click(function() {
+        if(wrapper.find('#is_initialize').prop('checked')) {
+                ignore_file_contents.slideDown('fast', function() {
+                 $(this).find('#ignore_files').focus();
+             });
+               
+        } // if
+        else
+        {
+            ignore_file_contents.slideUp('fast');
+           
+        }
+    });
+  });
     $(document).ready (function () {
         
+        
+         $("#ignore_files").width("200");
+         $("#ignore_files").height("100");
         if($('#is_enabled').val() == 1)
         {
               $("#gitoliteuser").attr("disabled", "disabled");

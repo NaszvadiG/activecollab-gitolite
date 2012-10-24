@@ -236,7 +236,7 @@
                     {
                         if($dup_cnt[0]['dup_name_cnt'] > 0)
                         {
-                            $errors->addError('You have already added repository with same name.');
+                            $errors->addError('Repository name already used');
 
                         }
                        
@@ -261,7 +261,6 @@
                     $this->active_repository = new GitRepository();
                     $this->active_repository->setAttributes($repository_data);
                     $this->active_repository->setCreatedBy($this->logged_user);
-                    
                     
                     
                     /*$result = true;
@@ -305,6 +304,7 @@
                                 
                                 $command = "cd ".$dir." && git add * && git commit -am 'render conf file' && git push  || echo 'Not found'";
                                 exec($command,$output,$return_var);
+                                
                                /*$git_server = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'];
                                 $command = "cd ".$settings['gitoliteadminpath']." && git clone ".$git_server.":".$repo_name;
                                 exec($command,$output,$return_var);*/

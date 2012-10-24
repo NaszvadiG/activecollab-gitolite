@@ -42,11 +42,13 @@ class AcGitoliteModule extends AngieModule {
         Router::map('get_public_keys', 'people/:company_id/users/:user_id/public-keys', array('controller'=>'ac_gitolite', 'action'=>'getpublickeys'));
         Router::map('add_public_keys', 'people/:company_id/users/:user_id/add-public-keys', array('controller'=>'ac_gitolite', 'action'=>'add_public_keys'));
         Router::map('remove_key', 'people/:company_id/users/:user_id/delete-keys/:key_id', array('controller'=>'ac_gitolite', 'action'=>'remove_key'));
-        Router::map('gitolite_admin', 'admin/gitolite_admin', array('controller'=> 'ac_gitolite_admin','action'=>'gitolite_admin'));
+        Router::map('gitolite_admin', 'admin/gitolite_admin', array('controller'=> 'ac_gitolite_admin','action'=>'index'));
+        Router::map('gitolite_admin_change', 'admin/change_gitolite_setings', array('controller'=> 'ac_gitolite_admin','action'=>'gitolite_admin'));
         Router::map('gitolite_test_connection', 'admin/test_connection', array('controller'=> 'ac_gitolite_admin','action'=>'test_connection'));
         Router::map('edit_git_repository', '/projects/:project_slug/repositories/:project_source_repository_id/edit-git', array('controller'=> 'project_tracking_gitolite','action'=>'edit_git_repo'));
         Router::map('deleted_gitolite_repo', '/projects/:project_slug/repositories/:project_source_repository_id/delete-repo', array('controller'=> 'project_tracking_gitolite','action'=>'delete_gitolite_repository'));
         Router::map('add_gitolite_steps', '/projects/:project_slug/repositories/:project_source_repository_id/action/:action/params/:params', array('controller'=> 'project_tracking_gitolite','action'=>'add_git_repo'));
+        Router::map('delele_repo_url', 'admin/gitolite_admin/delete', array('controller'=> 'ac_gitolite_admin','action'=>'delete_repo'));
         
     }// defineRoutes
 
