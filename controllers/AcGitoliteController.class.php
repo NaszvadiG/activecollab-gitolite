@@ -42,6 +42,7 @@
     
     /**
      * Add new public key of user. Create .pub file gitolite admin directory
+     * @return void
      */
     function add_public_keys(){
       
@@ -168,6 +169,7 @@
     
     /**
      * Remove a specific publick key
+     * @return void
      */
     function remove_key(){
         $get_data = $this->request->get(); 

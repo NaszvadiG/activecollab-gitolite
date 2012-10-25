@@ -5,7 +5,8 @@
  *
  * @package activeCollab.modules.ac_gitolite
  * @subpackage models
- */
+ * @author Kasim Badami <kasim.badami@rtcamp.com>
+*/
 class AcGitoliteModule extends AngieModule {
 
     /**

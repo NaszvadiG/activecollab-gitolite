@@ -331,6 +331,10 @@
              
      }
      
+     /**
+      * Edit gitolite repository access levels
+      * @throws ValidationErrors
+      */
      function edit_git_repo(){
          $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
          
@@ -609,6 +613,7 @@
 
      /**
       * Check repository access and add repository help on history page
+      * @return void
       */
      function history() {
          
