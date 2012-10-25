@@ -7,19 +7,16 @@
    * 
    * @package activeCollab.modules.ac_gitolite
    * @subpackage controllers
-   * @author rtCamp Solutions Pvt Ltd
+   * @author Kasim Badami <kasim.badami@rtcamp.com>
+   * @author  Mitesh Shah <mitesh.shah@rtcamp.com>
    */
   class AcGitoliteController extends UsersController {
-  
-    
- 
     
     /**
-     * getpublickeys
      * List public keys in inline tabs
+     * @return void
      */
-    function getpublickeys()
-    {
+    function getpublickeys(){
       
         $active_user = $this->active_user;
 
@@ -44,11 +41,9 @@
     }
     
     /**
-     * add_public_keys
-     * Add new public key of user. Create .pub file gitolite admin dir
+     * Add new public key of user. Create .pub file gitolite admin directory
      */
-    function add_public_keys()
-    {
+    function add_public_keys(){
       
        $active_user = $this->active_user;
        
@@ -172,11 +167,9 @@
  }   
     
     /**
-     * remove_key
      * Remove a specific publick key
      */
-    function remove_key()
-    {
+    function remove_key(){
         $get_data = $this->request->get(); 
         $active_user = $this->active_user;
         
@@ -202,10 +195,10 @@
                      $command = "cd ".$dirpath." && git add * && git commit -am 'deleted key $filename.pub' && git push  || echo 'Not found'";
                      exec($command,$output,$return_var);
                      echo '<script type="text/javascript">window.location.href = "' . $this->active_user->getViewUrl() . '"</script>';
-                }   
-            }
+                } // else   
+            } // if 
                 
-        }
+        } // if
        
     }
     
