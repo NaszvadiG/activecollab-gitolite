@@ -189,16 +189,16 @@ else
 fi
 
 # Add Server SSH Fingerprint To known_hosts
-if [ $# -lt 3 ]
-then
-	echo -e "\033[34m The Gitolite Server Address is given at Gitolite Settings \e[0m" | tee -ai $LOGFILE
-	read -p " Enter the Gitoliter Server Address: " GITSERVER
-	echo GITSERVER = $GITSERVER &>> $LOGFILE
+#if [ $# -lt 3 ]
+#then
+#	echo -e "\033[34m The Gitolite Server Address is given at Gitolite Settings \e[0m" | tee -ai $LOGFILE
+#	read -p " Enter the Gitoliter Server Address: " GITSERVER
+#	echo GITSERVER = $GITSERVER &>> $LOGFILE
 
-else
-	GITSERVER=$3
-	echo GITSERVER = $GITSERVER &>> $LOGFILE
-fi
+#else
+#	GITSERVER=$3
+#	echo GITSERVER = $GITSERVER &>> $LOGFILE
+#fi
 
 # Create known_hosts file if not exist
 # Or if known_hosts exist update timestamp 
@@ -206,7 +206,17 @@ sudo touch $WEBUSERHOME/.ssh/known_hosts || OwnError "Unable to create known_hos
 
 # Give 666 Permission To Add SSH Server Fingerprint
 sudo chmod 666 $WEBUSERHOME/.ssh/known_hosts || OwnError "Unable to chmod 666 known_hosts"
-sudo ssh-keyscan -H $GITSERVER >> $WEBUSERHOME/.ssh/known_hosts 2>/dev/null || OwnError "Unable to add ssh-keyscan for $GITSERVER"
+
+# Use Wildcard For Match All The Domains
+sudo echo -n "* " >> $WEBUSERHOME/.ssh/known_hosts || OwnError "Unable to add wildcard as servername"
+
+# Copy The SSH Server Fingerprint
+cat /etc/ssh/ssh_host_rsa_key.pub >> $WEBUSERHOME/.ssh/known_hosts \
+|| OwnError "Unable to add ssh server fingerprint"
+
+#sudo ssh-keyscan -H $GITSERVER >> $WEBUSERHOME/.ssh/known_hosts 2>/dev/null || OwnError "Unable to add ssh-keyscan for $GITSERVER"
+
+# Give Back 644 Permission To Add SSH Server Fingerprint
 sudo chmod 644 $WEBUSERHOME/.ssh/known_hosts || OwnError "Unable to chmod 644 known_hosts"
 sudo chown $WEBUSER:$WEBUSER $WEBUSERHOME/.ssh/known_hosts || OwnError "Unable to chown known_hosts"
 
