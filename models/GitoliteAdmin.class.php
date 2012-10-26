@@ -5,11 +5,14 @@
    *
    * @package custom.modules.ac_gitolite
    * @subpackage models
+   * @author rtCamp Software Solutions Pvt Ltd <admin@rtcamp.com>
+   * @author Rahul Bansal <rahul.bansal@rtcamp.com>
+   * @author Kasim Badami <kasim.badami@rtcamp.com>
+
    */
   class GitoliteAdmin {
 
         /**
-         * get_admin_settings
          * Get admin settings from database
          * @return void
          */
@@ -45,7 +48,6 @@
         }
         
         /**
-         * setting_exists
          * Check whether settings are already added.
          * @return boolean
          */
@@ -63,7 +65,6 @@
         }
         
         /**
-         * insert_settings
          * Insert module settings.
          * @param array $post_data
          * @param integer $active_user
@@ -85,7 +86,6 @@
         }
         
         /**
-         * update_settings
          * Update admin settings.
          * @param array $post_data
          * @param integer $active_user
@@ -117,7 +117,6 @@
         }
         
         /**
-         * get_server_user_path
          * Get git user home path.
          * @return boolean
          */

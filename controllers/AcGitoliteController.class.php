@@ -7,6 +7,8 @@
    * 
    * @package activeCollab.modules.ac_gitolite
    * @subpackage controllers
+   * @author rtCamp Software Solutions Pvt Ltd<admin@rtcamp.com>
+   * @author Rahul Bansal <rahul.bansal@rtcamp.com>
    * @author Kasim Badami <kasim.badami@rtcamp.com>
    * @author  Mitesh Shah <mitesh.shah@rtcamp.com>
    */
@@ -42,6 +44,7 @@
     
     /**
      * Add new public key of user. Create .pub file gitolite admin directory
+     * @return void
      */
     function add_public_keys(){
       
@@ -168,6 +171,7 @@
     
     /**
      * Remove a specific publick key
+     * @return void
      */
     function remove_key(){
         $get_data = $this->request->get(); 

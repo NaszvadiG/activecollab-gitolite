@@ -7,8 +7,11 @@ AngieApplication::useController('admin', ENVIRONMENT_FRAMEWORK_INJECT_INTO);
  * Ac Gitolite Admin Controller 
  * @package activeCollab.modules.ac_gitolite
  * @subpackage controllers
+ * @author rtCamp Software Solutions Pvt Ltd <admin@rtcamp.com>
+ * @author Rahul Bansal <rahul.bansal@rtcamp.com>
  * @author Kasim Badami <kasim.badami@rtcamp.com>
- * @author  Mitesh Shah <mitesh.shah@rtcamp.com>
+ * @author Mitesh Shah <mitesh.shah@rtcamp.com>
+ 
  */
 class AcGitoliteAdminController extends AdminController {
 
