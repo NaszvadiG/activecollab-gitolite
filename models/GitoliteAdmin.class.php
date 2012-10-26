@@ -211,6 +211,15 @@
             
             
         }
+        
+        /**
+         * Get web user name
+         * @return string
+         */
+        function get_web_user()
+        {
+            return exec ("whoami");
+        }
  }
     
     

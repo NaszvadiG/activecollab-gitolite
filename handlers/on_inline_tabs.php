@@ -26,7 +26,6 @@
             'url' => Router::assemble('get_public_keys', array('company_id' => $object->getCompanyId(),'user_id' => $object->getId())), 
             ));        
         }
-      
     } // if User
     
   } // ac_gitolite_handle_on_inline_tabs
