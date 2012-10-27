@@ -52,7 +52,7 @@
             $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
             
             DB::execute("INSERT INTO $repo_table_name (repo_fk,project_id,repo_name,git_repo_path,repo_created_by) VALUES (? ,?, ?, ?, ?)",
-              $repo_fk,$active_project, $post_data['name'],$repo_path,$user_id
+              $repo_fk,$active_project, trim($post_data['name']),$repo_path,$user_id
             );
             return DB::lastInsertId() ;
             
