@@ -99,7 +99,7 @@
        
         
         DB::execute("INSERT INTO $keys_table_name (user_id, key_name,pub_file_name, public_key) VALUES (?, ?, ?, ?)",
-              $active_user, $post_data['key_name'],$pub_file_name,trim($post_data['public_keys'])
+              $active_user, trim($post_data['key_name']),$pub_file_name,trim($post_data['public_keys'])
          );
          return DB::lastInsertId() ;
     }

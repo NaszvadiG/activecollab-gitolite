@@ -2,8 +2,6 @@
 
   /**
    * Ac Gitolite
-   * @license GPL
-   * @license http://opensource.org/licenses/gpl-license.php GNU Public License
    * @package activeCollab.modules.ac_gitolite
    * @author Kasim Badami <kasim.badami@rtcamp.com>
    */
