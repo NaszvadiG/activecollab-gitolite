@@ -45,17 +45,38 @@ echo &>> $LOGFILE
 echo &>> $LOGFILE
 echo &>> $LOGFILE
 echo -e "\033[34m Gitolite Admin Installation Started At `date` \e[0m" | tee -ai $LOGFILE
-# Detect Linux Distro
-whereis lsb_release | grep bin/lsb_release &>> /dev/null
-if [ $? -eq 0 ]
-then
-	LINUXDISTRO=$(lsb_release -i | awk '{print $3}')
 
-else
-	LINUXDISTRO=$(cat /etc/*-release | awk '{print $1}' | head -n1)
+# Detect Linux Distro
+KERNEL=`uname -s`
+KERNELRELEASE=`uname -r`
+
+
+if [ "$KERNEL" = "Linux" ]
+then
+	if [ -f /etc/redhat-release ]
+	then
+		LINUXDISTRO=RedHat
+
+	elif [ -f cat /etc/centos-release ]
+	then
+		LINUXDISTRO=CentOS
+
+
+	elif [ -f /etc/lsb-release ]
+	then
+		LINUXDISTRO=Ubuntu
+
+	elif [ -f  /etc/debian_version ]
+	then
+		LINUXDISTRO=Debian
+
+	else
+        	echo | tee -ai $LOGFILE
+	       	echo -e "\033[31m Currently This Script Supports Only \
+		Redhat, CentOS, Ubuntu and Debian Linux Distro \e[0m"
+       		exit 200
 fi
 
-#uname -a | grep Ubuntu &>> $LOGFILE
 if [ "$LINUXDISTRO" = "Debian" ] || [ "$LINUXDISTRO" = "Ubuntu" ]
 then
         echo | tee -ai $LOGFILE
@@ -83,7 +104,7 @@ then
 		sudo apt-get -y install openssh-server git-core curl &>> $LOGFILE \
 		|| OwnError "Unable To Install Open SSH Server, Git and Curl "
 	fi
-elif [ "$LINUXDISTRO" = "RedHatEnterpriseServer" ] || [ "$LINUXDISTRO" = "Red" ] || [ "$LINUXDISTRO" = "CentOS" ] 
+elif [ "$LINUXDISTRO" = "RedHat" ] || [ "$LINUXDISTRO" = "CentOS" ] 
 then
         echo | tee -ai $LOGFILE
         echo -e "\033[34m $LINUXDISTRO Detected... \e[0m" | tee -ai $LOGFILE
@@ -106,10 +127,6 @@ then
 		sudo yum -y install openssh-server git-core curl &>> $LOGFILE \
 		|| OwnError "Unable To Install Open SSH Server, Git and Curl "
 	fi
-else
-        echo | tee -ai $LOGFILE
-       	echo -e "\033[31m Currently This Script Supports Only Debian,Ubuntu and RHEL Distros \e[0m"
-       	exit 200
 fi
 
 
@@ -150,7 +167,7 @@ then
 	sudo adduser --system --home /home/$GITUSER --shell /bin/bash --group \
 	--disabled-login --disabled-password --gecos 'git version control' $GITUSER &>> $LOGFILE \
 	|| OwnError "Unable To Create $GITUSER"
-elif [ "$LINUXDISTRO" = "RedHatEnterpriseServer" ] || [ "$LINUXDISTRO" = "Red" ] || [ "$LINUXDISTRO" = "CentOS" ]
+elif [ "$LINUXDISTRO" = "RedHat" ] || [ "$LINUXDISTRO" = "CentOS" ]
 then
 	echo -e "\033[34m Creating $LINUXDISTRO System User [$GITUSER]  \e[0m" | tee -ai $LOGFILE
 	sudo adduser --system --home /home/$GITUSER --create-home --shell /bin/bash \
