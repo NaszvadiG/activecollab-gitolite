@@ -46,13 +46,20 @@ echo &>> $LOGFILE
 echo &>> $LOGFILE
 echo -e "\033[34m Gitolite Admin Installation Started At `date` \e[0m" | tee -ai $LOGFILE
 # Detect Linux Distro
-
-# Detection Of Ubuntu
-uname -a | grep Ubuntu &>> $LOGFILE
+whereis lsb_release | grep bin/lsb_release &>> /dev/null
 if [ $? -eq 0 ]
 then
+	LINUXDISTRO=$(lsb_release -i | awk '{print $3}')
+
+else
+	LINUXDISTRO=$(cat /etc/*-release | awk '{print $1}' | head -n1)
+fi
+
+#uname -a | grep Ubuntu &>> $LOGFILE
+if [ "$LINUXDISTRO" = "Debian" ] || [ "$LINUXDISTRO" = "Ubuntu" ]
+then
         echo | tee -ai $LOGFILE
-        echo -e "\033[34m Ubuntu Detected... \e[0m" | tee -ai $LOGFILE
+        echo -e "\033[34m $LINUXDISTRO Detected... \e[0m" | tee -ai $LOGFILE
 
 	# Checking Installed Packages
 	dpkg --list | grep openssh-server &>> $LOGFILE
@@ -76,10 +83,32 @@ then
 		sudo apt-get -y install openssh-server git-core curl &>> $LOGFILE \
 		|| OwnError "Unable To Install Open SSH Server, Git and Curl "
 	fi
+elif [ "$LINUXDISTRO" = "RedHatEnterpriseServer" ] || [ "$LINUXDISTRO" = "Red" ] || [ "$LINUXDISTRO" = "CentOS" ] 
+then
+        echo | tee -ai $LOGFILE
+        echo -e "\033[34m $LINUXDISTRO Detected... \e[0m" | tee -ai $LOGFILE
 
+	# Checking Installed Packages
+	rpm -qa | grep openssh-server &>> $LOGFILE
+	OPENSSH=$(echo $?)
+	rpm -qa | grep git-core &>> $LOGFILE
+	GITCORE=$(echo $?)
+	rpm -qa | grep curl &>> $LOGFILE
+	CURL=$(echo $?)
+	echo Checking Installed Packages = $GITCORE $OPENSSH $CURL &>> $LOGFILE
+
+
+	# Install Git, Curl & Open SSH If It Not Installed
+	if [ $OPENSSH -ne 0 ] || [ $GITCORE -ne 0 ] || [ $CURL -ne 0 ]
+	then
+		# Install Open SSH Server And Git
+		echo -e "\033[34m Installing Open SSH Server, Git and Curl... \e[0m"
+		sudo yum -y install openssh-server git-core curl &>> $LOGFILE \
+		|| OwnError "Unable To Install Open SSH Server, Git and Curl "
+	fi
 else
         echo | tee -ai $LOGFILE
-       	echo -e "\033[31m Currently This Script Supports Only Ubuntu Distro \e[0m"
+       	echo -e "\033[31m Currently This Script Supports Only Debian,Ubuntu and RHEL Distros \e[0m"
        	exit 200
 fi
 
@@ -115,14 +144,26 @@ then
 fi
 
 # Create Git User
-echo -e "\033[34m Creating System User [$GITUSER]  \e[0m" | tee -ai $LOGFILE
-sudo adduser --system --home /home/$GITUSER --shell /bin/bash --group \
---disabled-login --disabled-password --gecos 'git version control' $GITUSER &>> $LOGFILE \
-|| OwnError "Unable To Create $GITUSER"
+if [ "$LINUXDISTRO" = "Debian" ] || [ "$LINUXDISTRO" = "Ubuntu" ]
+then
+	echo -e "\033[34m Creating $LINUXDISTRO System User [$GITUSER]  \e[0m" | tee -ai $LOGFILE
+	sudo adduser --system --home /home/$GITUSER --shell /bin/bash --group \
+	--disabled-login --disabled-password --gecos 'git version control' $GITUSER &>> $LOGFILE \
+	|| OwnError "Unable To Create $GITUSER"
+elif [ "$LINUXDISTRO" = "RedHatEnterpriseServer" ] || [ "$LINUXDISTRO" = "Red" ] || [ "$LINUXDISTRO" = "CentOS" ]
+then
+	echo -e "\033[34m Creating $LINUXDISTRO System User [$GITUSER]  \e[0m" | tee -ai $LOGFILE
+	sudo adduser --system --home /home/$GITUSER --create-home --shell /bin/bash \
+	-c 'git version control' $GITUSER
+
+	# Redhat Is More Secure Than Debian and Ubuntu
+	# So Need To Set Read & Execute Permission For Groups/Others
+	sudo chmod 755 /home/$GITUSER
+fi
 
 # Copy Skeleton Contents
 echo -e "\033[34m Copying System Files...  \e[0m" | tee -ai $LOGFILE
-sudo -H -u $GITUSER cp /etc/skel/.profile /etc/skel/.bashrc /etc/skel/.bash_logout /home/$GITUSER/
+sudo -H -u $GITUSER cp /etc/skel/.profile /etc/skel/.bash_profile /etc/skel/.bashrc /etc/skel/.bash_logout /home/$GITUSER/ 2> /dev/null
 
 # Create a bin Directory For Git User
 echo -e "\033[34m Creating bin Directory \e[0m" | tee -ai $LOGFILE
