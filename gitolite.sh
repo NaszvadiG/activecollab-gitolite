@@ -75,6 +75,7 @@ then
 	       	echo -e "\033[31m Currently This Script Supports Only \
 		Redhat, CentOS, Ubuntu and Debian Linux Distro \e[0m"
        		exit 200
+	fi
 fi
 
 if [ "$LINUXDISTRO" = "Debian" ] || [ "$LINUXDISTRO" = "Ubuntu" ]
@@ -343,6 +344,5 @@ echo
 echo -e "\033[34m Gitolite Admin Is Successfully Installed On `date` \e[0m" | tee -ai $LOGFILE
 echo -e "\033[34m Please Go Back To Gitolite Admin, Test Connection And Save Settings. \e[0m" \
 | tee -ai $LOGFILE
-
 
 
