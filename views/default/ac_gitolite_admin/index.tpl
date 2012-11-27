@@ -10,7 +10,14 @@
 		      <div class="properties">
 		        <div class="property" id="gitolite_server_details">
 		          <div class="label">{lang}Server Address{/lang}</div>
-                          <div class="data"><span id="g_user">{$gitoliteuser}</span>@<span id="g_server">{$server_name}</span></div>
+                          <div class="data">
+                          {if $gitoliteuser == ""}
+                              <span id="g_user">Address not set.</span>
+                           {else}
+                               <span id="g_user">{$gitoliteuser}@{$server_name}</span>
+                           {/if}
+                          <!--<span id="g_user">{$gitoliteuser}</span>@<span id="g_server">{$server_name}</span>-->
+                          </div>
                           <input type = "hidden" value = "{$gitoliteuser}" id="gitoliteuser_index">
                           <input type="hidden" value="{$delete_url}" id="delete_url" />
                           <input type="hidden" value="{image_url name="layout/bits/indicator-loading-normal.gif" module=$smarty.const.ENVIRONMENT_FRAMEWORK}" id="loader_image">
@@ -20,7 +27,13 @@
                         
                         <div class="property" id="gitolite_admin_path">
 		          <div class="label">{lang}Admin Path{/lang}</div>
-		          <div class="data">{$gitoliteadminpath}</div>
+                          {if $gitoliteuser == ""}
+                              
+                              <div class="data" id="admin_path">Path not found.</div>
+                          {else}
+                              <div class="data" id="admin_path">{$gitoliteadminpath}</div>
+                          {/if}
+                          
 		        </div>
                         
                         
@@ -104,8 +117,10 @@
     App.Wireframe.Events.bind('gitolite_settings_updated.content', function(event, settings) {
         
      
-      $("#g_user").html(settings['gitoliteuser']); 
-      $("#g_server").html(settings['gitoliteserveradd']); 
+      $("#g_user").html(settings['gitoliteuser']+"@"+settings['gitoliteserveradd']); 
+          $("#admin_path").html(settings['gitoliteadminpath_admin'])
+          
+      //$("#g_server").html(settings['gitoliteserveradd']); 
       /*if(settings['initialize_repo'])
       {
             $("#show_auto_init").html(settings['initialize_repo']); 

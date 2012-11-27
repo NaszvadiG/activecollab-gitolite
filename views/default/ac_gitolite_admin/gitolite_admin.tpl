@@ -187,20 +187,18 @@
      <div class="content_stack_wrapper">
          <div class="content_stack_element">
             <div class="content_stack_element_info">
-              <h3>{lang}Import Conf Data{/lang}</h3>
+              <h3>{lang}Import Users & Repos from Gitolite{/lang}</h3>
             </div>
             <div class="content_stack_element_body">
                 {wrap field=title}
                 
-                <em>Your current gitolite setup contains some users and repositories, which you might want to map with current users and projects respectively
-                    
-                </em>
-              <p class="aid">{lang}Please click on import button to map data.{/lang}</p>
+                <em>Your current gitolite setup contains some users and repositories, which you need to map with current activeCollab users and projects.<strong>If you skip this step, old gitolite users and repositories may become inaccesible. </strong></em>
+              <p class="aid">{lang}Please click "Start Import (Mapping)" button below to proceed. {/lang}</p>
               {/wrap}
             </div>
         </div>
             {wrap_buttons}
-            <button type="button" id="import_button" class="default"><span>{lang}Import Data{/lang}</span></button>
+            <button type="button" id="import_button" class="default"><span>{lang}Start Import (Mapping){/lang}</span></button>
             {/wrap_buttons}
      </div>
 

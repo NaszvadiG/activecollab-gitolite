@@ -43,19 +43,22 @@ class AcGitoliteAdminController extends AdminController{
         $setup_script = GitoliteAdmin :: get_setup_path();
         $settings = GitoliteAdmin :: get_admin_settings();
         
-        $gitoliteadminpath = ($settings['gitoliteadminpath'] == "") ? $gitoliteadminpath."/gitolite" : $settings['gitoliteadminpath'];
+        //$gitoliteadminpath = ($settings['gitoliteadminpath'] == "") ? $gitoliteadminpath."/gitolite/gitolite-admin" : $settings['gitoliteadminpath'];
+        $gitoliteadminpath = ($settings['gitoliteadminpath'] == "") ? "" : $settings['gitoliteadminpath']."gitolite-admin/";
         //$gitoliteadminpath.="/gitolite/";
         
         $domain_name = GitoliteAdmin :: get_server_name();
         $server_name = ($settings['gitoliteserveradd'] == "") ? $domain_name : $settings['gitoliteserveradd'];
-        $gitoliteuser = ($settings['gitoliteuser'] == "") ? "git" : $settings['gitoliteuser'];
+        //$gitoliteuser = ($settings['gitoliteuser'] == "") ? "git" : $settings['gitoliteuser'];
+        //$gitoliteuser = ($settings['gitoliteuser'] == "") ? "git" : $settings['gitoliteuser'];
         $git_server_location = ($settings['git_server_location'] == "") ? "local" : $settings['git_server_location'];
         
         //$is_auto = ($settings['initialize_repo'] == "") ? "No" : $settings['initialize_repo'];
         
         if($settings['gitoliteuser'] == "")
         {
-            $gitoliteuser = "git";
+            //$gitoliteuser = "git";
+            $gitoliteuser = "";
             $is_enable = FALSE;
 
         }
@@ -189,6 +192,11 @@ class AcGitoliteAdminController extends AdminController{
                      $settings_update = GitoliteAdmin :: update_settings($post_data,$this->logged_user->getId());
                 }
                 DB::commit('Admin Settings Saved @ ' . __CLASS__);
+                $gitoliteadminpath = $post_data["gitoliteadminpath"];
+                // append gitolite-admin dir name
+                $gitoliteadminpath.="gitolite-admin/";
+                $array_path = array("gitoliteadminpath_admin" => $gitoliteadminpath);
+                $post_data = array_merge($array_path,$post_data);
                 
                 $this->response->respondWithData($post_data, array('as' => 'settings'));
                 
@@ -443,7 +451,7 @@ class AcGitoliteAdminController extends AdminController{
         $get_ac_users = new Users();
         $ac_users = $get_ac_users->getIdNameMap();
         self::$ac_users = $ac_users;
-        $ac_users[""] = "Select Users";
+        $ac_users[""] = "Select a user";
         ksort($ac_users);
         
         $conf_file_path = GIT_FILES_PATH."/gitolite/gitolite-admin/conf/gitolite.conf";
@@ -462,7 +470,7 @@ class AcGitoliteAdminController extends AdminController{
             
             $projects = new Projects();
             $ac_projects = $projects->getIdNameMap($this->logged_user);
-            $ac_projects[""] = "Select Projects";
+            $ac_projects[""] = "Select Project";
             ksort( $ac_projects);
             $array_repos = self::parse_repos();
             

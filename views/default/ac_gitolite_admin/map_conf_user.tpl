@@ -1,4 +1,4 @@
-{title}Map Users{/title}
+{title}Map Wizard{/title}
 {add_bread_crumb}Map Users{/add_bread_crumb}
 <div class="settings_panel_body" id="map_users_container">
  <input type="hidden" id="admin_index_url" value = "{$admin_index_url}" class="key_id"> 
@@ -7,12 +7,10 @@
       <div id="empty_repos">
           <table cellspacing="0" class="common auto list_items" id="mapping_lists" >
                 <thead>
-                    <tr>
-                        <th colspan="3"><strong>Key's List</strong></th>
-                    </tr>
+                    
                     <tr>
                         <th>Public Keys</th>
-                        <th>Members List</th>
+                        <th>activeCollab Users</th>
                         
                     </tr>
                 </thead>
@@ -50,7 +48,7 @@
                           <button type="button" id="map_user_button" class="default"><span>{lang}Map Users{/lang}</span></button>
                           <input type="hidden" value = "{$map_users_url}" id="map_users_url">
                           <img id="map_user_loading_img" src="{image_url name="layout/bits/indicator-loading-normal.gif" module=$smarty.const.ENVIRONMENT_FRAMEWORK}" alt='' /> 
-                          <button type="button" id="show_map_project" class="default"><span>{lang}Map Projects{/lang}</span></button>
+                          <button type="button" id="show_map_project" class="default"><span>{lang}Map Repositories & Projects{/lang}</span></button>
                       </td>
                   </tr>
                 
