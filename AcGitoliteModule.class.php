@@ -22,7 +22,6 @@ class AcGitoliteModule extends AngieModule {
      */
     function defineRoutes() 
     {
-        
         Router::map('add_git_repository', '/projects/:project_slug/repositories/add-git', array('controller'=>'project_tracking_gitolite', 'action'=>'add_git_repo'));
         Router::map('project_repositories', '/projects/:project_slug/repositories', array('controller'=>'project_tracking_gitolite', 'action'=>'index'));
         Router::map('repository_history', '/projects/:project_slug/repositories/:project_source_repository_id', array('controller'=>'project_tracking_gitolite', 'action'=>'history'), array('project_source_repository_id'=>Router::MATCH_ID));
@@ -37,7 +36,14 @@ class AcGitoliteModule extends AngieModule {
         Router::map('add_gitolite_steps', '/projects/:project_slug/repositories/:project_source_repository_id/action/:action/params/:params', array('controller'=> 'project_tracking_gitolite','action'=>'add_git_repo'));
         Router::map('delele_repo_url', 'admin/gitolite_admin/delete', array('controller'=> 'ac_gitolite_admin','action'=>'delete_repo'));
         Router::map('need_help_path', 'admin/gitolite_admin/help', array('controller'=> 'ac_gitolite_admin','action'=>'need_help'));
+        Router::map('repository_update', '/projects/:project_slug/repositories/:project_source_repository_id/update', array('controller'=>'project_tracking_gitolite', 'action'=>'update'), array('project_source_repository_id'=>Router::MATCH_ID));
+        Router::map('add_remote_git', '/projects/:project_slug/repositories/add-remote-git', array('controller'=>'project_tracking_gitolite', 'action'=>'add_remote_git_repo'));
+        Router::map('save_admin_settings', 'admin/save_admin_settings', array('controller'=>'ac_gitolite_admin', 'action'=>'save_admin_settings'));
+        Router::map('map_users', 'admin/map_users', array('controller'=>'ac_gitolite_admin', 'action'=>'map_conf_user'));
+        Router::map('map_repos', 'admin/map_repos', array('controller'=>'ac_gitolite_admin', 'action'=>'map_conf_repos'));
+        Router::map('render_after_clone', 'admin/render_after_clone', array('controller'=>'ac_gitolite_admin', 'action'=>'render_after_clone_conf'));
         
+         //Router::map('map_repos', '/projects/:project_slug/repositories/map-remote-git', array('controller'=>'project_tracking_gitolite', 'action'=>'map_conf_repos'), array('project_slug'=>Router::MATCH_SLUG));
     }// defineRoutes
     
      /**
@@ -49,7 +55,9 @@ class AcGitoliteModule extends AngieModule {
        EventsManager::listen('on_inline_tabs', 'on_inline_tabs');   
        EventsManager::listen('on_admin_panel', 'on_admin_panel');   
        EventsManager::listen('on_object_options', 'on_object_options');
-       
+       EventsManager::listen('on_frequently', 'on_frequently');
+       EventsManager::listen('on_hourly', 'on_hourly');
+       EventsManager::listen('on_daily', 'on_daily');
         
     }// defineHandlers
 
@@ -144,7 +152,7 @@ class AcGitoliteModule extends AngieModule {
             `key_name`  varchar(255) NOT NULL,
             `public_key` TEXT NOT NULL,
             `pub_file_name` varchar(255) NOT NULL,
-            `is_deleted`    ENUM('0', '1') not null default '0',
+            `is_deleted`    ENUM('0', '1') NOT NULL default '0',
             `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY  (`key_id`)
           ) $storage_engine $default_charset;";
@@ -164,6 +172,23 @@ class AcGitoliteModule extends AngieModule {
           ) $storage_engine $default_charset;";
             //create the rt_gitolite_repomaster table to store repo information
          DB::execute($create_repo_table);
+         
+         
+         /*$repo_tb_name = TABLE_PREFIX . "rt_gitolite_repomaster";
+         $chkcol = DB::execute("SELECT * FROM $repo_tb_name LIMIT 1");
+         $add_new_col = mysql_fetch_array($chkcol);
+         if(!isset($add_new_col['is_remote']))
+         {
+            mysql_query("ALTER TABLE $repo_tb_name ADD `is_remote` ENUM('0', '1') NOT NULL DEFAULT '0'");
+         }*/
+         
+         /*$key_tb_name = TABLE_PREFIX . "rt_gitolite_user_public_keys";
+         $chkcol = DB::execute("SELECT * FROM $key_tb_name LIMIT 1");
+         $add_new_col = mysql_fetch_array($chkcol);
+         if(!isset($add_new_col['key_access']))
+         {
+            mysql_query("ALTER TABLE $key_tb_name ADD `key_access` CHAR(5) DEFAULT NULL");
+         }*/
          
          $create_access_table = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "rt_gitolite_access_master` (
             `access_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
@@ -202,6 +227,17 @@ class AcGitoliteModule extends AngieModule {
             //create the rt_config_settings table to store admin settings
          DB::execute($create_rt_config_settings);
          
+         $create_rt_remote_repos = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "rt_remote_repos` (
+                                     `remote_repo_id` INT(11) NOT NULL AUTO_INCREMENT,
+                                     `repo_fk` INT(10) NOT NULL,
+                                     `remote_repo_name` varchar(255) NOT NULL,
+                                     `remote_repo_path` varchar(255) NOT NULL,
+                                     `remote_repo_url` TEXT NOT NULL,
+                                     `repo_created_by` INT(10) NOT NULL,
+                                     `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                     PRIMARY KEY  (`remote_repo_id`)
+                                     ) $storage_engine $default_charset;";
+         DB::execute($create_rt_remote_repos);
          
     }
     

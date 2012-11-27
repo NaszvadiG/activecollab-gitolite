@@ -23,6 +23,8 @@
 		          <div class="data">{$gitoliteadminpath}</div>
 		        </div>
                         
+                        
+                        
                          <!--<div class="property" id="gitolite_auto_initialize">
 		          <div class="label">{lang}Auto Initialize{/lang}</div>
 		          <div class="data" id="show_auto_init">
@@ -48,6 +50,8 @@
 		      </div>
           <ul class="settings_panel_header_cell_actions">
             <li>{link href=Router::assemble('gitolite_admin_change') mode=flyout_form success_event="gitolite_settings_updated" title="Gitolite Settings" class="link_button_alternative"}Change Settings{/link}</li>
+            <!--<li>{link href=Router::assemble('map_users') class="link_button_alternative"}Map Wizard{/link}</li>
+            <!--<li>{link href=Router::assemble('map_repos') class="link_button_alternative"}Map Repositories{/link}</li>-->
           </ul>
         </td>
       </tr>

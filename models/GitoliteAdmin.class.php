@@ -33,7 +33,8 @@
                $results = array(
                                 'gitoliteuser'=> $config_settings['gitoliteuser'],
                                 'gitoliteserveradd'=> $config_settings['gitoliteserveradd'],
-                                'gitoliteadminpath' => $config_settings['gitoliteadminpath']
+                                'gitoliteadminpath' => $config_settings['gitoliteadminpath'],
+                                'git_server_location' => $config_settings['git_server_location']
                         );
                //'initialize_repo' => $config_settings['initialize_repo'],
                //'ignore_files' => $config_settings['ignore_files']
@@ -113,7 +114,8 @@
         public function get_admin_path()
         {
             
-            return exec ("cd ../work/git/ && pwd");
+             return exec ("cd ../work/git/ && pwd");
+             ;
         }
         
         /**
@@ -220,6 +222,206 @@
         {
             return exec ("whoami");
         }
+        
+        /**
+         * Clone remote repositories.
+         * @param string $repo_url
+         * @param string $work_git_path
+         * @return boolean status
+         */
+        
+        function clone_remote_repo($repo_url,$work_git_path)
+        {
+            if($repo_url == "" || $work_git_path == "")
+            {
+                return false;
+            }
+            
+            $path = exec("cd $work_git_path && git clone $repo_url",$output);
+
+            if(is_array($output) && count($output) > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+           
+            return true;
+        }
+        
+        /**
+         * Execute pull commands for every repositories
+         * @param strin $path
+         * @return boolean
+         */
+        function pull_repo_commits($path = "")
+        {
+            if($path == "")
+            {
+                return false;
+            }
+            $path = exec("cd $path && git pull");
+            return true;
+        }
+       
+       /**
+        * Pull repository commits, to update it on frequently.
+        * @param type $update_type
+        * @return boolean
+        */
+       function call_events($update_type = 0)
+       {
+           $update_type = (int)$update_type;
+           if($update_type > 0 && $update_type == 1)
+           {
+                $remote_repos_table_name = TABLE_PREFIX . 'rt_remote_repos';
+                $source_table_name = TABLE_PREFIX . 'source_repositories';
+                $result = DB::execute("SELECT a.*,b.update_type FROM ".$remote_repos_table_name." a 
+                                       JOIN ".$source_table_name." b ON a.repo_fk = b.id and b.update_type = '$update_type'");
+                if($result)
+                {
+
+                     while($row_repos = mysql_fetch_assoc($result->getResource()))
+                     {
+                         self::pull_repo_commits($row_repos["remote_repo_path"]);
+                     }
+                 }
+           }
+           return true;
+        }
+        
+       /**
+        * Get PHP running user key.
+        * @return string
+        */ 
+       function  get_web_user_key()
+       {
+           $user  = self::get_web_user();
+           $sshdir = exec ("cd ~$user && cd .ssh && pwd",$output);
+           if(is_array($output) && count($output) > 0)
+           {
+               $user_key = exec ("cd $sshdir && cat id_rsa.pub",$output_key);
+               if(is_array($output_key) && count($output_key) > 0)
+               {
+                   return $output_key;
+               }
+               else
+               {
+                   return "nokey";
+               }
+           }
+           else
+           {
+               return "nodir";
+           }
+           
+       }
+       /**
+        * Update remote repository after adding in database
+        * @param integer $repo_id
+        * @return string result
+        */
+       function update_remote_repo($repo_id = 0)
+       {
+           
+            require_once(ANGIE_PATH.'/classes/xml/xml2array.php');
+            //$source_repositories = SourceRepositories::findByUpdateType(REPOSITORY_UPDATE_FREQUENTLY);
+            //$source_repositories = new ProjectSourceRepository($repo_id);
+            //echo $repo_id."=========";
+            
+            $source_obj = new SourceRepositories();
+            $source_repositories = $source_obj->findById($repo_id);
+
+            //$source_repositories = $source_obj->findById($repo_id);
+
+            /*print_r($source_repositories);
+            die();*/
+            if($source_repositories) {
+
+              $results = "";
+              foreach ($source_repositories as $source_repository) {
+
+                  //echo "abc";
+               // if ($source_repository instanceof SourceRepository) {
+
+                  $project_source_repositories = ProjectSourceRepositories::findByParent($source_repositories);
+
+                  //echo $source_repository->getId();
+                  //$project_source_repositories = new ProjectSourceRepository($repo_id);
+                  //print_r($project_source_repositories);
+                  //
+                  // don't update repositories which are not added to any project
+
+                  if (is_foreachable($project_source_repositories)) {
+
+                    //load and get engines
+                    if (($error = $source_repositories->loadEngine()) !== true) {
+
+                      return($error);
+                    } // if
+                    if (!$repository_engine = $source_repositories->getEngine()) {
+
+                      return lang('Failed to load repository engine class');
+                    } // if
+
+                    if (is_error($repository_engine->error)) {
+
+                      $results .= lang('Error connecting to repository ') . ' ' . $source_repositories->getName() . ': ' . $repository_engine->error->getMessage();
+                      continue;
+                    } //if
+
+                    $last_commit = $source_repositories->getLastCommit();
+
+                    $latest_revision = $last_commit instanceof SourceCommit ? $last_commit->getRevisionNumber() : ($repository_engine->getZeroRevision() - 1);
+                    $head_revision = $repository_engine->getHeadRevision();
+
+                    if (!$head_revision) {
+
+                      $results .= lang('Connection to') . ' ' . $source_repositories->getName() . ' ' . lang('failed') . '. ' . lang('Please contact repository server administrator');
+                      continue;
+                    } //if
+
+                    if (!is_null($repository_engine->error) || ($latest_revision == $head_revision)) {
+                      continue;
+                    } //if
+
+                    $revision_from = $latest_revision+1;
+                    $revision_to = $revision_from + $repository_engine->getModuleLogsPerRequest() - 1;
+                    if ($revision_to >= $head_revision) {
+                      $revision_to = $head_revision;
+                    } //if
+                    $logs = $repository_engine->getLogs($revision_from,$revision_to);
+                    if (!is_null($repository_engine->error)) {
+                      continue;
+                    } //if
+                    $source_repositories->update($logs['data']);
+
+                    $total_commits = $logs['total'] - $logs['skipped_commits'];
+
+                    $results .= $source_repositories->getName().' ('.$total_commits.' '. lang('new commits') . '); \n';
+
+                    foreach ($project_source_repositories as $project_source_repository) {
+                                if ($total_commits <= MAX_UPDATED_COMMITS_TO_SEND_DETAILED_NOTIFICATIONS) {
+                                        $project_source_repository->detailed_notifications = true;
+                                } //if
+
+                                $project_source_repository->last_update_commits_count = $total_commits;
+                                $project_source_repository->source_repository = $source_repositories;
+                                SourceRepository::sendCommitNotificationsToSubscribers($project_source_repository);
+                                $project_source_repository->createActivityLog();
+                        } //foreach
+                  } //if  
+                //} //if
+              } // foreach
+
+              return empty($results) ? lang('No repositories for frequently update') : lang('Updated repositories: \n') . $results; 
+            } else {
+              return lang('No repositories for frequently update 123');
+             }
+    
+       }
  }
     
     

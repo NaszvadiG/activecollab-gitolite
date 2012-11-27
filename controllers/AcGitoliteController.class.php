@@ -7,7 +7,7 @@
    * 
    * @package activeCollab.modules.ac_gitolite
    * @subpackage controllers
-   * @author rtCamp Software Solutions Pvt Ltd  <admin@rtcamp.com>
+   * @author rtCamp Software Solutions Pvt Ltd<admin@rtcamp.com>
    * @author Rahul Bansal <rahul.bansal@rtcamp.com>
    * @author Kasim Badami <kasim.badami@rtcamp.com>
    * @author  Mitesh Shah <mitesh.shah@rtcamp.com>
@@ -54,13 +54,6 @@
              'form_action' => Router::assemble('add_public_keys', array('company_id' => $active_user->getCompanyId(),'user_id' => $active_user->getId())),
              'user_rmail' => $active_user->getEmail()
            ));  
-       $admin_settings  = GitoliteAdmin :: get_admin_settings();
-       
-       if(!isset($admin_settings['gitoliteadminpath']))
-       {
-           $this->response->exception("Gitolite admin path not set");
-           die();
-       }
        
        if($this->request->isSubmitted()) // check for form submission
        {
@@ -87,23 +80,9 @@
                       {
                         $errors->addError('Please enter valid key name.', 'public_keys');
                       }
-                     $web_user = GitoliteAdmin::get_web_user();
-                     $web_user_file = $admin_settings['gitoliteadminpath']."gitolite-admin/keydir/".$web_user.".pub";
-
+                      
                      $fetch_actual_key = explode(" ", $public_keys);
                      $actual_key = $fetch_actual_key[1];
-                     if(file_exists($web_user_file))
-                     {      
-                          
-                          $web_user_key = file_get_contents($web_user_file);
-                          $fetch_actual_web_key = explode(" ", $web_user_key);
-                          $actual_web_key = $fetch_actual_web_key[1];
-                          if($actual_web_key == $actual_key)
-                          {
-                               $errors->addError('Entered key is already added on server.');
-                          }
-                             
-                     } 
                      $dup_cnt = GitoliteAc::check_duplication($active_user->getId(),$post_data,$actual_key);
                      if(count($dup_cnt) == 0)
                      {
@@ -111,8 +90,6 @@
                      }
                      elseif(count($dup_cnt) > 0)
                      {
-                         // check whether entered key is matching with php user key.
-                         
                          if($dup_cnt[0]['dup_name_cnt'] > 0)
                          {
                              $errors->addError('You have already added key with same name.');
@@ -120,7 +97,7 @@
                          }
                          if($dup_cnt[1]['dup_name_cnt'] > 0)
                          {
-                             $errors->addError('Entered key is already added on server.');
+                             $errors->addError('Entered key is already added.');
                          }
                      }
     
@@ -145,6 +122,13 @@
                 if($save_data)
                 {   
                     $file = $pub_file_name.".pub";
+                    
+                    $admin_settings  = GitoliteAdmin :: get_admin_settings();
+                    if(!isset($admin_settings['gitoliteadminpath']))
+                    {
+                        $this->response->exception("Gitolite admin path not set");
+                        die();
+                    }
                     
                     $dirpath  = $admin_settings['gitoliteadminpath']."gitolite-admin/keydir/";
                     $adminrepo  = $admin_settings['gitoliteadminpath']."gitolite-admin/";

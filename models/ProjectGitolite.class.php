@@ -34,6 +34,80 @@
 
         }
         
+        function check_repo_map_exists($repo_name = "")
+        {
+            $dup_repo_name = false;
+            if($repo_name == "")
+            {
+                return false;
+            }
+            $rt_repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
+            $result = DB::execute("SELECT repo_fk FROM ".$rt_repo_table_name." where repo_name = '".$repo_name."'");
+            if($result)
+            {
+                $dup_repo_name = $result->getRowAt(0);
+                
+                $objects_table_name = TABLE_PREFIX . 'project_objects';
+                $project_table_name = TABLE_PREFIX . 'acx_projects';
+                
+                $result = DB::execute("SELECT b.name ,b.id FROM ".$objects_table_name." a 
+                                  JOIN ".$project_table_name." b ON a.project_id = b.id 
+                                  where a.integer_field_1 = '".$dup_repo_name['repo_fk']."'");
+                if($result)
+                {
+                    return $prj_name = $result->getRowAt(0);
+                }
+            }
+            return $dup_repo_name;
+        }
+
+
+
+
+        /**
+         * Check remote repository duplication
+         * @param integer $project_id
+         * @param array $repository_data
+         * @return boolean
+         */
+        function check_remote_duplication($project_id,$repository_data,$repo_url)
+        {
+            $dup_remote_repo = false;
+           /*
+           if(!is_numeric($project_id) || count($repository_data) == 0)
+           {
+                return FALSE;
+           }
+           $source_table_name = TABLE_PREFIX . 'source_repositories';
+           $objects_table_name = TABLE_PREFIX . 'project_objects';
+           $result = DB::execute("SELECT a.*, COUNT(b.id) as dup_url_cnt ,b.id FROM ".$objects_table_name." a 
+                                  JOIN ".$source_table_name." b ON a.integer_field_1 = b.id 
+                                  where b.name = '".$repository_data['name']."' 
+                                  and a.project_id = '".$project_id."'");
+           if($result)
+           {
+                $dup_repo_name[] = $result->getRowAt(0);
+           }
+             return $dup_repo_name;*/
+            
+            $source_table_name = TABLE_PREFIX . 'source_repositories';
+            $objects_table_name = TABLE_PREFIX . 'project_objects';
+            $result = DB::execute("SELECT COUNT(id) as dup_name_cnt from ".$source_table_name."
+                                where  name = '".$repository_data['name']."' 
+                                UNION
+                                SELECT COUNT(b.id) as dup_url_cnt FROM ".$objects_table_name." a 
+                                JOIN ".$source_table_name." b ON a.integer_field_1 = b.id 
+                                where a.body = '".$repo_url."' 
+                                and a.project_id = '".$project_id."'");
+            if($result)
+            {
+                 $dup_remote_repo[] = $result->getRowAt(0);
+                 $dup_remote_repo[] = $result->getRowAt(1);
+
+            }
+            return $dup_remote_repo;
+        }
+        
         /**
          * Save repository details in database.
          * @param type $active_project
@@ -58,6 +132,23 @@
             
         }
         
+        
+        function add_remote_repo_details($repo_fk,$user_id = 0,$repo_path,$repo_name,$repo_url = "")
+        {
+            
+            if(!is_numeric($repo_fk) || $repo_name == "" || !is_numeric($user_id) || $repo_path == "" || $repo_url == "")
+            {
+                return FALSE;
+            }
+            $repo_table_name = TABLE_PREFIX . 'rt_remote_repos';
+            
+            DB::execute("INSERT INTO $repo_table_name (repo_fk,remote_repo_name,remote_repo_path,remote_repo_url,repo_created_by) VALUES (? ,?, ?, ?, ?)",
+              $repo_fk, trim($repo_name),trim($repo_path),trim($repo_url),$user_id
+            );
+            
+            return DB::lastInsertId() ;
+            
+        }
         
         /**
          * Add access levels of repositories for users
@@ -113,8 +204,12 @@
                 
                 /** Defalut access to gitolite admin **/
                 $get_git_admins = DB::execute("SELECT * FROM ".$admin_settings_table_name);
+                fwrite($fh, "repo "."@all"."\n");
+                fwrite($fh, "RW+" ."\t"."="."\t".$webuser."\n");
                 fwrite($fh, "repo "."gitolite-admin"."\n");
                 fwrite($fh, "RW+" ."\t"."="."\t".$webuser."\n");
+                
+                
                 
                
                 if($get_git_admins)
@@ -368,6 +463,117 @@
                return array();
            }
         }
+        
+        /**
+         * Get branches under specific repository.
+         * @param type $repo_path
+         * @return array branches
+         */
+        function get_branches($repo_path = "")
+        {
+            if($repo_path == "")
+            {
+                return FALSE;
+            }
+            exec ("cd $repo_path && git branch --a",$output);
+           
+            if(is_array($output) && count($output) > 0)
+            {
+                return array_reverse($output);
+            }
+            else
+            {
+                return FALSE;
+            }
+            
+            return FALSE;
+        }
+        
+        /**
+         * Get tags under specific repository.
+         * @param type $repo_path
+         * @return array tags
+         */
+        function get_tags($repo_path = "")
+        {
+            if($repo_path == "")
+            {
+                return FALSE;
+            }
+            exec ("cd $repo_path && git tag -l",$output);
+            if(is_array($output) && count($output) > 0)
+            {
+                return array_reverse($output);
+            }
+            else
+            {
+                return FALSE;
+            }
+            
+            return FALSE;
+        }
      
+        function delete_commits($repo_id)
+        {
+           
+            $commits_table = TABLE_PREFIX . 'source_commits';
+            $paths_table_name = TABLE_PREFIX . 'source_paths';
+            $result =  DB::execute("SELECT * from $commits_table where repository_id = '".$repo_id."'");
+            if($result)
+            { 
+                while ($row = mysql_fetch_assoc($result->getResource())) {
+                    
+                    $result_delete =  DB::execute("DELETE from $paths_table_name where commit_id = '".$row['id']."'");
+                } 
+            }
+            $resultcommit =  DB::execute("DELETE from $commits_table where repository_id = '".$repo_id."'");
+            return true;
+        }
+        
+        /**
+         * Fetch actual repository name from remote URL path
+         * @param string $repo_url
+         * @return boolean
+         */
+        
+        function get_actual_repo_name($repo_url = "")
+        {
+            if($repo_url == "")
+            {
+                return false;
+            }
+            
+            $index_colan = strpos(strrev($repo_url),":");
+            if($index_colan)
+            {
+                 $index_colan=strlen($string)-strlen($item)-$index_colan;
+                 $index_colan = (int)$index_colan;
+            }
+            $index_slash = strpos(strrev($repo_url),"/");
+            if($index_slash)
+            {
+                 $index_slash=strlen($string)-strlen($item)-$index_slash;
+                 $index_slash = (int)$index_slash;
+            }
+            
+            
+            if($index_colan > $index_slash)
+            {
+                $repo_array = array_reverse(explode(":", $repo_url));
+            }
+            elseif($index_colan < $index_slash)
+            {
+                $repo_array = array_reverse(explode("/", $repo_url));
+            }
+           
+            if(is_array($repo_array) && count($repo_array) > 0)
+            {
+                return $actual_git_repo_name = $repo_array[0];
+            }
+            else
+            {
+                return FALSE;
+            }
+        }
   }
     

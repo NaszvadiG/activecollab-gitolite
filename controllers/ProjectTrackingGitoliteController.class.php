@@ -1,7 +1,8 @@
 <?php
-
+ require_once SOURCE_MODULE_PATH.'/engines/git.class.php';
   // Build on top of system module
  AngieApplication::useController('repository', SOURCE_MODULE);
+
 /**
 * Project Tracking Gitolite Controller controller implementation
 *
@@ -15,19 +16,31 @@
 */
   class ProjectTrackingGitoliteController extends RepositoryController {
     
+      
+      function __before() {
+          
+        parent::__before();
+        
+      }
     /**
      * Project Tracking Gitolite
      * Add "Add New Git Repository" option under source tab.
      * Check for allowed repository as per the permissions
      */
+      
      function index() {
        
          parent::index();
          
          // check whether user have access to add repositories
         if(ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
-         $this->wireframe->actions->add('add_git', 'Add New Git Repository', Router::assemble('add_git_repository',array('project_slug' => $this->active_project->getSlug())), array(
+         $this->wireframe->actions->add('add_git', 'Create Git Repository', Router::assemble('add_git_repository',array('project_slug' => $this->active_project->getSlug())), array(
                  'onclick' => new FlyoutFormCallback('repository_created', array('width' => 'narrow')),
+                 'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
+             );
+         
+          $this->wireframe->actions->add('add_remote_git', 'Clone Remote Repository', Router::assemble('add_remote_git',array('project_slug' => $this->active_project->getSlug())), array(
+                 'onclick' => new FlyoutFormCallback('repository_created', array('width' => '900')),
                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
              );
         }
@@ -76,8 +89,6 @@
                     {
                          $allowed_repos[] = $repository->getId();
                     }
-                   
-
                 }
           //}
          
@@ -90,9 +101,10 @@
                      ));
                
      } // index
-     
+
      /**
-      * Add new gitolite repository
+      *  Add new gitolite repository
+      * @throws ValidationErrors
       */
      function add_git_repo(){
                
@@ -200,15 +212,21 @@
                     
                     $errors = new ValidationErrors();    
                     $post_data =  $this->request->post();
-                    $settings = GitoliteAdmin :: get_admin_settings();
                     
-                    $sever_user_path = GitoliteAdmin::get_server_user_path();
-                    if(!$sever_user_path)
+                    /*print_r($post_data['access']);
+                    die();*/
+                    $settings = GitoliteAdmin :: get_admin_settings();
+                    $is_remote = ($settings["git_server_location"] == "local") ? false : true;
+                    if(!$is_remote)
                     {
-                        $errors->addError('Repository path on server invalid');
+                        $sever_user_path = GitoliteAdmin::get_server_user_path();
+                        if(!$sever_user_path)
+                        {
+                            $errors->addError('Repository path on server invalid');
+                        }
                     }
                     
-                    $repo_path = $sever_user_path."/repositories/".$repository_data['name'].".git";
+                    
                     
                                         
                     $repo_name = trim($repository_data['name']);
@@ -233,8 +251,8 @@
                       {
                          $errors->addError('Problem occured while saving data, please try again.');
                       }
-                    elseif(count($dup_cnt) > 0)
-                    {
+                     elseif(count($dup_cnt) > 0)
+                     {
                         if($dup_cnt[0]['dup_name_cnt'] > 0)
                         {
                             $errors->addError('Repository name already used');
@@ -252,7 +270,20 @@
                 /** save gitolite details in database **/
                 // save reponame
                  try {
+                     
                     DB::beginWork('Creating a new repository @ ' . __CLASS__);
+                    
+                    /**
+                     * if gitolite is setup on remote, change repo path
+                     */
+                    if(!$is_remote)
+                    {
+                        $repo_path = $sever_user_path."/repositories/".$repository_data['name'].".git";
+                    }
+                    elseif($is_remote)
+                    {
+                        $repo_path = GIT_FILES_PATH."/".$repo_name;
+                    }
                     if(is_array($post_data))
                     {
                         $repository_path_url = array('repository_path_url' => $repo_path);
@@ -292,10 +323,14 @@
                                 
                                 $command = "cd ".$dir." && git add * && git commit -am 'render conf file' && git push  || echo 'Not found'";
                                 exec($command,$output,$return_var);
-                                
-                               /*$git_server = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'];
-                                $command = "cd ".$settings['gitoliteadminpath']." && git clone ".$git_server.":".$repo_name;
-                                exec($command,$output,$return_var);*/
+                                if($is_remote)
+                                {
+                                   $git_server = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'];
+                                   //$command = "cd ".$settings['gitoliteadminpath']." && git clone ".$git_server.":".$repo_name;
+                                   chdir(GIT_FILES_PATH);
+                                   $command = "git clone ".$git_server.":".$repo_name;
+                                   exec($command,$output,$return_var);
+                                }
 
                             }
                             else
@@ -330,8 +365,217 @@
              }
              
          } 
-             
+
      }
+     /**
+      *  Add new gitolite repository
+      * @throws ValidationErrors
+      */
+     function add_remote_git_repo()
+     {
+        $project  = $this->active_project;
+        $project_id = $project->getId();
+        $logged_user = $this->logged_user;
+        $user_id = $logged_user->getId();
+        $web_user = GitoliteAdmin::get_web_user();
+        $webuser_pub_key = GitoliteAdmin::get_web_user_key();
+        /*echo $webuser_pub_key;
+        print_r($webuser_pub_key);
+        //die();*/
+        $this->response->assign(
+                    array(
+                        'form_action' => Router::assemble('add_remote_git', array('project_slug' => $project->getSlug())),
+                        'web_user' => $web_user,
+                        'webuser_pub_key' => $webuser_pub_key
+                        )
+                   );
+        if($this->request->isSubmitted()) // check for form submission
+        {    
+                try {
+                   $repository_data = $this->request->post('repository');
+                   $repo_name = trim($repository_data["name"]);
+                   $repo_url = trim($this->request->post("remoteurl"));
+                   $errors = new ValidationErrors();    
+                   $post_data =  $this->request->post();
+                   
+                   if($repo_name == "") {
+                        $errors->addError('Please enter repository name', 'repo_name');
+                    }
+                    
+                    if($repo_url == "") {
+                        $errors->addError('Please enter repository URL', 'repo_name');
+                    }
+
+                   $dup_cnt = ProjectGitolite::check_remote_duplication($project_id,$repository_data,$repo_url);
+                   
+                  
+                   if(!$errors->hasErrors())
+                   {
+                      if(!preg_match("/^[A-Za-z0-9-]+$/", $repo_name))
+                      {
+                            $errors->addError('Please enter valid repository name.', 'repo_name');
+                      } 
+                      /*if(preg_match('|^[a-z]?:@[a-z0-9]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $url))
+                      {
+                        return ;
+                      }*/
+                      
+                      if(strstr($repo_url,  "http://") || strstr($repo_url,  "https://"))
+                      {
+                            $errors->addError('HTTP url not allowed to add remote repository', 'repo_url');
+                      }
+                      
+                      /*if(!strstr($repo_url,  "git://github.com/"))
+                      {
+                            $errors->addError('Please enter valid Git URL', 'repo_url');
+                      }*/
+                      if(count($dup_cnt) == 0)
+                      {
+                         $errors->addError('Problem occured while saving data, please try again.');
+                      }
+                      elseif(is_array($dup_cnt) && count($dup_cnt) > 0)
+                      {
+                        
+                        if($dup_cnt[0]['dup_name_cnt'] > 0)
+                         {
+                             $errors->addError('Repository with same name is already added');
+                             
+                         }
+                         if($dup_cnt[1]['dup_name_cnt'] > 0)
+                         {
+                             $errors->addError('Remote URL already cloned under this project.');
+                         }
+                       
+                      }
+                   }
+                   if($errors->hasErrors()) {
+                     throw $errors;
+                    }
+                    
+                    try {
+                        DB::beginWork('Creating a new remote repository @ ' . __CLASS__);
+                        
+                        $actual_git_repo_name = ProjectGitolite::get_actual_repo_name($repo_url);
+                        if(!$actual_git_repo_name)
+                        {
+                            $errors->addError('Invalid Git Repository.');
+                            throw $errors;
+                        }
+                        
+                        // clone remote repo
+                        
+                        
+                        /*echo $actual_git_repo_name;
+                        die();*/
+                        
+                        // path with folder name which is created as same as repo name to avoid same git repo collision
+                        $work_git_path = GIT_FILES_PATH."/".$repo_name."/";
+                        
+                        // path with folder name which is created after repo is cloned 
+                        
+                        //
+//                        /echo $actual_git_repo_name;
+                        $git_ext = strpos($actual_git_repo_name,".git");
+                        if($git_ext)
+                        {
+                            $actual_git_repo_name = substr($actual_git_repo_name, 0,-4);
+                        }
+                        
+                        $actual_repo_path = GIT_FILES_PATH."/".$repo_name."/".$actual_git_repo_name."/";
+                        
+                       
+                        if(!is_dir($work_git_path))
+                        {
+                            if(mkdir ($work_git_path))
+                            {
+                                $output =  GitoliteAdmin::clone_remote_repo($repo_url,$work_git_path);
+                                
+                                if(!$output)
+                                {
+                                     $errors->addError('Invalid git repository.');
+                                     throw $errors;
+                                }
+                            }
+                            else
+                            {
+                                $errors->addError('Cannot clone repository.');
+                                throw $errors;
+                            }
+                        }
+                        //die();
+                        $repository_path_url = array('repository_path_url' => $actual_repo_path);
+                       
+                        
+                        //echo $work_git_path;
+                        
+                        $repository_data = array_merge($repository_data,$repository_path_url);
+                        
+                        /*print_r($repository_data);
+                        die();*/
+                        $this->active_repository = new GitRepository();
+                        $this->active_repository->setAttributes($repository_data);
+                        $this->active_repository->setCreatedBy($this->logged_user);
+
+                        $this->active_repository->save();
+                        $repo_fk = $this->active_repository->getId();
+                        
+                        if($repo_fk)
+                        {
+                            $clone_url = $repo_url;
+                            $body = $clone_url;
+
+                            $this->project_object_repository->setName($this->active_repository->getName());
+                            $this->project_object_repository->setBody($body);
+                            $this->project_object_repository->setParentId($this->active_repository->getId());
+                            $this->project_object_repository->setVisibility($repository_data['visibility']);
+                            $this->project_object_repository->setProjectId($this->active_project->getId());
+                            $this->project_object_repository->setCreatedBy($this->logged_user);
+                            $this->project_object_repository->setState(STATE_VISIBLE);
+                            $this->project_object_repository->save();
+                            
+                            $repo_id = ProjectGitolite::add_remote_repo_details($repo_fk,$user_id,$actual_repo_path,$repo_name,$repo_url);
+                            if($repo_id)
+                            {
+                                
+                                DB::commit('Repository created @ ' . __CLASS__);
+                                //$out = $this->update_remote_repo($repo_fk);
+                                $out = GitoliteAdmin::update_remote_repo($repo_fk);
+                                
+                                $this->response->respondWithData($this->project_object_repository);
+                            }
+                            else
+                            {     
+                                 @self::remove_directory($work_git_path);
+                                 $errors->addError('Error while saving repository.');
+                                 throw $errors;
+                            }
+                        }
+                        else
+                        {
+                            @self::remove_directory($work_git_path);
+                            $errors->addError('Error while saving repository.');
+                            throw $errors;
+                        }
+                        
+                 }
+                catch (Exception $e)
+                {  
+                    DB::rollback('Failed to create a repository @ ' . __CLASS__);
+                    $this->response->exception($e);
+                }
+                
+                   //$this->response->respondWithData($this->project_object_repository);
+                   //repo path
+                   //$repo_path = $sever_user_path."/repositories/".$repository_data['name'].".git";
+                }
+                catch (Exception $e)
+                {
+                    DB::rollback('Failed to create a repository @ ' . __CLASS__);
+                    $this->response->exception($e);
+                }
+        }
+     }
+     
      
      /**
       * Edit gitolite repository access levels
@@ -361,7 +605,7 @@
               
               $users_details = $this->active_project->users()->describe($this->logged_user, true, true, STATE_ARCHIVED);
              
-              $repo_details = ProjectGitolite::get_repo_details($repo_id);
+              $repo_details = ProjectGitolite::get_repo_details();
                
               
               
@@ -398,13 +642,11 @@
                   }
                   else
                   { 
-                      
                       $this->response->forbidden();
                   }
               }
               else
               {
-                  
                   $this->response->forbidden();
               }
               
@@ -618,7 +860,20 @@
       * @return void
       */
      function history() {
-         
+          
+         //ProjectGitolite::delete_commits($this->active_repository->getId());
+         /**$this->wireframe->actions->add('branches', lang('Branches'), '#', array(
+        	'subitems' => self::ac_gitolite_get_branches(),
+                'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE),
+                'id'=> 'branches_list'
+        ));
+        
+        $this->wireframe->actions->add('tags', lang('Tags'), '#', array(
+        	'subitems' => self::ac_gitolite_get_tags(),
+                'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE),
+                'id'=> 'tags_list'
+        ));
+         */
           $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
           $project = $this->active_project;
           $repository = $this->active_repository;
@@ -640,9 +895,10 @@
                                                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE),
                      ));
                 } //if
+                
             }
                                        
-          
+           
          
           $repo_path = $repository->getRepositoryPathUrl();
          
@@ -712,4 +968,103 @@
      
     }
     
+    /**
+     * Removes directory created to clone repository, if cloning repository or adding repository gets falied
+     * @param string $dir
+     * @return boolean
+     */
+    function remove_directory($dir)
+    {
+        if (is_dir($dir)) {
+         $objects = scandir($dir);
+         foreach ($objects as $object) {
+           if ($object != "." && $object != "..") {
+             if (filetype($dir."/".$object) == "dir") self::remove_directory($dir."/".$object); else unlink($dir."/".$object);
+           }
+         }
+         reset($objects);
+         rmdir($dir);
+         
+       }
+       return true;
+    }
+  /**
+   * Get options for file
+   * 
+   * @param Repository $repository
+   * @param SourceCommit $commit
+   * @param string $file
+   * @return array
+   */
+  function ac_gitolite_get_branches() {
+    // prepare options for dropdown
+     $repo_path = $this->active_repository->getRepositoryPathUrl();
+     $branches = ProjectGitolite::get_branches($repo_path);
+
+    $file_options = new NamedList();
+    if(is_array($branches))
+    {
+        foreach ($branches as $key => $value) 
+        {
+            $file_options->add("branch_$key", array(
+            'text' => $value,
+            'url' => "#",
+            //'onclick' => new FlyoutFormCallback()
+            ));
+        } 
+
+    }
+    else {
+        $file_options->add("no_branches", array(
+            'text' => "No Branches Added",
+            'url' => "#"
+            ));
+    }
+
+    /*$file_options->add('download', array(
+            'text' => lang('Download'),
+            'url' => $repository->getFileDownloadUrl($commit, $file)
+    ));*/
+    return $file_options->toArray();
+  } // source_module_get_file_options
+  
+ function ac_gitolite_get_tags()
+ {
+    // prepare options for dropdown
+     $repo_path = $this->active_repository->getRepositoryPathUrl();
+     $branches = ProjectGitolite::get_tags($repo_path);
+
+    $file_options = new NamedList();
+    if(is_array($branches))
+    {
+        foreach ($branches as $key => $value) 
+        {
+            $file_options->add("tags_$key", array(
+            'text' => $value,
+            'url' => "#",
+            //'onclick' => new FlyoutFormCallback()
+            ));
+        } 
+
+    }
+    else {
+        $file_options->add("no_branches", array(
+            'text' => "No Tags Added",
+            'url' => "#"
+            ));
+    }
+
+    /*$file_options->add('download', array(
+            'text' => lang('Download'),
+            'url' => $repository->getFileDownloadUrl($commit, $file)
+    ));*/
+    return $file_options->toArray();
   }
+  
+  function update() 
+  {
+        $repo = $this->active_repository;
+        $pull_commits = GitoliteAdmin::pull_repo_commits($repo->getRepositoryPathUrl());
+        parent::update();
+  }
+}

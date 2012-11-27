@@ -44,8 +44,13 @@ Gitolite Admin
     width: 397px;
     float: right;
     padding-top: 0px;
-    
-   
+}
+
+.key_help_remote
+{
+    width: 440px;
+    float: right;
+    padding-top: 0px;
 }
 .ssh_code{
     background-color: #FFF0EB;
@@ -78,5 +83,49 @@ Gitolite Admin
     line-height: 3em;
 }
 
+#remote_form{
+    width: 50%;
+    float: left;
+}
+#key_instruction{
+    width: 40%;
+    float: right;
+    padding:10px;
+    margin: 5px;
+    display: inline;
+}
+
+.flyout_dialog_wrapper .button_holder{
+    padding: 6px 20px;
+}
 
 
+.ssh_code_wrap{
+    background-color: #FFF0EB;
+    padding-left: 0px;
+    word-wrap: break-word;
+}
+
+#mapping_lists{
+    width: 500px;
+}
+
+
+#page_action_add_git .title_action_button[style] {
+    padding-left: 28px !important;
+}
+
+#page_action_add_remote_git .title_action_button[style] {
+     padding-left: 28px !important;
+}
+
+#page_action_need_help .title_action_button[style]
+{
+     padding-left: 28px !important;
+}
+
+/*
+li#page_action_branches .title_action_button {
+    background-image: url("http://git2.rtcamp.info/public/assets/images/ac_gitolite/default/icons/16X16-git.png");
+}
+*/

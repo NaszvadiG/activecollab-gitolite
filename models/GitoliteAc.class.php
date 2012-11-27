@@ -82,6 +82,37 @@
     }
     
     /**
+     * Check key already exists while mapping
+     * @param string $pub_key
+     * @return boolean
+     */
+    
+    function check_key_map_exists($pub_key = "")
+    {
+        $key_cnt_res = false;
+        if($pub_key == "")
+        {
+            return $key_cnt;
+        }
+        $keys_table_name = TABLE_PREFIX . 'rt_gitolite_user_public_keys';
+        
+        $result= DB::execute("SELECT user_id,key_name FROM ".$keys_table_name." 
+                              WHERE  public_key LIKE '%".$pub_key."%' and is_deleted = '0'");
+        /*echo "SELECT COUNT(user_id) as dup_name_cnt FROM ".$keys_table_name." 
+                     WHERE  key_name = '".$pub_key."' and is_deleted = '0'";*/
+        /*echo "SELECT user_id,key_name FROM ".$keys_table_name." 
+                              WHERE  public_key LIKE '%".$pub_key."%' and is_deleted = '0'";*/
+        if($result)
+        {
+            $key_cnt_res = $result->getRowAt(0);
+            //print_r($key_cnt_res);
+            return $key_cnt_res;
+        } 
+        return $key_cnt_res;
+    }
+
+
+    /**
      * Add public keys.
      * @param integer $active_user
      * @param string $pub_file_name
@@ -178,6 +209,27 @@
            
             $get_key_count = $result->getRowAt(0);
             return $get_key_count['key_count'];
+            
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    function get_key_details($key_name = "")
+    {
+        
+        if($key_name == "")
+        {
+            return false;
+        }
+        $keys_table_name = TABLE_PREFIX . 'rt_gitolite_user_public_keys';
+        $result = DB::execute("SELECT * from ".$keys_table_name. " where key_name = '".$key_name."' and is_deleted  = '0'");
+        if($result)
+        {
+            $get_key= $result->getRowAt(0);
+            return $get_key;
             
         }
         else
