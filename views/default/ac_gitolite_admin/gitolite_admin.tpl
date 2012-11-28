@@ -156,8 +156,9 @@
         </div>
         <div class="content_stack_element_body">
             {wrap field=gitoliteadminpath}
-                    {text_field name="gitoliteadminpath" value = {$gitoliteadminpath} id=gitoliteadminpath  disabled = "disabled"}
-                {/wrap}
+                    {text_field name="gitoliteadminpath_show" value = {$gitoliteadminpath_show} id="gitoliteadminpath_show"  disabled = "disabled"}
+                    <input type="hidden" name="gitoliteadminpath" value="{$gitoliteadminpath}" id="gitoliteadminpath">
+            {/wrap}
                 
         </div>
      </div>
@@ -187,7 +188,7 @@
      <div class="content_stack_wrapper">
          <div class="content_stack_element">
             <div class="content_stack_element_info">
-              <h3>{lang}Import Users & Repos from Gitolite{/lang}</h3>
+              <h3>{lang}Import Users & Repositories From Gitolite{/lang}</h3>
             </div>
             <div class="content_stack_element_body">
                 {wrap field=title}
@@ -209,7 +210,7 @@
      <div class="content_stack_wrapper">
          <div class="content_stack_element">
             <div class="content_stack_element_info">
-              <h3>{lang}Import Conf Data{/lang}</h3>
+              <h3>{lang}Import Users & Repositories From Gitolite{/lang}</h3>
             </div>
             <div class="content_stack_element_body">
                 {wrap field=title}
@@ -245,7 +246,7 @@
                   
         }
         
-        $("#gitoliteadminpath").width(450);
+        $("#gitoliteadminpath_show").width(450);
          
         if($('#gitoliteuser').val() != "")
         {
@@ -281,7 +282,7 @@
 		$('#test_connection_loading_img').show();
 
 		
-                 $.get(test_connection_url,{user: gitoliteuser, engine: "GitRepository", async : true,dir:admin_dir,server:serveraddress},
+                $.get(test_connection_url,{user: gitoliteuser, engine: "GitRepository", async : true,dir:admin_dir,server:serveraddress},
 		function(data){
 			$('#test_connection_loading_img').hide();
 			if (jQuery.trim(data) == 'ok') {
@@ -347,19 +348,23 @@
                             //$('#next_step_1').show();
                                 //App.Wireframe.Content.set("sadasdasdas")
                                      $("#maptext").show();
+                                     
                                      $('#import_button').click(function(){
                                             document.location.href=$('#map_users_url').val();
                                      });
+                                         
                                      $("#gitolite_admin").hide();
                                 App.Wireframe.Flash.success(App.lang("Admin settings saved successfully."));
 
                     } else if(jQuery.trim(data) == 'nomap') {
                                 $("#save_settings").hide();
                                 $("#nomaptext").show();
-                                    $('#import_button').click(function(){
-                                            document.location.href=$('#no_map_url').val();
-                                     });
-                                     $("#gitolite_admin").hide();
+                                    
+                                $('#import_button_no_map').click(function(){
+                                        document.location.href=$('#no_map_url').val();
+                                });
+                                     
+                                $("#gitolite_admin").hide();
                         
                                //App.Wireframe.Flash.error(App.lang(data));
 

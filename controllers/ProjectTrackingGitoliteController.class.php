@@ -407,7 +407,8 @@
                     }
 
                    $dup_cnt = ProjectGitolite::check_remote_duplication($project_id,$repository_data,$repo_url);
-                   
+                   /*print_r($dup_cnt);
+                   die();*/
                   
                    if(!$errors->hasErrors())
                    {
@@ -488,11 +489,11 @@
                         {
                             if(mkdir ($work_git_path))
                             {
-                                $output =  GitoliteAdmin::clone_remote_repo($repo_url,$work_git_path);
-                                
-                                if(!$output)
+                                $return_status =  GitoliteAdmin::clone_remote_repo($repo_url,$work_git_path);
+                                 
+                                if(!$return_status)
                                 {
-                                     $errors->addError('Invalid git repository.');
+                                     $errors->addError('Problem occured while cloning repository.');
                                      throw $errors;
                                 }
                             }
@@ -502,7 +503,7 @@
                                 throw $errors;
                             }
                         }
-                        //die();
+                       
                         $repository_path_url = array('repository_path_url' => $actual_repo_path);
                        
                         

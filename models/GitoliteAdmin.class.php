@@ -234,21 +234,21 @@
         {
             if($repo_url == "" || $work_git_path == "")
             {
-                return false;
+                return FALSE;
             }
             
-            $path = exec("cd $work_git_path && git clone $repo_url",$output);
-
-            if(is_array($output) && count($output) > 0)
+            $path = exec("cd $work_git_path && git clone $repo_url",$output,$return_var);
+            
+            if($return_var == 0)
             {
-                return true;
+                return TRUE;
             }
             else
             {
-                return false;
+                return FALSE;
             }
            
-            return true;
+            return FALSE;
         }
         
         /**

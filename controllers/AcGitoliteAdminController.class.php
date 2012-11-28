@@ -115,6 +115,7 @@ class AcGitoliteAdminController extends AdminController{
        $domain_name = GitoliteAdmin :: get_server_name();
        
        $gitoliteadminpath = "$gitoliteadminpath/gitolite/";
+       $gitoliteadminpath_show = "$gitoliteadminpath/gitolite/gitolite-admin/";
       
        $web_user = GitoliteAdmin::get_web_user();
        $webuser_pub_key = GitoliteAdmin::get_web_user_key();
@@ -123,6 +124,7 @@ class AcGitoliteAdminController extends AdminController{
        {
            $gitoliteuser = "git";
            $is_enable = FALSE;
+           //$gitoliteadminpath_show = "Not Set";
           
        }
        else
@@ -142,6 +144,7 @@ class AcGitoliteAdminController extends AdminController{
                                   'gitoliteadmins' =>    $admins,
                                   'webuser' =>           $web_user,
                                   'gitoliteadminpath' => $gitoliteadminpath,
+                                  'gitoliteadminpath_show' => $gitoliteadminpath_show,
                                   'gitolite_repo_test_connection_url' => Router::assemble('gitolite_test_connection'),
                                   'save_admin_settings_url' => Router::assemble('save_admin_settings'),  
                                   'setup_script' => $setup_script,
@@ -164,8 +167,6 @@ class AcGitoliteAdminController extends AdminController{
            
            $errors = new ValidationErrors();    
            $post_data = $this->request->post("gitoliteadmin"); 
-           
-          
            
            try
            {

@@ -99,6 +99,7 @@
                                 JOIN ".$source_table_name." b ON a.integer_field_1 = b.id 
                                 where a.body = '".$repo_url."' 
                                 and a.project_id = '".$project_id."'");
+            
             if($result)
             {
                  $dup_remote_repo[] = $result->getRowAt(0);
