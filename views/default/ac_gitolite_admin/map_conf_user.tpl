@@ -51,8 +51,6 @@
                           <button type="button" id="show_map_project" class="default"><span>{lang}Map Repositories & Projects{/lang}</span></button>
                       </td>
                   </tr>
-                
-                
                   <!--<tr>
                       <td colspan="2">
                           <em>Note: The keys which are already present on sever will not be visible under "Public Keys" lists </em>

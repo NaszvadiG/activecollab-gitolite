@@ -546,14 +546,14 @@
                             }
                             else
                             {     
-                                 @self::remove_directory($work_git_path);
+                                 @ProjectGitolite::remove_directory($work_git_path);
                                  $errors->addError('Error while saving repository.');
                                  throw $errors;
                             }
                         }
                         else
                         {
-                            @self::remove_directory($work_git_path);
+                           @ProjectGitolite::remove_directory($work_git_path);
                             $errors->addError('Error while saving repository.');
                             throw $errors;
                         }
@@ -576,6 +576,8 @@
                 }
         }
      }
+     
+     
      
      
      /**
@@ -974,7 +976,7 @@
      * @param string $dir
      * @return boolean
      */
-    function remove_directory($dir)
+    /*function remove_directory($dir)
     {
         if (is_dir($dir)) {
          $objects = scandir($dir);
@@ -988,7 +990,7 @@
          
        }
        return true;
-    }
+    }*/
   /**
    * Get options for file
    * 
@@ -1062,9 +1064,25 @@
     return $file_options->toArray();
   }
   
+  
+  function add_existing() {
+      if(!ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
+            $this->response->forbidden();
+      } // if
+      $repository_data = $this->request->post('repository');
+      if(is_array($repository_data))
+      {
+          GitoliteAdmin::update_remote_repo($temp_source_repository_id);
+          
+      }
+      parent::add_existing();
+  }
+  
   function update() 
   {
+      
         $repo = $this->active_repository;
+        print_r($repo->getRepositoryPathUrl());
         $pull_commits = GitoliteAdmin::pull_repo_commits($repo->getRepositoryPathUrl());
         parent::update();
   }

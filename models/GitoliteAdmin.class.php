@@ -327,17 +327,10 @@
        {
            
             require_once(ANGIE_PATH.'/classes/xml/xml2array.php');
-            //$source_repositories = SourceRepositories::findByUpdateType(REPOSITORY_UPDATE_FREQUENTLY);
-            //$source_repositories = new ProjectSourceRepository($repo_id);
-            //echo $repo_id."=========";
             
             $source_obj = new SourceRepositories();
             $source_repositories = $source_obj->findById($repo_id);
 
-            //$source_repositories = $source_obj->findById($repo_id);
-
-            /*print_r($source_repositories);
-            die();*/
             if($source_repositories) {
 
               $results = "";
@@ -347,14 +340,10 @@
                // if ($source_repository instanceof SourceRepository) {
 
                   $project_source_repositories = ProjectSourceRepositories::findByParent($source_repositories);
-
-                  //echo $source_repository->getId();
                   //$project_source_repositories = new ProjectSourceRepository($repo_id);
-                  //print_r($project_source_repositories);
-                  //
                   // don't update repositories which are not added to any project
 
-                  if (is_foreachable($project_source_repositories)) {
+                  //if (is_foreachable($project_source_repositories)) {
 
                     //load and get engines
                     if (($error = $source_repositories->loadEngine()) !== true) {
@@ -412,13 +401,13 @@
                                 SourceRepository::sendCommitNotificationsToSubscribers($project_source_repository);
                                 $project_source_repository->createActivityLog();
                         } //foreach
-                  } //if  
+                  //} //if  
                 //} //if
               } // foreach
 
-              return empty($results) ? lang('No repositories for frequently update') : lang('Updated repositories: \n') . $results; 
+              return empty($results) ? lang('No repositories for update') : lang('Updated repositories: \n') . $results; 
             } else {
-              return lang('No repositories for frequently update 123');
+              return lang('No repositories for update');
              }
     
        }

@@ -1,7 +1,7 @@
 <tr class="{cycle values='odd,even'}">
   <td class="star">{favorite_object object=$repository user=$logged_user}</td>
   <td class="graph">
-
+     
   {assign var=activity value=$repository->source_repository->getRecentActivity()}
   {if is_foreachable($activity)}
     <ul class="timeline">

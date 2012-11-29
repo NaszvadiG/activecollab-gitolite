@@ -38,7 +38,6 @@ class AcGitoliteAdminController extends AdminController{
                  'onclick' => new FlyoutFormCallback('repository_created'),
                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
              );
-        
         $gitoliteadminpath = GitoliteAdmin :: get_admin_path();
         $setup_script = GitoliteAdmin :: get_setup_path();
         $settings = GitoliteAdmin :: get_admin_settings();
@@ -115,7 +114,7 @@ class AcGitoliteAdminController extends AdminController{
        $domain_name = GitoliteAdmin :: get_server_name();
        
        $gitoliteadminpath = "$gitoliteadminpath/gitolite/";
-       $gitoliteadminpath_show = "$gitoliteadminpath/gitolite/gitolite-admin/";
+       $gitoliteadminpath_show = $gitoliteadminpath."gitolite-admin/";
       
        $web_user = GitoliteAdmin::get_web_user();
        $webuser_pub_key = GitoliteAdmin::get_web_user_key();
@@ -368,8 +367,10 @@ class AcGitoliteAdminController extends AdminController{
           $this->active_repository = SourceRepositories::findById($repoid);
           $this->active_repository->delete();
           $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
-          
-          DB::execute("DELETE from $repo_table_name where repo_fk = '".$this->active_repository->getId()."'");
+           $repo_access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';
+          DB::execute("DELETE repo_acc,repo_tb FROM $repo_table_name repo_tb
+                        JOIN $repo_access_table_name repo_acc ON repo_acc.repo_id = repo_tb.repo_id
+                        WHERE repo_tb.repo_fk = '".$this->active_repository->getId()."'");
           die("ok");
       }
       else
@@ -767,5 +768,7 @@ class AcGitoliteAdminController extends AdminController{
         }
         return $array_repos;
    }
+   
+   
     		
 }
