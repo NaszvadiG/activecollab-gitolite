@@ -123,10 +123,25 @@ Gitolite Admin
 {
      padding-left: 28px !important;
 }
-#page_action_add_source_git .title_action_button[style]
+#page_action_clone_source_git .title_action_button[style]
 {
     padding-left: 28px !important;
 }
+#page_action_manage_access .title_action_button[style]
+{
+    padding-left: 28px !important;
+}
+
+#page_action_add_source_gitolite .title_action_button[style]
+{
+    padding-left: 28px !important;
+}
+#page_action_add_source_gitolite_repository .title_action_button[style]
+{
+    padding-left: 28px !important;
+}
+
+
 /*
 li#page_action_branches .title_action_button {
     background-image: url("http://git2.rtcamp.info/public/assets/images/ac_gitolite/default/icons/16X16-git.png");

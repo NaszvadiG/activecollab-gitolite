@@ -26,9 +26,9 @@
     </strong>
 
     <span class="block details">
-    {if $repository->getId()|in_array:$gitolite_repos}
+    {if $repository->getId()|in_array:$gitolite_repos || $repository->getId()|in_array:$remote_repos}
         <code>{$repository->getBody()}</code>
-    {else}
+     {else}
        <a href="{$repository->getBody()}">{$repository->getBody()}</a>
     {/if}
      </span>

@@ -34,6 +34,7 @@ class AcGitoliteAdminController extends AdminController{
      */
     function index() {
         
+       
         $this->wireframe->actions->add('need_help', 'Need Help?', Router::assemble('need_help_path'), array(
                  'onclick' => new FlyoutFormCallback('repository_created'),
                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
@@ -41,7 +42,7 @@ class AcGitoliteAdminController extends AdminController{
         $gitoliteadminpath = GitoliteAdmin :: get_admin_path();
         $setup_script = GitoliteAdmin :: get_setup_path();
         $settings = GitoliteAdmin :: get_admin_settings();
-        
+       
         //$gitoliteadminpath = ($settings['gitoliteadminpath'] == "") ? $gitoliteadminpath."/gitolite/gitolite-admin" : $settings['gitoliteadminpath'];
         $gitoliteadminpath = ($settings['gitoliteadminpath'] == "") ? "" : $settings['gitoliteadminpath']."gitolite-admin/";
         //$gitoliteadminpath.="/gitolite/";
@@ -69,6 +70,7 @@ class AcGitoliteAdminController extends AdminController{
         }
          
          $empty_repositories = GitoliteAdmin :: get_empty_repositories();
+        
          if(is_array($empty_repositories) && count($empty_repositories) > 0)
          {
              $i=0;
@@ -79,7 +81,7 @@ class AcGitoliteAdminController extends AdminController{
                  $i++;
              }
          }
-         
+          
          $delete_url = Router::assemble('delele_repo_url');
          $this->response->assign(array(
     		  'settings' => $settings, 

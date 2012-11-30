@@ -16,7 +16,7 @@
          */
         function check_duplication($active_project = 0,$post_data = array())
         {
-           if(!is_numeric($active_project) || count($post_data) == 0)
+           if(count($post_data) == 0)
            {
                 return array();
            }
@@ -33,6 +33,28 @@
            return $dup_repo_name;
 
         }
+        
+        function check_source_git_dup($post_data = array())
+        {
+           $dup_repo_name = FALSE; 
+           if(count($post_data) == 0)
+           {
+                return array();
+           }
+            $rt_repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
+            $result = DB::execute("SELECT repo_fk FROM ".$rt_repo_table_name." where repo_name = '".$post_data["name"]."'");
+            if($result)
+            {
+                $dup_repo_name = $result->getRowAt(0);
+            }
+            return $dup_repo_name;
+        }
+       
+        /**
+         * Check whether repository is already mapped with project.
+         * @param string $repo_name
+         * @return array $dup_repo_name
+         */
         
         function check_repo_map_exists($repo_name = "")
         {
@@ -108,6 +130,9 @@
             }
             return $dup_remote_repo;
         }
+        
+        
+        
         
         /**
          * Save repository details in database.
@@ -596,6 +621,34 @@
          
        }
        return true;
+    }
+    
+    function chk_remote_repo($repo_fk = 0)
+    {
+        $cnt_array = false;
+        if(!is_numeric($repo_fk) || $repo_fk == 0)
+        {
+                return false;
+        }
+        $remote_repo_table_name = TABLE_PREFIX .'rt_remote_repos';
+        
+        $result = DB::execute("SELECT count(repo_fk) as chk_remote,remote_repo_name,repo_fk,remote_repo_id from  $remote_repo_table_name 
+                               where repo_fk = '$repo_fk'");
+
+        if($result)
+        {
+            $cnt_array = $result->getRowAt("0");
+            if(is_array($cnt_array) && count($cnt_array) > 0)
+            {
+                return $cnt_array;
+            }
+
+        }
+        else
+        {
+            return false;
+        }
+          
     }
   }
     

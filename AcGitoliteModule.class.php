@@ -44,8 +44,9 @@ class AcGitoliteModule extends AngieModule {
         Router::map('render_after_clone', 'admin/render_after_clone', array('controller'=>'ac_gitolite_admin', 'action'=>'render_after_clone_conf'));
         Router::map('admin_source', '/admin/tools/source', array('controller'=>'ac_gitolite_source', 'action'=>'index'));
         Router::map('admin_source_git_repository_delete', '/admin/tools/source/git-repositories/:source_repository_id/delete-new', array('controller' => 'ac_gitolite_source', 'action' => 'delete_git'), array('source_repository_id'=>Router::MATCH_ID));
-        Router::map('clone_source_git_repository', '/admin/tools/source/add-gitolite', array('controller'=>'ac_gitolite_source', 'action'=>'clone_source_git_repository'));
+        Router::map('clone_source_git_repository', '/admin/tools/source/clone-gitolite', array('controller'=>'ac_gitolite_source', 'action'=>'clone_source_git_repository'));
         Router::map('repository_add_existing', '/projects/:project_slug/repositories/add-existing', array('controller'=>'project_tracking_gitolite', 'action'=>'add_existing'));
+        Router::map('add_source_gitolite_repository', '/admin/tools/source/add-gitolite-repo', array('controller'=>'ac_gitolite_source', 'action'=>'add_source_gitolite_repository'));
         
          //Router::map('map_repos', '/projects/:project_slug/repositories/map-remote-git', array('controller'=>'project_tracking_gitolite', 'action'=>'map_conf_repos'), array('project_slug'=>Router::MATCH_SLUG));
     }// defineRoutes

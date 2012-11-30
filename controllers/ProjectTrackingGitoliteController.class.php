@@ -53,6 +53,7 @@
           //{
                 $cloneurls = array();
                 $gitolite_repos = array();
+                $remote_repos = array();
                 foreach ($repositories as $repository) {
 
                     $repo_fk = $repository->getFieldValue("integer_field_1");
@@ -84,6 +85,18 @@
                         /*$clone_url = $get_admin_settings['gitoliteuser']."@".$get_admin_settings['gitoliteserveradd'].":".$repository->getName();
                         $cloneurls[$repository->getId()] = "git clone ".$clone_url.".git";*/
                         $gitolite_repos[] = $repository->getId();
+                        
+                    }
+                    elseif(is_array($chk_gitolite) && sizeof($chk_gitolite) > 0 && $chk_gitolite['chk_gitolite'] == 0)
+                    {
+                        
+                        $chk_remote = ProjectGitolite::chk_remote_repo($repo_fk);
+                        
+                        if(is_array($chk_remote) && sizeof($chk_remote) > 0 && $chk_remote['chk_remote'] > 0)
+                        {
+                            $remote_repos[] = $repository->getId();
+                            $allowed_repos[] = $repository->getId();
+                        }
                     }
                     else
                     {
@@ -92,10 +105,12 @@
                 }
           //}
          
+        
           $this->response->assign(array(
                     'repositories' => $repositories,
                     'cloneurls' => $cloneurls,  
                     'gitolite_repos' => $gitolite_repos,
+                    'remote_repos' => $remote_repos,
                     'can_add_repository' => $can_add_repository,
                     'allowed_repos' => $allowed_repos
                      ));
@@ -588,7 +603,7 @@
          $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
          
          $is_gitolite  = GitoliteAdmin :: is_gitolite();
-          if(!ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
+         if(!ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
                  $this->response->forbidden();
           } // if
                    
@@ -608,7 +623,7 @@
               
               $users_details = $this->active_project->users()->describe($this->logged_user, true, true, STATE_ARCHIVED);
              
-              $repo_details = ProjectGitolite::get_repo_details();
+              $repo_details = ProjectGitolite::get_repo_details($repo_id);
                
               
               
@@ -645,11 +660,13 @@
                   }
                   else
                   { 
+                      die();
                       $this->response->forbidden();
                   }
               }
               else
               {
+                   die();
                   $this->response->forbidden();
               }
               
@@ -900,8 +917,7 @@
                 } //if
                 
             }
-                                       
-           
+      
          
           $repo_path = $repository->getRepositoryPathUrl();
          
@@ -1076,6 +1092,8 @@
           
       }
       parent::add_existing();
+      echo "dasdasdas dasd";
+      die();
   }
   
   function update() 
