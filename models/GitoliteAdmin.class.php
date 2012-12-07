@@ -102,7 +102,7 @@
             $settings_table_name = TABLE_PREFIX . 'rt_config_settings';
             
            
-             DB::execute("UPDATE  $settings_table_name SET config_settings = '".  serialize($post_data)."'"
+             DB::execute("UPDATE  $settings_table_name SET config_settings = '".  serialize($post_data)."' WHERE module_name = '".AC_GITOLITE_MODULE."'"
             );
             return DB::affectedRows();
         }

@@ -18,6 +18,7 @@ class AcGitoliteAdminController extends AdminController{
 
     public static $conf_parsed;
     public static $ac_users;
+    
     /**
      * Prepare controller
      */
@@ -179,7 +180,7 @@ class AcGitoliteAdminController extends AdminController{
                //array_push($array, $post_data)
                
                DB::beginWork('Save admin settings @ ' . __CLASS__);
-               $setting_exists = GitoliteAdmin :: setting_exists();
+               $setting_exists = GitoliteAdmin::setting_exists();
                if($setting_exists['cnt_settings'] == 0)
                {    
                     $settings_add = GitoliteAdmin :: insert_settings($post_data,$this->logged_user->getId());

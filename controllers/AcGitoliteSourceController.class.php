@@ -58,12 +58,11 @@ class AcGitoliteSourceController extends SourceAdminController{
     function add_source_gitolite_repository()
     {
          $is_gitolite  = GitoliteAdmin :: is_gitolite();
-         
-         
          $logged_user = $this->logged_user;
          $user_id = $logged_user->getId();
          $no_key_warning = FALSE;
          $view_url = "";
+         
          if(AngieApplication::isModuleLoaded("source") && $this->getControllerName() == 'ac_gitolite_source')
          { 
              
@@ -170,6 +169,7 @@ class AcGitoliteSourceController extends SourceAdminController{
                     /*print_r($post_data['access']);
                     die();*/
                     $settings = GitoliteAdmin :: get_admin_settings();
+                    
                     $is_remote = ($settings["git_server_location"] == "local") ? false : true;
                     if(!$is_remote)
                     {
@@ -241,7 +241,7 @@ class AcGitoliteSourceController extends SourceAdminController{
                         $repository_path_url = array('repository_path_url' => $repo_path);
                     }
                     $repository_data = array_merge($repository_data,$repository_path_url);
-                    
+                    $clone_url = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'].":".$repo_name;
                     $this->active_repository = new GitRepository();
                     $this->active_repository->setAttributes($repository_data);
                     $this->active_repository->setCreatedBy($this->logged_user);
@@ -250,7 +250,7 @@ class AcGitoliteSourceController extends SourceAdminController{
                     $repo_fk = $this->active_repository->getId();
                     if($repo_fk)
                     {
-                        $repo_id = ProjectGitolite::add_repo_details($repo_fk,0,$user_id,$repo_path,$repository_data);
+                        $repo_id = ProjectGitolite::add_repo_details($repo_fk,0,$user_id,$repo_path,$repository_data,$clone_url);
                         if($repo_id)
                         {
                             

@@ -143,16 +143,16 @@
          * @return boolean
          */
         
-        function add_repo_details($repo_fk,$active_project = 0,$user_id = 0,$repo_path,$post_data = array())
+        function add_repo_details($repo_fk,$active_project = 0,$user_id = 0,$repo_path,$post_data = array(),$clone_url)
         {
-            if(!is_numeric($repo_fk) || !is_numeric($active_project) || count($post_data) == 0 || !is_numeric($user_id) || $repo_path== "")
+            if(!is_numeric($repo_fk) || !is_numeric($active_project) || count($post_data) == 0 || !is_numeric($user_id) || $repo_path== "" || $clone_url == "")
             {
                 return FALSE;
             }
             $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
             
-            DB::execute("INSERT INTO $repo_table_name (repo_fk,project_id,repo_name,git_repo_path,repo_created_by) VALUES (? ,?, ?, ?, ?)",
-              $repo_fk,$active_project, trim($post_data['name']),$repo_path,$user_id
+            DB::execute("INSERT INTO $repo_table_name (repo_fk,project_id,repo_name,git_repo_path,repo_created_by,git_ssh_path) VALUES (? ,?, ?, ?, ?, ?)",
+              $repo_fk,$active_project, trim($post_data['name']),$repo_path,$user_id,$clone_url
             );
             return DB::lastInsertId() ;
             
@@ -409,7 +409,7 @@
            }
            $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
            $access_table_name = TABLE_PREFIX.'rt_gitolite_access_master';
-           $result = DB::execute("SELECT count(repo_fk) as chk_gitolite, b.permissions from $repo_table_name a , 
+           $result = DB::execute("SELECT count(repo_fk) as chk_gitolite, b.permissions, a.git_repo_path, a.git_ssh_path from $repo_table_name a , 
                                   $access_table_name b where a.repo_id = b.repo_id and
                                    repo_fk = '$repo_fk'");
           
@@ -632,7 +632,7 @@
         }
         $remote_repo_table_name = TABLE_PREFIX .'rt_remote_repos';
         
-        $result = DB::execute("SELECT count(repo_fk) as chk_remote,remote_repo_name,repo_fk,remote_repo_id from  $remote_repo_table_name 
+        $result = DB::execute("SELECT count(repo_fk) as chk_remote,remote_repo_name,repo_fk,remote_repo_id, remote_repo_path, remote_repo_path from  $remote_repo_table_name 
                                where repo_fk = '$repo_fk'");
 
         if($result)

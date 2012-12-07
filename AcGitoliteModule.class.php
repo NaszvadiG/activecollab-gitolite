@@ -179,13 +179,13 @@ class AcGitoliteModule extends AngieModule {
          DB::execute($create_repo_table);
          
          
-         /*$repo_tb_name = TABLE_PREFIX . "rt_gitolite_repomaster";
+         $repo_tb_name = TABLE_PREFIX . "rt_gitolite_repomaster";
          $chkcol = DB::execute("SELECT * FROM $repo_tb_name LIMIT 1");
          $add_new_col = mysql_fetch_array($chkcol);
-         if(!isset($add_new_col['is_remote']))
+         if(!isset($add_new_col['git_ssh_path']))
          {
-            mysql_query("ALTER TABLE $repo_tb_name ADD `is_remote` ENUM('0', '1') NOT NULL DEFAULT '0'");
-         }*/
+            mysql_query("ALTER TABLE $repo_tb_name ADD `git_ssh_path` varchar(255) NOT NULL");
+         }
          
          /*$key_tb_name = TABLE_PREFIX . "rt_gitolite_user_public_keys";
          $chkcol = DB::execute("SELECT * FROM $key_tb_name LIMIT 1");
