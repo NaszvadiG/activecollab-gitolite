@@ -536,7 +536,10 @@ class AcGitoliteSourceController extends SourceAdminController{
                   DB::execute("DELETE from $remote_repo_table_name where repo_fk = '".$repo_fk."'");
                   
                   $repo_path=GIT_FILES_PATH."/".$remote_name;
-                  @ProjectGitolite::remove_directory($repo_path);
+                  if($remote_name != "")
+                  {
+                    @ProjectGitolite::remove_directory($repo_path);
+                  }
               }
               
               $this->response->respondWithData($this->active_repository, array(

@@ -18,7 +18,6 @@ class AcGitoliteAdminController extends AdminController{
 
     public static $conf_parsed;
     public static $ac_users;
-    
     /**
      * Prepare controller
      */
@@ -180,7 +179,7 @@ class AcGitoliteAdminController extends AdminController{
                //array_push($array, $post_data)
                
                DB::beginWork('Save admin settings @ ' . __CLASS__);
-               $setting_exists = GitoliteAdmin::setting_exists();
+               $setting_exists = GitoliteAdmin :: setting_exists();
                if($setting_exists['cnt_settings'] == 0)
                {    
                     $settings_add = GitoliteAdmin :: insert_settings($post_data,$this->logged_user->getId());
@@ -370,7 +369,7 @@ class AcGitoliteAdminController extends AdminController{
           $this->active_repository = SourceRepositories::findById($repoid);
           $this->active_repository->delete();
           $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
-           $repo_access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';
+          $repo_access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';
           DB::execute("DELETE repo_acc,repo_tb FROM $repo_table_name repo_tb
                         JOIN $repo_access_table_name repo_acc ON repo_acc.repo_id = repo_tb.repo_id
                         WHERE repo_tb.repo_fk = '".$this->active_repository->getId()."'");

@@ -409,7 +409,7 @@
            }
            $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
            $access_table_name = TABLE_PREFIX.'rt_gitolite_access_master';
-           $result = DB::execute("SELECT count(repo_fk) as chk_gitolite, b.permissions, a.git_repo_path, a.git_ssh_path from $repo_table_name a , 
+           $result = DB::execute("SELECT count(repo_fk) as chk_gitolite, b.permissions from $repo_table_name a , 
                                   $access_table_name b where a.repo_id = b.repo_id and
                                    repo_fk = '$repo_fk'");
           
@@ -613,10 +613,11 @@
          $objects = scandir($dir);
          foreach ($objects as $object) {
            if ($object != "." && $object != "..") {
-             if (filetype($dir."/".$object) == "dir") self::remove_directory($dir."/".$object); else unlink($dir."/".$object);
+             if (filetype($dir."/".$object) == "dir" && $object != "git") self::remove_directory($dir."/".$object); else unlink($dir."/".$object);
            }
          }
          reset($objects);
+         
          rmdir($dir);
          
        }
@@ -632,7 +633,7 @@
         }
         $remote_repo_table_name = TABLE_PREFIX .'rt_remote_repos';
         
-        $result = DB::execute("SELECT count(repo_fk) as chk_remote,remote_repo_name,repo_fk,remote_repo_id, remote_repo_path, remote_repo_path from  $remote_repo_table_name 
+        $result = DB::execute("SELECT count(repo_fk) as chk_remote,remote_repo_name,repo_fk,remote_repo_id from  $remote_repo_table_name 
                                where repo_fk = '$repo_fk'");
 
         if($result)
@@ -649,6 +650,31 @@
             return false;
         }
           
+    }
+    
+    function pull_branches($actual_repo_path = "")
+    {
+        if($actual_repo_path  == "")
+        {
+            return false;
+        }
+        $branches = $get_branches = exec("cd $actual_repo_path && git branch -a",$output);
+        if(is_foreachable($output))
+        {
+            $array_unique_banch = array();
+            foreach ($output as $key => $value) 
+            {
+                $branch_name = substr(strrchr($value, "/"), 1);
+
+                if(!in_array($branch_name, $array_unique_banch))
+                {
+                    exec("cd $actual_repo_path && git checkout -b $branch_name origin/$branch_name");
+                    // && git pull
+                }
+                $array_unique_banch[] = $branch_name;
+            }
+        }
+        return true;
     }
   }
     

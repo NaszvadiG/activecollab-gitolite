@@ -54,20 +54,17 @@
                 $cloneurls = array();
                 $gitolite_repos = array();
                 $remote_repos = array();
-                // the below two array are used to store actual clone path, in case existing repository is added on project.
-                $gitolite_repo_clone_path = array();
-                $remote_repos_repo_clone_path = array();
+                
                 foreach ($repositories as $repository) {
 
                     $repo_fk = $repository->getFieldValue("integer_field_1");
-                    
-                    $src_repo_obj =  SourceRepositories::findById($repo_fk);
+                   
                    
                     $chk_gitolite = ProjectGitolite::is_gitolite_repo($repo_fk);
-                    
+                   
                     if(is_array($chk_gitolite) && sizeof($chk_gitolite) > 0 && $chk_gitolite['chk_gitolite'] > 0)
                     {
-                        
+                       
                         $permissions = @unserialize($chk_gitolite['permissions']);
                         if($permissions !== false || $permissions === 'b:0;')
                         {
@@ -90,42 +87,32 @@
                         $cloneurls[$repository->getId()] = "git clone ".$clone_url.".git";*/
                         $gitolite_repos[] = $repository->getId();
                         
-                        if($chk_gitolite["git_repo_path"] == $repository->getBody())
-                        {
-                            //$gitolite_repo_clone_path[$repository->getId()] = $chk_gitolitep["git_ssh_path"];
-                            $repository->setBody($chk_gitolite["git_ssh_path"]);
-                           
-                            $repository->save();
-                        }
-                        
                     }
                     elseif(is_array($chk_gitolite) && sizeof($chk_gitolite) > 0 && $chk_gitolite['chk_gitolite'] == 0)
-                    {
-                        
+                    { 
+                       
                         $chk_remote = ProjectGitolite::chk_remote_repo($repo_fk);
                         
                         if(is_array($chk_remote) && sizeof($chk_remote) > 0 && $chk_remote['chk_remote'] > 0)
                         {
                             $remote_repos[] = $repository->getId();
                             $allowed_repos[] = $repository->getId();
-                           
-                            if($remote_repos_repo_clone_path["remote_repo_path"] == $repository->getBody())
-                            {
-                                //$gitolite_repo_clone_path[$repository->getId()] = $chk_gitolitep["git_ssh_path"];
-                                 $repository->setBody($chk_remote["remote_repo_url"]);
-                                 $repository->save();
-                            }
+                        }
+                        else
+                        {   
                             
+                            $allowed_repos[] = $repository->getId();
                         }
                     }
                     else
-                    {
-                         $allowed_repos[] = $repository->getId();
+                    {   
+                        $allowed_repos[] = $repository->getId();
                     }
                 }
           //}
-         
-        
+                //echo "asdas dasd";
+                //print_r($allowed_repos);
+                //die();
           $this->response->assign(array(
                     'repositories' => $repositories,
                     'cloneurls' => $cloneurls,  
@@ -364,6 +351,17 @@
                                    chdir(GIT_FILES_PATH);
                                    $command = "git clone ".$git_server.":".$repo_name;
                                    exec($command,$output,$return_var);
+                                   
+                                    /*@set_time_limit(0);
+                                    $pull_all_branches = ProjectGitolite::pull_branches($repo_path);
+                                    if(!$pull_all_branches)
+                                    {
+                                        @ProjectGitolite::remove_directory($work_git_path);
+                                        $errors->addError('Error while saving branches.');
+                                        throw $errors;
+                                    }*/
+                                   
+                                   
                                 }
 
                             }
@@ -571,12 +569,35 @@
                             $repo_id = ProjectGitolite::add_remote_repo_details($repo_fk,$user_id,$actual_repo_path,$repo_name,$repo_url);
                             if($repo_id)
                             {
-                                
-                                DB::commit('Repository created @ ' . __CLASS__);
+                                //ini_set('max_execution_time', 500);
+                                $pull_all_branches = ProjectGitolite::pull_branches($actual_repo_path);
+                                if(!$pull_all_branches)
+                                {
+                                    @ProjectGitolite::remove_directory($work_git_path);
+                                    $errors->addError('Error while saving branches.');
+                                    throw $errors;
+                                }
                                 //$out = $this->update_remote_repo($repo_fk);
+                                /*$branches = $get_branches = exec("cd $actual_repo_path && git branch -a",$output);
+                                if(is_foreachable($output))
+                                {
+                                    $array_unique_banch = array();
+                                    foreach ($output as $key => $value) 
+                                    {
+                                        $branch_name = substr(strrchr($value, "/"), 1);
+
+                                        if(!in_array($branch_name, $array_unique_banch))
+                                        {
+                                            exec("cd $actual_repo_path && git checkout -b $branch_name origin/$branch_name && git pull");
+                                        }
+                                        $array_unique_banch[] = $branch_name;
+                                    }
+                                }*/
+                                DB::commit('Repository created @ ' . __CLASS__);
                                 $out = GitoliteAdmin::update_remote_repo($repo_fk);
                                 
                                 $this->response->respondWithData($this->project_object_repository);
+                               
                             }
                             else
                             {     
@@ -913,6 +934,7 @@
                 'id'=> 'tags_list'
         ));
          */
+         
           $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
           $project = $this->active_project;
           $repository = $this->active_repository;
@@ -1118,9 +1140,9 @@
   
   function update() 
   {
-        $repo = $this->active_repository;
+        //$repo = $this->active_repository;
         //print_r($repo->getRepositoryPathUrl());
-        $pull_commits = GitoliteAdmin::pull_repo_commits($repo->getRepositoryPathUrl());
+        //$pull_commits = GitoliteAdmin::pull_repo_commits($repo->getRepositoryPathUrl());
         parent::update();
   }
 }

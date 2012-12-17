@@ -102,7 +102,7 @@
             $settings_table_name = TABLE_PREFIX . 'rt_config_settings';
             
            
-             DB::execute("UPDATE  $settings_table_name SET config_settings = '".  serialize($post_data)."' WHERE module_name = '".AC_GITOLITE_MODULE."'"
+             DB::execute("UPDATE  $settings_table_name SET config_settings = '".  serialize($post_data)."'"
             );
             return DB::affectedRows();
         }
@@ -360,8 +360,12 @@
                       $results .= lang('Error connecting to repository ') . ' ' . $source_repositories->getName() . ': ' . $repository_engine->error->getMessage();
                       continue;
                     } //if
-
-                    $last_commit = $source_repositories->getLastCommit();
+                    
+                    $branches = $source_repositories->hasBranches() ? $repository_engine->getBranches() : Array('');
+                    foreach ($branches as $branch) {
+                    $repository_engine->active_branch = $branch;
+                    $last_commit = $source_repositories->getLastCommit($branch);
+                    
 
                     $latest_revision = $last_commit instanceof SourceCommit ? $last_commit->getRevisionNumber() : ($repository_engine->getZeroRevision() - 1);
                     $head_revision = $repository_engine->getHeadRevision();
@@ -385,11 +389,11 @@
                     if (!is_null($repository_engine->error)) {
                       continue;
                     } //if
-                    $source_repositories->update($logs['data']);
+                    $source_repositories->update($logs['data'], $branch);
 
                     $total_commits = $logs['total'] - $logs['skipped_commits'];
-
-                    $results .= $source_repositories->getName().' ('.$total_commits.' '. lang('new commits') . '); \n';
+                    $branch_string = $branch ? ' '.lang('Branch'). ': '.$branch : '';    
+                    $results .= $source_repositories->getName(). $branch_string . ' ('.$total_commits.' '. lang('new commits')   . '); \n';
 
                     foreach ($project_source_repositories as $project_source_repository) {
                                 if ($total_commits <= MAX_UPDATED_COMMITS_TO_SEND_DETAILED_NOTIFICATIONS) {
@@ -403,8 +407,8 @@
                         } //foreach
                   //} //if  
                 //} //if
-              } // foreach
-
+                } // foreach
+              }
               return empty($results) ? lang('No repositories for update') : lang('Updated repositories: \n') . $results; 
             } else {
               return lang('No repositories for update');

@@ -1,8 +1,8 @@
 <tr class="{cycle values='odd,even'}">
   <td class="star">{favorite_object object=$repository user=$logged_user}</td>
   <td class="graph">
-     
-  {assign var=activity value=$repository->source_repository->getRecentActivity()}
+      
+  {assign var=activity value=$repository->source_repository->getRecentActivity($repository->getDefaultBranch($logged_user))}
   {if is_foreachable($activity)}
     <ul class="timeline">
     {foreach from=$activity item=item}
@@ -27,9 +27,16 @@
 
     <span class="block details">
     {if $repository->getId()|in_array:$gitolite_repos || $repository->getId()|in_array:$remote_repos}
-        <code>{$repository->getBody()}</code>
+        <code>{$repository->getBody()}<br>
+            {if $repository->source_repository->hasBranches()}
+                {lang}Branch{/lang}: {$repository->getDefaultBranch($logged_user)}
+            {/if}
+        
+        </code>
      {else}
-       <a href="{$repository->getBody()}">{$repository->getBody()}</a>
+       {if $repository->source_repository->hasBranches()}
+        {lang}Branch{/lang}: {$repository->getDefaultBranch($logged_user)}
+      {/if}
     {/if}
      </span>
   </td>
