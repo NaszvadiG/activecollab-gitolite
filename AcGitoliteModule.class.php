@@ -188,6 +188,15 @@ class AcGitoliteModule extends AngieModule {
             mysql_query("ALTER TABLE $repo_tb_name ADD `git_ssh_path` varchar(255) NOT NULL");
          }
          
+         $repo_remote_tb_name = TABLE_PREFIX . "rt_remote_repos";
+         $chkcol = DB::execute("SELECT * FROM $repo_remote_tb_name LIMIT 1");
+         $add_new_col = mysql_fetch_array($chkcol);
+         
+         if(!isset($add_new_col['actual_repo_name']))
+         {
+            mysql_query("ALTER TABLE $repo_remote_tb_name ADD `actual_repo_name` varchar(255) NOT NULL");
+         }
+         
          /*$key_tb_name = TABLE_PREFIX . "rt_gitolite_user_public_keys";
          $chkcol = DB::execute("SELECT * FROM $key_tb_name LIMIT 1");
          $add_new_col = mysql_fetch_array($chkcol);

@@ -230,15 +230,15 @@
          * @return boolean status
          */
         
-        function clone_remote_repo($repo_url,$work_git_path)
+        function clone_remote_repo($repo_url,$work_git_path, $actual_git_repo_name)
         {
-            if($repo_url == "" || $work_git_path == "")
+            if($repo_url == "" || $work_git_path == "" || $actual_git_repo_name == "")
             {
                 return FALSE;
             }
             
-            $path = exec("cd $work_git_path && git clone $repo_url",$output,$return_var);
-            
+            $path = exec("cd $work_git_path && git clone $repo_url $actual_git_repo_name",$output,$return_var);
+           
             if($return_var == 0)
             {
                 return TRUE;

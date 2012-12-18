@@ -405,7 +405,7 @@ class AcGitoliteSourceController extends SourceAdminController{
                         
                         // clone remote repo
                         // path with folder name which is created as same as repo name to avoid same git repo collision
-                        $work_git_path = GIT_FILES_PATH."/".$repo_name."/";
+                        $work_git_path = GIT_FILES_PATH."/";
                         
                         // path with folder name which is created after repo is cloned 
                         $git_ext = strpos($actual_git_repo_name,".git");
@@ -416,24 +416,30 @@ class AcGitoliteSourceController extends SourceAdminController{
                         
                         $actual_repo_path = GIT_FILES_PATH."/".$repo_name."/".$actual_git_repo_name."/";
                         
-                       
-                        if(!is_dir($work_git_path))
+                        $folder_append = "";
+                        $chk_actual_name_exists_cnt = ProjectGitolite::check_actual_name_count($actual_git_repo_name);
+                        if(is_array($chk_actual_name_exists_cnt) && isset($chk_actual_name_exists_cnt["actual_name_cnt"]))
                         {
-                            if(mkdir ($work_git_path))
-                            {
-                                $return_status =  GitoliteAdmin::clone_remote_repo($repo_url,$work_git_path);
-                                 
-                                if(!$return_status)
-                                {
-                                     $errors->addError('Problem occured while cloning repository.');
-                                     throw $errors;
-                                }
-                            }
-                            else
-                            {
-                                $errors->addError('Cannot clone repository.');
-                                throw $errors;
-                            }
+                           
+                            $cnt = ($chk_actual_name_exists_cnt["actual_name_cnt"] > 0) ? $chk_actual_name_exists_cnt["actual_name_cnt"]+1 : "";
+                            $folder_append = ($cnt != "") ? "-$cnt" : "";
+                        }
+                        else
+                        {
+                            
+                            $folder_append = "-1";
+                        }
+                        
+                        // if git repsitory name is same , we need to change the folder name while cloning the repository
+                        
+                        $folder_name =  $actual_git_repo_name.$folder_append;
+                        $actual_repo_path = GIT_FILES_PATH."/".$folder_name."/";
+                        
+                        $return_status =  GitoliteAdmin::clone_remote_repo($repo_url,$work_git_path,$folder_name);
+                        if(!$return_status)
+                        {
+                            $errors->addError('Problem occured while cloning repository.');
+                            throw $errors;
                         }
                        
                         $repository_path_url = array('repository_path_url' => $actual_repo_path);
@@ -453,7 +459,7 @@ class AcGitoliteSourceController extends SourceAdminController{
                         
                         if($repo_fk)
                         {
-                            $repo_id = ProjectGitolite::add_remote_repo_details($repo_fk,$user_id,$actual_repo_path,$repo_name,$repo_url);
+                            $repo_id = ProjectGitolite::add_remote_repo_details($repo_fk,$user_id,$actual_repo_path,$repo_name,$repo_url,$actual_git_repo_name);
                             if($repo_id)
                             {
                                 DB::commit('Repository created @ ' . __CLASS__);

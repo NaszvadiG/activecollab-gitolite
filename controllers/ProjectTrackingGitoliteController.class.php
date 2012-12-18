@@ -238,7 +238,7 @@
                     /*print_r($post_data['access']);
                     die();*/
                     $settings = GitoliteAdmin :: get_admin_settings();
-                    $is_remote = ($settings["git_server_location"] == "local") ? false : true;
+                    $is_remote = (!isset($settings["git_server_location"]) || $settings["git_server_location"] != "remote") ? false : true;
                     if(!$is_remote)
                     {
                         $sever_user_path = GitoliteAdmin::get_server_user_path();
@@ -344,6 +344,7 @@
                                 
                                 $command = "cd ".$dir." && git add * && git commit -am 'render conf file' && git push  || echo 'Not found'";
                                 exec($command,$output,$return_var);
+                                
                                 if($is_remote)
                                 {
                                    $git_server = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'];
@@ -351,7 +352,6 @@
                                    chdir(GIT_FILES_PATH);
                                    $command = "git clone ".$git_server.":".$repo_name;
                                    exec($command,$output,$return_var);
-                                   
                                     /*@set_time_limit(0);
                                     $pull_all_branches = ProjectGitolite::pull_branches($repo_path);
                                     if(!$pull_all_branches)
@@ -360,10 +360,9 @@
                                         $errors->addError('Error while saving branches.');
                                         throw $errors;
                                     }*/
-                                   
-                                   
                                 }
-
+                               
+                               die();
                             }
                             else
                             {
@@ -474,10 +473,10 @@
                              $errors->addError('Repository with same name is already added');
                              
                          }
-                         if($dup_cnt[1]['dup_name_cnt'] > 0)
+                         /*if($dup_cnt[1]['dup_name_cnt'] > 0)
                          {
                              $errors->addError('Remote URL already cloned under this project.');
-                         }
+                         }*/
                        
                       }
                    }
@@ -502,40 +501,50 @@
                         die();*/
                         
                         // path with folder name which is created as same as repo name to avoid same git repo collision
-                        $work_git_path = GIT_FILES_PATH."/".$repo_name."/";
+                        
+                        $work_git_path = GIT_FILES_PATH."/";
                         
                         // path with folder name which is created after repo is cloned 
                         
                         //
 //                        /echo $actual_git_repo_name;
                         $git_ext = strpos($actual_git_repo_name,".git");
+                        
+                        
                         if($git_ext)
                         {
                             $actual_git_repo_name = substr($actual_git_repo_name, 0,-4);
                         }
                         
-                        $actual_repo_path = GIT_FILES_PATH."/".$repo_name."/".$actual_git_repo_name."/";
-                        
-                       
-                        if(!is_dir($work_git_path))
+                        $folder_append = "";
+                        $chk_actual_name_exists_cnt = ProjectGitolite::check_actual_name_count($actual_git_repo_name);
+                        if(is_array($chk_actual_name_exists_cnt) && isset($chk_actual_name_exists_cnt["actual_name_cnt"]))
                         {
-                            if(mkdir ($work_git_path))
-                            {
-                                $return_status =  GitoliteAdmin::clone_remote_repo($repo_url,$work_git_path);
-                                 
-                                if(!$return_status)
-                                {
-                                     $errors->addError('Problem occured while cloning repository.');
-                                     throw $errors;
-                                }
-                            }
-                            else
-                            {
-                                $errors->addError('Cannot clone repository.');
-                                throw $errors;
-                            }
+                           
+                            $cnt = ($chk_actual_name_exists_cnt["actual_name_cnt"] > 0) ? $chk_actual_name_exists_cnt["actual_name_cnt"]+1 : "";
+                            $folder_append = ($cnt != "") ? "-$cnt" : "";
                         }
-                       
+                        else
+                        {
+                            
+                            $folder_append = "-1";
+                        }
+                        
+                        // if git repsitory name is same , we need to change the folder name while cloning the repository
+                        
+                        $folder_name =  $actual_git_repo_name.$folder_append;
+                        $actual_repo_path = GIT_FILES_PATH."/".$folder_name."/";
+                        //echo $actual_git_repo_name;
+                        
+                        
+                        
+                        $return_status =  GitoliteAdmin::clone_remote_repo($repo_url,$work_git_path,$folder_name);
+                        if(!$return_status)
+                        {
+                            $errors->addError('Problem occured while cloning repository.');
+                            throw $errors;
+                        }
+                        
                         $repository_path_url = array('repository_path_url' => $actual_repo_path);
                        
                         
@@ -566,10 +575,10 @@
                             $this->project_object_repository->setState(STATE_VISIBLE);
                             $this->project_object_repository->save();
                             
-                            $repo_id = ProjectGitolite::add_remote_repo_details($repo_fk,$user_id,$actual_repo_path,$repo_name,$repo_url);
+                            $repo_id = ProjectGitolite::add_remote_repo_details($repo_fk,$user_id,$actual_repo_path,$repo_name,$repo_url,$actual_git_repo_name);
                             if($repo_id)
                             {
-                                //ini_set('max_execution_time', 500);
+                                ini_set('max_execution_time', 500);
                                 $pull_all_branches = ProjectGitolite::pull_branches($actual_repo_path);
                                 if(!$pull_all_branches)
                                 {
@@ -601,15 +610,15 @@
                             }
                             else
                             {     
-                                 @ProjectGitolite::remove_directory($work_git_path);
-                                 $errors->addError('Error while saving repository.');
+                                 @ProjectGitolite::remove_directory($actual_repo_path);
+                                 $errors->addError('Error while saving repository.123');
                                  throw $errors;
                             }
                         }
                         else
                         {
-                           @ProjectGitolite::remove_directory($work_git_path);
-                            $errors->addError('Error while saving repository.');
+                           @ProjectGitolite::remove_directory($actual_repo_path);
+                            $errors->addError('Error while saving repository.456');
                             throw $errors;
                         }
                         

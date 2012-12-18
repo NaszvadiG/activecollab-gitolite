@@ -159,17 +159,17 @@
         }
         
         
-        function add_remote_repo_details($repo_fk,$user_id = 0,$repo_path,$repo_name,$repo_url = "")
+        function add_remote_repo_details($repo_fk,$user_id = 0,$repo_path,$repo_name,$repo_url = "",$actual_git_repo_name)
         {
             
-            if(!is_numeric($repo_fk) || $repo_name == "" || !is_numeric($user_id) || $repo_path == "" || $repo_url == "")
+            if(!is_numeric($repo_fk) || $repo_name == "" || !is_numeric($user_id) || $repo_path == "" || $repo_url == "" || $actual_git_repo_name == "")
             {
                 return FALSE;
             }
             $repo_table_name = TABLE_PREFIX . 'rt_remote_repos';
             
-            DB::execute("INSERT INTO $repo_table_name (repo_fk,remote_repo_name,remote_repo_path,remote_repo_url,repo_created_by) VALUES (? ,?, ?, ?, ?)",
-              $repo_fk, trim($repo_name),trim($repo_path),trim($repo_url),$user_id
+            DB::execute("INSERT INTO $repo_table_name (repo_fk,remote_repo_name,remote_repo_path,remote_repo_url,repo_created_by,actual_repo_name) VALUES (? ,?, ?, ?, ?, ?)",
+              $repo_fk, trim($repo_name),trim($repo_path),trim($repo_url),$user_id,$actual_git_repo_name
             );
             
             return DB::lastInsertId() ;
@@ -674,6 +674,27 @@
             }
         }
         return true;
+    }
+    
+    
+    function check_actual_name_count($actual_git_repo_name = "")
+    {
+        if($actual_git_repo_name  == "")
+        {
+            return 0;
+        }
+        $remote_repo_table_name = TABLE_PREFIX .'rt_remote_repos';
+        $result = DB::execute("SELECT count(repo_fk) as actual_name_cnt from  $remote_repo_table_name where actual_repo_name = '$actual_git_repo_name'");
+        
+        if($result)
+        {
+            $cnt_array = $result->getRowAt("0");
+            if(is_array($cnt_array) && count($cnt_array) > 0)
+            {
+                return $cnt_array;
+            }
+
+        }
     }
   }
     
