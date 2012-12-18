@@ -238,8 +238,8 @@
                     /*print_r($post_data['access']);
                     die();*/
                     $settings = GitoliteAdmin :: get_admin_settings();
-                    $is_remote = (!isset($settings["git_server_location"]) || $settings["git_server_location"] != "remote") ? false : true;
-                    if(!$is_remote)
+                    $is_remote = (!isset($settings["git_server_location"]) || $settings["git_server_location"] != "remote") ? FALSE : TRUE;
+                    if($is_remote == FALSE)
                     {
                         $sever_user_path = GitoliteAdmin::get_server_user_path();
                         if(!$sever_user_path)
@@ -247,10 +247,7 @@
                             $errors->addError('Repository path on server invalid');
                         }
                     }
-                    
-                    
-                    
-                                        
+                              
                     $repo_name = trim($repository_data['name']);
                     $access = $post_data['access'];
                     
@@ -473,10 +470,10 @@
                              $errors->addError('Repository with same name is already added');
                              
                          }
-                         /*if($dup_cnt[1]['dup_name_cnt'] > 0)
+                         if($dup_cnt[1]['dup_name_cnt'] > 0)
                          {
                              $errors->addError('Remote URL already cloned under this project.');
-                         }*/
+                         }
                        
                       }
                    }
@@ -526,12 +523,10 @@
                         }
                         else
                         {
-                            
                             $folder_append = "-1";
                         }
-                        
+
                         // if git repsitory name is same , we need to change the folder name while cloning the repository
-                        
                         $folder_name =  $actual_git_repo_name.$folder_append;
                         $actual_repo_path = GIT_FILES_PATH."/".$folder_name."/";
                         //echo $actual_git_repo_name;
