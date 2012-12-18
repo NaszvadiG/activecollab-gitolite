@@ -1,3 +1,17 @@
 v 1.0 [2012, Oct 27]
 ================================================================================
 - Initial release
+
+V 1.1 [2012, Nov 20]
+================================================================================
+- Added support for cloning remote repositories.
+- Repositories are updated automatically after cloning (no need to manual update).
+- Support Added For Ubuntu, Debian, RHEL and CentOS.
+
+V 1.2 [2012, December 3]
+================================================================================
+- Added support for mapping remote gitolite setup with activeCollab Projects, repositories and user keys.
+
+V 1.3 [2012 , Dec 18]
+================================================================================
+- Added support for branching when remote repositories is cloned.

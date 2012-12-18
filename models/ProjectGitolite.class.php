@@ -617,8 +617,7 @@
            }
          }
          reset($objects);
-         
-         rmdir($dir);
+         rename("old_$dir".time(),$dir);
          
        }
        return true;
