@@ -128,7 +128,8 @@
       *  Add new gitolite repository
       * @throws ValidationErrors
       */
-     function add_git_repo(){
+     function add_git_repo()
+     {
                
          $is_gitolite  = GitoliteAdmin :: is_gitolite();
          
@@ -144,7 +145,6 @@
          $view_url = "";
          if(AngieApplication::isModuleLoaded("source") && $this->getControllerName() == 'project_tracking_gitolite')
          { 
-             
               $do_continue = true;
           }
           

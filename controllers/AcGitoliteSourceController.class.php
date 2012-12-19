@@ -170,7 +170,8 @@ class AcGitoliteSourceController extends SourceAdminController{
                     die();*/
                     $settings = GitoliteAdmin :: get_admin_settings();
                     
-                    $is_remote = ($settings["git_server_location"] == "local") ? false : true;
+                    //$is_remote = ($settings["git_server_location"] == "local") ? false : true;
+                    $is_remote = (!isset($settings["git_server_location"]) || $settings["git_server_location"] != "remote") ? false : true;
                     if(!$is_remote)
                     {
                         $sever_user_path = GitoliteAdmin::get_server_user_path();
