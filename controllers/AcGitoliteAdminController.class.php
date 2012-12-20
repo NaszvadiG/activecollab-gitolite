@@ -608,8 +608,23 @@ class AcGitoliteAdminController extends AdminController{
                    /**
                     * Add rrepositories
                     */
+                    $actual_git_repo_name = $repo_name;
+                    $chk_actual_name_exists_cnt = ProjectGitolite::check_actual_name_count_gitolite($actual_git_repo_name);
+                    if(is_array($chk_actual_name_exists_cnt) && isset($chk_actual_name_exists_cnt["actual_name_cnt"]))
+                    {
+
+                        $cnt = ($chk_actual_name_exists_cnt["actual_name_cnt"] > 0) ? $chk_actual_name_exists_cnt["actual_name_cnt"]+1 : "";
+                        $folder_append = ($cnt != "") ? "-$cnt" : "";
+                    }
+                    else
+                    {
+                        $folder_append = "-1";
+                    }
+
+                    // if git repsitory name is same , we need to change the folder name while cloning the repository
+                   $folder_name =  $actual_git_repo_name.$folder_append;
                    
-                   $work_git_path = GIT_FILES_PATH."/".$repo_name."/";
+                   $work_git_path = GIT_FILES_PATH."/".$folder_name."/";
                    $repository_path_url = array('repository_path_url' => $work_git_path);
                    $repository_data = array_merge($repository_data,$repository_path_url);
                    
@@ -641,7 +656,7 @@ class AcGitoliteAdminController extends AdminController{
                         
                         $prj_obj->save();
                         
-                        $repo_id = ProjectGitolite::add_repo_details($repo_fk,$prj_id,$user_id,$work_git_path,$repository_data);
+                        $repo_id = ProjectGitolite::add_repo_details($repo_fk,$prj_id,$user_id,$work_git_path,$repository_data,$clone_url);
                         if($repo_id)
                         {
                            
@@ -653,10 +668,18 @@ class AcGitoliteAdminController extends AdminController{
                                 $git_server = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'];
                                 chdir(GIT_FILES_PATH);
                                 //cd ".GIT_FILES_PATH." && 
-                                $command = "git clone ".$git_server.":".$repo_name;
+                                $command = "git clone ".$git_server.":".$repo_name." $folder_name";
                                 //$command = "git clone ".$git_server.":".$repo_name;
                                 exec($command,$output,$return_var);
                                 $out = GitoliteAdmin::update_remote_repo($repo_fk);
+                                ini_set('max_execution_time', 500);
+                                $pull_all_branches = ProjectGitolite::pull_branches($actual_repo_path);
+                                if(!$pull_all_branches)
+                                {
+                                    @ProjectGitolite::remove_directory($work_git_path);
+                                    die("Error while saving branches.");
+                                    throw $errors;
+                                }
                                 die("ok");
                             }
                             else

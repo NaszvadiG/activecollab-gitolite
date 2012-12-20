@@ -613,11 +613,12 @@
          $objects = scandir($dir);
          foreach ($objects as $object) {
            if ($object != "." && $object != "..") {
-             if (filetype($dir."/".$object) == "dir" && $object != "git") self::remove_directory($dir."/".$object); else unlink($dir."/".$object);
+             if (filetype($dir."/".$object) == "dir" && $object != "git" && $object != "gitolite") self::remove_directory($dir."/".$object); else unlink($dir."/".$object);
            }
          }
          reset($objects);
-         rename("old_$dir".time(),$dir);
+         //rename("old_$dir".time(),$dir);
+         rename("$dir",$dir."-".time());
          
        }
        return true;
@@ -685,6 +686,27 @@
         }
         $remote_repo_table_name = TABLE_PREFIX .'rt_remote_repos';
         $result = DB::execute("SELECT count(repo_fk) as actual_name_cnt from  $remote_repo_table_name where actual_repo_name = '$actual_git_repo_name'");
+        
+        if($result)
+        {
+            $cnt_array = $result->getRowAt("0");
+            if(is_array($cnt_array) && count($cnt_array) > 0)
+            {
+                return $cnt_array;
+            }
+
+        }
+    }
+    
+    
+    function check_actual_name_count_gitolite($actual_git_repo_name = "")
+    {
+        if($actual_git_repo_name  == "")
+        {
+            return 0;
+        }
+        $remote_repo_table_name = TABLE_PREFIX .'rt_gitolite_repomaster';
+        $result = DB::execute("SELECT count(repo_fk) as actual_name_cnt from  $remote_repo_table_name where repo_name = '$actual_git_repo_name'");
         
         if($result)
         {

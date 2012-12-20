@@ -606,14 +606,14 @@
                             else
                             {     
                                  @ProjectGitolite::remove_directory($actual_repo_path);
-                                 $errors->addError('Error while saving repository.123');
+                                 $errors->addError('Error while saving repository');
                                  throw $errors;
                             }
                         }
                         else
                         {
                            @ProjectGitolite::remove_directory($actual_repo_path);
-                            $errors->addError('Error while saving repository.456');
+                            $errors->addError('Error while saving repository.');
                             throw $errors;
                         }
                         
@@ -658,7 +658,6 @@
          $no_key_warning = FALSE;   // to give warning if logged in user has not added his public key
          if(AngieApplication::isModuleLoaded("source") && $this->getControllerName() == 'project_tracking_gitolite')
          { 
-             
               $do_continue = true;
           }
           
@@ -673,6 +672,7 @@
               
                
                $repository_data = $this->request->post('repository');
+               
                if (!is_array($repository_data)) {
                   $repository_data = array(
                           'updatetype'      => $this->active_repository->getFieldValue("update_type"),
