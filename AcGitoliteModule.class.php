@@ -48,6 +48,9 @@ class AcGitoliteModule extends AngieModule {
         Router::map('clone_source_git_repository', '/admin/tools/source/clone-gitolite', array('controller'=>'ac_gitolite_source', 'action'=>'clone_source_git_repository'));
         Router::map('repository_add_existing', '/projects/:project_slug/repositories/add-existing', array('controller'=>'project_tracking_gitolite', 'action'=>'add_existing'));
         Router::map('add_source_gitolite_repository', '/admin/tools/source/add-gitolite-repo', array('controller'=>'ac_gitolite_source', 'action'=>'add_source_gitolite_repository'));
+        Router::map('add_hooks_git', '/projects/:project_slug/repositories/:project_source_repository_id/add-git-hook', array('controller'=>'project_tracking_gitolite', 'action'=>'add_git_hooks'), array('project_source_repository_id'=>Router::MATCH_ID));
+        Router::map('test_hooks_url', '/projects/:project_slug/repositories/:project_source_repository_id/test-hooks-url', array('controller'=>'project_tracking_gitolite', 'action'=>'test_hooks_url'), array('project_source_repository_id'=>Router::MATCH_ID));
+        Router::map('hookcall', 'hookcall', array('controller'=>'ac_gitolite_hooks', 'action'=>'hooks_call'));
         
          //Router::map('map_repos', '/projects/:project_slug/repositories/map-remote-git', array('controller'=>'project_tracking_gitolite', 'action'=>'map_conf_repos'), array('project_slug'=>Router::MATCH_SLUG));
     }// defineRoutes
@@ -83,7 +86,7 @@ class AcGitoliteModule extends AngieModule {
      * @return string
      */
     function getDescription() {
-	return lang('Manage Git repositories and user public keys.');
+	return lang("Manage Git repositories and user public keys.");
     }// getDescription
 
     /**
@@ -180,22 +183,8 @@ class AcGitoliteModule extends AngieModule {
          DB::execute($create_repo_table);
          
          
-         $repo_tb_name = TABLE_PREFIX . "rt_gitolite_repomaster";
-         $chkcol = DB::execute("SELECT * FROM $repo_tb_name LIMIT 1");
-         $add_new_col = mysql_fetch_array($chkcol);
-         if(!isset($add_new_col['git_ssh_path']))
-         {
-            mysql_query("ALTER TABLE $repo_tb_name ADD `git_ssh_path` varchar(255) NOT NULL");
-         }
          
-         $repo_remote_tb_name = TABLE_PREFIX . "rt_remote_repos";
-         $chkcol = DB::execute("SELECT * FROM $repo_remote_tb_name LIMIT 1");
-         $add_new_col = mysql_fetch_array($chkcol);
          
-         if(!isset($add_new_col['actual_repo_name']))
-         {
-            mysql_query("ALTER TABLE $repo_remote_tb_name ADD `actual_repo_name` varchar(255) NOT NULL");
-         }
          
          /*$key_tb_name = TABLE_PREFIX . "rt_gitolite_user_public_keys";
          $chkcol = DB::execute("SELECT * FROM $key_tb_name LIMIT 1");
@@ -253,6 +242,34 @@ class AcGitoliteModule extends AngieModule {
                                      PRIMARY KEY  (`remote_repo_id`)
                                      ) $storage_engine $default_charset;";
          DB::execute($create_rt_remote_repos);
+         
+         $create_rt_web_hooks = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "rt_web_hooks` (
+            `web_hook_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+            `repo_fk` INT(10) NOT NULL,
+            `webhook_urls` MEDIUMTEXT NOT NULL,
+            `added_by` INT(10) NOT NULL,
+            `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY  (`web_hook_id`)
+          ) $storage_engine $default_charset;";
+            //create the rt_config_settings table to store admin settings
+         DB::execute($create_rt_web_hooks);
+         
+         $repo_tb_name = TABLE_PREFIX . "rt_gitolite_repomaster";
+         $chkcol = DB::execute("SELECT * FROM $repo_tb_name LIMIT 1");
+         $add_new_col = mysql_fetch_array($chkcol);
+         if(!isset($add_new_col['git_ssh_path']))
+         {
+            mysql_query("ALTER TABLE $repo_tb_name ADD `git_ssh_path` varchar(255) NOT NULL");
+         }
+         
+         $repo_remote_tb_name = TABLE_PREFIX . "rt_remote_repos";
+         $chkcol = DB::execute("SELECT * FROM $repo_remote_tb_name LIMIT 1");
+         $add_new_col = mysql_fetch_array($chkcol);
+         
+         if(!isset($add_new_col['actual_repo_name']))
+         {
+            mysql_query("ALTER TABLE $repo_remote_tb_name ADD `actual_repo_name` varchar(255) NOT NULL");
+         }
          
     }
     

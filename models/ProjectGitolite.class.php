@@ -718,5 +718,65 @@
 
         }
     }
+    
+    function urls_exists($src_repo_id = 0)
+    {
+        if($src_repo_id == "" || $src_repo_id == 0)
+        {
+            return false;
+        }
+        $web_hooks_table_name = TABLE_PREFIX .'rt_web_hooks';
+        $result = DB::execute("SELECT * from  $web_hooks_table_name where repo_fk = '$src_repo_id'");
+        
+        if($result)
+        {
+            $web_hooks_array = $result->getRowAt("0");
+            if(is_array($web_hooks_array) && count($web_hooks_array) > 0)
+            {
+                return $web_hooks_array;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+        else
+        {
+            return false;
+        }
+    }
+    /**
+     * Add web hooks for a specifiv repository
+     * @param string $array_urls_str
+     * @param integer $src_repo_id
+     * @param integer $added_by
+     * @return boolean
+     */
+    function insert_urls($array_urls_str = "",$src_repo_id = 0,$added_by = 0)
+    {
+        if(!is_numeric($src_repo_id) || $array_urls_str == "" || !is_numeric($added_by))
+        {
+                return FALSE;
+        }
+        $web_hooks_table_name = TABLE_PREFIX .'rt_web_hooks';
+        DB::execute("INSERT INTO $web_hooks_table_name (repo_fk,webhook_urls,added_by) VALUES (? ,?, ?)",
+          $src_repo_id, $array_urls_str,$added_by
+        );
+        return DB::lastInsertId() ;
+    }
+    
+    
+    function update_web_hooks($array_urls_str = "",$src_repo_id = 0,$added_by = 0)
+    {
+        if(!is_numeric($src_repo_id) || $array_urls_str == "" || !is_numeric($added_by))
+        {
+                return FALSE;
+        }
+        $web_hooks_table_name = TABLE_PREFIX .'rt_web_hooks';
+        $update_access  =  DB::execute("update  ".$web_hooks_table_name." set  	webhook_urls = '$array_urls_str' where repo_fk = ".DB::escape($src_repo_id));
+        return TRUE;
+    }
+    
   }
     

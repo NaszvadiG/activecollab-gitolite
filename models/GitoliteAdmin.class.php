@@ -286,8 +286,17 @@
                      while($row_repos = mysql_fetch_assoc($result->getResource()))
                      {
                          self::pull_repo_commits($row_repos["remote_repo_path"]);
+                         
+                         
+                         
                      }
                  }
+                 
+                /*$gitolite_repos_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
+                $source_table_name = TABLE_PREFIX . 'source_repositories';
+                
+                $result = DB::execute("SELECT a.*,b.update_type FROM ".$gitolite_repos_table_name." a 
+                                       JOIN ".$source_table_name." b ON a.repo_fk = b.id and b.update_type = '$update_type'");*/
            }
            return true;
         }
@@ -323,7 +332,7 @@
         * @param integer $repo_id
         * @return string result
         */
-       function update_remote_repo($repo_id = 0)
+       function update_remote_repo($repo_id = 0,$call_hooks = false)
        {
            
             require_once(ANGIE_PATH.'/classes/xml/xml2array.php');
@@ -389,8 +398,64 @@
                     if (!is_null($repository_engine->error)) {
                       continue;
                     } //if
+                    //die();
+                     /*commits.append({'id': r['id'],
+                        'author': {'name': r['name'], 'email': r['email']},
+                        'url': url,
+                        'message': r['message'],
+                        'timestamp': r['date']
+                        })*/
                     $source_repositories->update($logs['data'], $branch);
+                    if($call_hooks)
+                    { 
+                        $array_commits = array();
+                       
+                          if (is_foreachable($logs['data'])) {
+                                foreach ($logs['data'] as $data) {
 
+
+                                    $array_commits["name"] = urlencode($data['commit']['name']);
+                                    $array_commits["author"] = urlencode($data['commit']['authored_by_name']);
+                                    $array_commits["message_title"] = urlencode($data['commit']['message_title']);
+                                    $array_commits["message_body"] = urlencode($data['commit']['message_body']);
+                                }
+
+
+                          }
+                        foreach($array_commits as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+                        
+                        $hooks_table_name = TABLE_PREFIX."rt_web_hooks";
+                        $get_repo_hooks = DB::execute("SELECT * from $hooks_table_name where repo_fk = '".$repo_id."'");
+                        if($get_repo_hooks)
+                        {
+                            $url_array = $get_repo_hooks->getRowAt(0);
+                            $url_array = @unserialize($url_array["webhook_urls"]);
+                            
+                            if(is_foreachable($url_array))
+                            {
+                                foreach ($url_array as $key_url => $value_url)
+                                {
+                                    $url = $value_url;
+                                    rtrim($fields_string, '&');
+                                    //open connection
+                                    $ch = curl_init();
+                                    //set the url, number of POST vars, POST data
+                                    curl_setopt($ch,CURLOPT_URL, $url);
+                                    curl_setopt($ch,CURLOPT_POST, count($array_commits));
+                                    curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
+                                    curl_setopt($ch,  CURLOPT_RETURNTRANSFER, 1);
+                                    //execute post
+                                    $curl_result = curl_exec($ch);
+                                    
+                                    $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                                    curl_close($ch);
+                                }
+                            }
+                            
+                        }
+                    }
+                    
+                    
                     $total_commits = $logs['total'] - $logs['skipped_commits'];
                     $branch_string = $branch ? ' '.lang('Branch'). ': '.$branch : '';    
                     $results .= $source_repositories->getName(). $branch_string . ' ('.$total_commits.' '. lang('new commits')   . '); \n';

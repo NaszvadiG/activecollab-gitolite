@@ -42,6 +42,9 @@
             App.Wireframe.Events.bind('access_updated', function (event, repository) {
                 App.Wireframe.Flash.success(App.lang('Repository updated successfully'));
             });
+            App.Wireframe.Events.bind('urls_updated', function (event, repository) {
+                App.Wireframe.Flash.success(App.lang('WebHooks updated successfully'));
+            });
   
         });
    

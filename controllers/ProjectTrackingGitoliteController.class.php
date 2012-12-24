@@ -43,6 +43,7 @@
                  'onclick' => new FlyoutFormCallback('repository_created', array('width' => '900')),
                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
              );
+
         }
           
           $repositories = ProjectSourceRepositories::findByProjectId($this->active_project->getId(), $this->logged_user->getMinVisibility());
@@ -960,10 +961,15 @@
                                                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE),
                      ));
                 } //if
+                          
                 
             }
       
-         
+         $this->wireframe->actions->add('add_hooks', 'Hooks', Router::assemble('add_hooks_git',array('project_slug' => $this->active_project->getSlug(),
+                                             'project_source_repository_id' => $repo_id)), array(
+                 'onclick' => new FlyoutFormCallback('urls_updated', array('width' => '900')),
+                 'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
+                );
           $repo_path = $repository->getRepositoryPathUrl();
          
           $repo_fk = $repository->getId();
@@ -1142,6 +1148,7 @@
       
   }
   
+  
   function update() 
   {
         //$repo = $this->active_repository;
@@ -1149,4 +1156,148 @@
         //$pull_commits = GitoliteAdmin::pull_repo_commits($repo->getRepositoryPathUrl());
         parent::update();
   }
+  
+  /**
+   * Add hooks for a repositories.
+   * @throws ValidationErrors
+   */
+  function add_git_hooks()
+  {
+        $project  = $this->active_project;
+        $project_id = $project->getId();
+        $logged_user = $this->logged_user;
+        $user_id = $logged_user->getId();
+        $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
+        
+        
+        $repo_obj = new ProjectSourceRepository($repo_id);
+        $src_repo_id = $repo_obj->getIntegerField1();
+        $urls_exists = ProjectGitolite::urls_exists($src_repo_id);
+        
+        if(is_array($urls_exists) && count($urls_exists) > 0)
+        {
+            $url_array = @unserialize($urls_exists["webhook_urls"]);
+           
+        }
+        else
+        {
+            $url_array = array();
+        }
+        //$src_repo->find
+        $this->response->assign(
+                    array(
+                        'form_action' =>  Router::assemble('add_hooks_git',array('project_slug' => $this->active_project->getSlug(),
+                                             'project_source_repository_id' => $repo_id)),
+                        'url_array' => $url_array,
+                        'web_user' => $web_user,
+                        'test_url' =>  Router::assemble('test_hooks_url',array('project_slug' => $this->active_project->getSlug(),
+                                             'project_source_repository_id' => $repo_id)),
+                        'webuser_pub_key' => $webuser_pub_key
+                        )
+                   );
+        if($this->request->isSubmitted()) // check for form submission
+        {    
+            $post_data =  $this->request->post();    
+            
+            //print_r($post_data);
+            try {
+                   
+                  
+                   $errors = new ValidationErrors();    
+                   $webhooks_url = $post_data["webhooks"];
+                   $array_urls = array();
+                   foreach ($webhooks_url as $key => $value) 
+                   {
+                        if(!filter_var($value, FILTER_VALIDATE_URL) && $value != "")
+                        {
+                            $errors->addError("$value is not a valid URL.");
+                        }
+                        else
+                        {
+                            $array_urls[] = $value;
+                        }
+                    }
+                    if($errors->hasErrors()) 
+                    {
+                       throw $errors;
+                    }
+                   
+                     DB::beginWork('Add URL @ ' . __CLASS__);
+                     
+                     if(is_array($array_urls) && count($array_urls) > 0)
+                     {
+                        $urls_exists = ProjectGitolite::urls_exists($src_repo_id);
+                        $array_urls = array_filter($array_urls);
+                        $array_urls_str = serialize($array_urls);
+                        if(!is_array($urls_exists) || count($urls_exists) == 0)
+                        {
+                            
+                             $web_hooks_add = ProjectGitolite :: insert_urls($array_urls_str,$src_repo_id,$this->logged_user->getId());
+                             if(!$web_hooks_add)
+                             {
+                                  $errors->addError('Problem occured while saving data, please try again.');
+                                  throw $errors;
+                             }
+                         }
+                         else
+                         {   
+                              $web_hooks_update = ProjectGitolite :: update_web_hooks($array_urls_str,$src_repo_id,$this->logged_user->getId());
+                             
+                         }
+                         DB::commit('URL Added @ ' . __CLASS__);
+                         $this->response->ok();
+                     }
+                     else
+                     {
+                        $errors->addError("Error while saving URL's.");
+                        throw $errors;
+                     }
+                 
+                     
+                }
+                catch (Exception $e)
+                {
+                    
+                     DB::rollback('Failed to add url @ ' . __CLASS__);
+                    $this->response->exception($e);
+                }
+        }
+  }
+  
+  /**
+   * Test hook url using cURL, whether it is a valid URL
+   */
+  function test_hooks_url()
+  {
+        $url = $_GET["testing_url"];
+        $fields = array(
+            'repo_name' => urlencode($this->active_repository->getName())
+        );
+        //url-ify the data for the POST
+        foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+        rtrim($fields_string, '&');
+        //open connection
+        $ch = curl_init();
+        //set the url, number of POST vars, POST data
+        curl_setopt($ch,CURLOPT_URL, $url);
+        curl_setopt($ch,CURLOPT_POST, count($fields));
+        curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
+        curl_setopt($ch,  CURLOPT_RETURNTRANSFER, 1);
+        //execute post
+        $result = curl_exec($ch);
+        $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if($http_status == 200)
+        {
+            die("ok");
+        }
+        else
+        {
+            die("Can't connect to URL, error code : $http_status");
+        }
+        
+        //close connection
+        curl_close($ch);
+        
+  }
+  
 }

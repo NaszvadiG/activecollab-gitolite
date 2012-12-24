@@ -793,7 +793,21 @@ class AcGitoliteAdminController extends AdminController{
         }
         return $array_repos;
    }
-   
-   
-    		
+   /*function hooks_call()
+   {
+       
+       //echo $_GET["repo_name"];
+      
+       $src_obj = new SourceRepositories();
+       //(array("name" => $_GET["repo_name"]))
+       $res = $src_obj->findBySQL("select * from acx_source_repositories where name = '".$_GET["repo_name"]."'");
+       print_r($res);
+       $repo_array = $res->getRowAt(0);
+       
+       $repo_id = $repo_array["id"];
+       echo "<br>";
+       echo "call curl here";
+       $this->renderText('Repo Name: '.$repo_id );
+       die();
+   }	*/
 }
