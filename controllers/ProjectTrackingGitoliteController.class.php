@@ -1273,16 +1273,101 @@
         $fields = array(
             'repo_name' => urlencode($this->active_repository->getName())
         );
-        //url-ify the data for the POST
-        foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
-        rtrim($fields_string, '&');
+        
+        $repo_path = $this->active_repository->getRepositoryPathUrl();
+        $array_pay_load = array();
+        $get_last_commit_data = exec("cd $repo_path && git show --name-status  --pretty=format:'%H || %an || %ae || %s || %cd ||'",$output_command,$return_var);
+        $array_pay_load["repository"] = array(
+                                            "url" => $this->active_repository->getViewUrl(),
+                                            "name" => $this->active_repository->getName(),
+                                            "owner" => array("email" => $this->active_repository->getCreatedByEmail(),
+                                                             "name" => $this->active_repository->getCreatedBy()->getName())
+                                             );
+       
+        
+        
+        if(is_array($output_command) && count($output_command) > 0)
+        {
+             $output = explode("||",$output_command[0]);
+             $out_cnt = count($output_command);
+             //print_r($output);
+            
+             $array_commits["id"] = trim($output[0]);
+                                    $array_commits["author"] = array(
+                                                                        "email" => trim($output[2]),
+                                                                        "name" => trim($output[1])
+                                                                    );
+                                    $array_commits["message"] = trim($output[3]);
+                                    $array_commits["message_title"] = trim($output[3]);
+                                    $array_commits["timestamp"] = trim($output[4]);
+            $last_commit_payload = $output[0];
+            
+            for($i = 1;$i<=$out_cnt;$i++)
+            {
+               
+                if(isset($output_command[$i]))
+                {
+                    $path  = trim($output_command[$i]);
+                    $paths_array =  explode(" ",$path);
+                    
+                    if($paths_array[0] == "A")
+                    {
+                        $array_added[] = $paths_array[1];
+                    }
+                    elseif($paths_array[0] == "M")
+                    {
+                        $array_modified[] = $paths_array[1];
+                    }
+                    elseif($paths_array[0] == "D")
+                    {
+                        $array_deleted[] = $paths_array[1];
+                    }
+                }
+            }
+            
+             $array_commits["added"] = $array_added;
+             $array_commits["removed"] = $array_deleted;
+             $array_commits["modified"] = $array_modified;
+             
+             $array_pay_load["commits"][]= $array_commits;
+                                    
+        }
+        else
+        {
+            $array_pay_load["commits"][]= array();
+        }
+        
+         $array_pay_load["after"] = $last_commit_payload;
+         $array_pay_load["ref"] = "refs/heads/master";
+        
+         //print_r($array_pay_load);
+         
+        /*print_r($output);
+        die();
+        */
+        /*if(is_array($output) && count($output) > 0)
+        {
+            foreach ($output as $key_out => $value_out) {
+                print_r(explode(":", $value_out));
+            }
+        }*/
+        
+        
+         
+        //foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+        //rtrim($fields_string, '&');
+        $fields_string = json_encode($array_pay_load);     
         //open connection
         $ch = curl_init();
         //set the url, number of POST vars, POST data
         curl_setopt($ch,CURLOPT_URL, $url);
-        curl_setopt($ch,CURLOPT_POST, count($fields));
+        curl_setopt($ch,CURLOPT_POST, count($array_pay_load));
         curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
         curl_setopt($ch,  CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(                                                                          
+                                                   'Content-Type: application/json',                                                                                
+                                                'Content-Length: ' . strlen($fields_string))                                                                       
+         );   
         //execute post
         $result = curl_exec($ch);
         $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
