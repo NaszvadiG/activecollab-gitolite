@@ -349,6 +349,7 @@
                // if ($source_repository instanceof SourceRepository) {
 
                   $project_source_repositories = ProjectSourceRepositories::findByParent($source_repositories);
+                  
                   //$project_source_repositories = new ProjectSourceRepository($repo_id);
                   // don't update repositories which are not added to any project
 
@@ -372,6 +373,7 @@
                     
                     $branches = $source_repositories->hasBranches() ? $repository_engine->getBranches() : Array('');
                     foreach ($branches as $branch) {
+                      $array_branch_commit = array();
                     $repository_engine->active_branch = $branch;
                     $last_commit = $source_repositories->getLastCommit($branch);
                     
@@ -405,29 +407,95 @@
                         'message': r['message'],
                         'timestamp': r['date']
                         })*/
+                    
+                    
+                    $array_pay_load = array();
+                    // get last commit 
+                    $comm = new SourceCommits();
+                    $before = $source_repositories->getLastCommit($branch,1);
+                    $array_pay_load["before"] = $before->getName();
                     $source_repositories->update($logs['data'], $branch);
+                    //print_r($logs['data']);
+                    
                     if($call_hooks)
                     { 
                         $array_commits = array();
                        
-                          if (is_foreachable($logs['data'])) {
-                                foreach ($logs['data'] as $data) {
-
-
-                                    $array_commits["name"] = urlencode($data['commit']['name']);
-                                    $array_commits["author"] = urlencode($data['commit']['authored_by_name']);
+                          if (is_foreachable($logs['data'])) 
+                          {
+                                 
+                                 
+                                 
+                                 $array_pay_load["repository"] = array(
+                                                                       "url" => $source_repositories->getViewUrl(),
+                                                                       "name" => $source_repositories->getName(),
+                                                                       "description" => "ActiveCollab Reposirory",
+                                                                       "owner" => array("email" => $source_repositories->getCreatedByEmail(),
+                                                                                        "name" => $source_repositories->getCreatedBy()->getName())
+                                                                       );
+                                foreach ($logs['data'] as $data)
+                                {
+                                    $array_added = array();
+                                    $array_modified = array();
+                                    $array_deleted = array();
+                                    $array_commits = array();
+                                    
+                                    $array_commits["id"] = urlencode($data['commit']['name']);
+                                    $array_commits["url"] = "";
+                                    $array_commits["author"] = array(
+                                                                        "email" => $data['commit']['authored_by_email'],
+                                                                        "name" => $data['commit']['authored_by_name']
+                                                                    );
+                                    $array_commits["message"] = urlencode($data['commit']['message_body']);
+                                    $array_commits["message"] = urlencode($data['commit']['message_body']);
+                                    
                                     $array_commits["message_title"] = urlencode($data['commit']['message_title']);
-                                    $array_commits["message_body"] = urlencode($data['commit']['message_body']);
+                                    $array_commits["timestamp"] = urlencode($data['commit']['commited_on']);
+                                    
+                                    $paths_array = unserialize($data["paths"]);
+                                    if(is_foreachable($paths_array))
+                                    {
+                                        foreach ($paths_array as $key_paths => $value_paths) {
+                                            if($value_paths["action"] == "A")
+                                            {
+                                                $array_added[] = $value_paths["path"];
+                                            }
+                                            elseif($value_paths["action"] == "M")
+                                            {
+                                                $array_modified[] = $value_paths["path"];
+                                            }
+                                            elseif($value_paths["action"] == "D")
+                                            {
+                                                $array_deleted[] = $value_paths["path"];
+                                            }
+                                        }
+                                    }
+                                    
+                                    $array_commits["added"] = $array_added;
+                                    $array_commits["removed"] = $array_deleted;
+                                    $array_commits["modified"] = $array_modified;
+                                    $last_commit_payload = $data['commit']['name']; // keep assigning commits , as we need last commit id
+                                    $array_pay_load["commits"][]= $array_commits;
+                                    //print_r($data);
+                                    //print_r(unserialize($data["paths"]));
+                                    $k++;
                                 }
 
-
+                                $array_pay_load["after"] = $last_commit_payload;
+                                $array_pay_load["ref"] = "refs/heads/master";
                           }
-                        foreach($array_commits as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+                         
+                        //foreach($array_commits as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+                        $fields_string = json_encode($array_pay_load);     
                         
                         $hooks_table_name = TABLE_PREFIX."rt_web_hooks";
                         $get_repo_hooks = DB::execute("SELECT * from $hooks_table_name where repo_fk = '".$repo_id."'");
                         if($get_repo_hooks)
                         {
+                            
+                            
+                            
+                            
                             $url_array = $get_repo_hooks->getRowAt(0);
                             $url_array = @unserialize($url_array["webhook_urls"]);
                             
@@ -441,9 +509,13 @@
                                     $ch = curl_init();
                                     //set the url, number of POST vars, POST data
                                     curl_setopt($ch,CURLOPT_URL, $url);
-                                    curl_setopt($ch,CURLOPT_POST, count($array_commits));
+                                    curl_setopt($ch,CURLOPT_POST, count($array_pay_load));
                                     curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
                                     curl_setopt($ch,  CURLOPT_RETURNTRANSFER, 1);
+                                    curl_setopt($ch, CURLOPT_HTTPHEADER, array(                                                                          
+                                                'Content-Type: application/json',                                                                                
+                                                'Content-Length: ' . strlen($fields_string))                                                                       
+                                                );   
                                     //execute post
                                     $curl_result = curl_exec($ch);
                                     
