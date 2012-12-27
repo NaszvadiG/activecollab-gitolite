@@ -29,8 +29,10 @@ class AcGitoliteHooksController  extends FrontendController {
    function hooks_call()
    {
        $src_obj = new SourceRepositories();
-       $res = $src_obj->findBySQL("select * from acx_source_repositories where name = '".$_GET["repo_name"]."'");
+       $source_repo_table = TABLE_PREFIX."source_repositories";
+       $res = $src_obj->findBySQL("select * from $source_repo_table where name = '".trim($_GET["repo_name"])."'");
        $repo_array = $res->getRowAt(0);
+      
        GitoliteAdmin::update_remote_repo($repo_array->getId(),TRUE);
        die();
    }		

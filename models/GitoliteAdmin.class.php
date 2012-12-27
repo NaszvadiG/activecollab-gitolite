@@ -408,16 +408,21 @@
                         'timestamp': r['date']
                         })*/
                     
+                    $hooks_table_name = TABLE_PREFIX."rt_web_hooks";
+                    $get_repo_hooks = DB::execute("SELECT * from $hooks_table_name where repo_fk = '".$repo_id."'");
+                    if($get_repo_hooks)
+                    {
+                        $array_pay_load = array();
+                        // get last commit 
+                        $comm = new SourceCommits();
+                        $before = $source_repositories->getLastCommit($branch,1);
+                        $array_pay_load["before"] = $before->getName();
+                    }
                     
-                    $array_pay_load = array();
-                    // get last commit 
-                    $comm = new SourceCommits();
-                    $before = $source_repositories->getLastCommit($branch,1);
-                    $array_pay_load["before"] = $before->getName();
                     $source_repositories->update($logs['data'], $branch);
                     //print_r($logs['data']);
                     
-                    if($call_hooks)
+                    if($get_repo_hooks)
                     { 
                         $array_commits = array();
                        
@@ -429,7 +434,7 @@
                                  $array_pay_load["repository"] = array(
                                                                        "url" => $source_repositories->getViewUrl(),
                                                                        "name" => $source_repositories->getName(),
-                                                                       "description" => "ActiveCollab Reposirory",
+                                                                       "description" => "",
                                                                        "owner" => array("email" => $source_repositories->getCreatedByEmail(),
                                                                                         "name" => $source_repositories->getCreatedBy()->getName())
                                                                        );
@@ -488,13 +493,9 @@
                         //foreach($array_commits as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
                         $fields_string = json_encode($array_pay_load);     
                         
-                        $hooks_table_name = TABLE_PREFIX."rt_web_hooks";
-                        $get_repo_hooks = DB::execute("SELECT * from $hooks_table_name where repo_fk = '".$repo_id."'");
+                        
                         if($get_repo_hooks)
                         {
-                            
-                            
-                            
                             
                             $url_array = $get_repo_hooks->getRowAt(0);
                             $url_array = @unserialize($url_array["webhook_urls"]);

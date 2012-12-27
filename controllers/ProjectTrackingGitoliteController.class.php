@@ -1163,6 +1163,7 @@
    */
   function add_git_hooks()
   {
+        
         $project  = $this->active_project;
         $project_id = $project->getId();
         $logged_user = $this->logged_user;
