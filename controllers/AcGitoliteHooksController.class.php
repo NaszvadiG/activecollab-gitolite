@@ -23,7 +23,6 @@ class AcGitoliteHooksController  extends FrontendController {
     function __before() {
         parent::__before();
         
-         
     }
    
    function hooks_call()
@@ -31,9 +30,11 @@ class AcGitoliteHooksController  extends FrontendController {
        $src_obj = new SourceRepositories();
        $source_repo_table = TABLE_PREFIX."source_repositories";
        $res = $src_obj->findBySQL("select * from $source_repo_table where name = '".trim($_GET["repo_name"])."'");
-       $repo_array = $res->getRowAt(0);
-      
-       GitoliteAdmin::update_remote_repo($repo_array->getId(),TRUE);
+       if($res)
+       {
+            $repo_array = $res->getRowAt(0);
+            GitoliteAdmin::update_remote_repo($repo_array->getId(),TRUE);
+       }
        die();
    }		
 }
