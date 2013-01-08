@@ -233,7 +233,7 @@ echo -e "\033[34m Adding $WEBUSER to $GITUSER Group  \e[0m" | tee -ai $LOGFILE
 sudo adduser $WEBUSER $GITUSER &>> $LOGFILE
 
 # Get The Web User Home Dir Path
-WEBUSERHOME=$(grep $WEBUSER /etc/passwd | cut -d':' -f6 | head -n1)
+WEBUSERHOME=$(grep $WEBUSER: /etc/passwd | cut -d':' -f6 | head -n1)
 echo WEBUSERHOME = $WEBUSERHOME &>> $LOGFILE
 if [ -z $WEBUSERHOME ]
 then
