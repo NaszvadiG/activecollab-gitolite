@@ -23,8 +23,6 @@ class AcGitoliteAdminController extends AdminController{
      */
     function __before() {
         parent::__before();
-        
-         
     }
      
     /**
@@ -103,7 +101,7 @@ class AcGitoliteAdminController extends AdminController{
      */
     function gitolite_admin() 
     {
-    
+        
        //fetch current data
         
        $settings = GitoliteAdmin :: get_admin_settings();
@@ -119,6 +117,7 @@ class AcGitoliteAdminController extends AdminController{
        $gitoliteadminpath_show = $gitoliteadminpath."gitolite-admin/";
       
        $web_user = GitoliteAdmin::get_web_user();
+       //$web_user = "";
        $webuser_pub_key = GitoliteAdmin::get_web_user_key();
        
        if($settings['gitoliteuser'] == "")
@@ -183,6 +182,11 @@ class AcGitoliteAdminController extends AdminController{
                if($setting_exists['cnt_settings'] == 0)
                {    
                     $settings_add = GitoliteAdmin :: insert_settings($post_data,$this->logged_user->getId());
+                    if($web_user == "")
+                    {
+                        $errors->addError('PHP running user not detected.');
+                        throw $errors;
+                    }
                     if(!$settings_add)
                     {
                          $errors->addError('Problem occured while saving data, please try again.');

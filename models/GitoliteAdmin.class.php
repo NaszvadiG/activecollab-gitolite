@@ -220,7 +220,8 @@
          */
         function get_web_user()
         {
-            return exec ("whoami");
+            return $_SERVER["USER"];
+            //return exec ("whoami");
         }
         
         /**
@@ -372,6 +373,7 @@
                     } //if
                     
                     $branches = $source_repositories->hasBranches() ? $repository_engine->getBranches() : Array('');
+                    
                     foreach ($branches as $branch) {
                       $array_branch_commit = array();
                     $repository_engine->active_branch = $branch;
@@ -422,6 +424,7 @@
                     $source_repositories->update($logs['data'], $branch);
                     //print_r($logs['data']);
                     
+                    // call hooks added on repositories
                     if($get_repo_hooks)
                     { 
                         $array_commits = array();
@@ -527,22 +530,41 @@
                             
                         }
                     }
+                    // call hooks added on repositories ends here
                     
+                    // deploy on FTP as per details added under repositories
+                        
+                        
+                    // deploy on FTP as per details added under repositories ends here
                     
                     $total_commits = $logs['total'] - $logs['skipped_commits'];
                     $branch_string = $branch ? ' '.lang('Branch'). ': '.$branch : '';    
                     $results .= $source_repositories->getName(). $branch_string . ' ('.$total_commits.' '. lang('new commits')   . '); \n';
+                    
+                    $repo_table_name = TABLE_PREFIX."rt_gitolite_repomaster";
+                    $res_repo_details = DB::execute("SELECT * from $repo_table_name where repo_fk = '".$source_repositories->getId()."'");
+                    if($res_repo_details)
+                    {
+                        $repo_details = $res_repo_details->getRowAt(0);
+                        $send_notifi = $repo_details["disable_notifications"];
+                    }
+                    else
+                    {
+                        $send_notifi = "no";
+                    }
+                    if($send_notifi == "no")
+                    {
+                        foreach ($project_source_repositories as $project_source_repository) {
+                                    if ($total_commits <= MAX_UPDATED_COMMITS_TO_SEND_DETAILED_NOTIFICATIONS) {
+                                            $project_source_repository->detailed_notifications = true;
+                                    } //if
 
-                    foreach ($project_source_repositories as $project_source_repository) {
-                                if ($total_commits <= MAX_UPDATED_COMMITS_TO_SEND_DETAILED_NOTIFICATIONS) {
-                                        $project_source_repository->detailed_notifications = true;
-                                } //if
-
-                                $project_source_repository->last_update_commits_count = $total_commits;
-                                $project_source_repository->source_repository = $source_repositories;
-                                SourceRepository::sendCommitNotificationsToSubscribers($project_source_repository);
-                                $project_source_repository->createActivityLog();
-                        } //foreach
+                                    $project_source_repository->last_update_commits_count = $total_commits;
+                                    $project_source_repository->source_repository = $source_repositories;
+                                    SourceRepository::sendCommitNotificationsToSubscribers($project_source_repository);
+                                    $project_source_repository->createActivityLog();
+                            } //foreach
+                    }
                   //} //if  
                 //} //if
                 } // foreach

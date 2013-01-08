@@ -51,6 +51,8 @@ class AcGitoliteModule extends AngieModule {
         Router::map('add_hooks_git', '/projects/:project_slug/repositories/:project_source_repository_id/add-git-hook', array('controller'=>'project_tracking_gitolite', 'action'=>'add_git_hooks'), array('project_source_repository_id'=>Router::MATCH_ID));
         Router::map('test_hooks_url', '/projects/:project_slug/repositories/:project_source_repository_id/test-hooks-url', array('controller'=>'project_tracking_gitolite', 'action'=>'test_hooks_url'), array('project_source_repository_id'=>Router::MATCH_ID));
         Router::map('hookcall', 'hookcall', array('controller'=>'ac_gitolite_hooks', 'action'=>'hooks_call'));
+        Router::map('add_ftp_conn', '/projects/:project_slug/repositories/:project_source_repository_id/add-ftp-details', array('controller'=>'project_tracking_gitolite', 'action'=>'add_ftp_connections'));
+        Router::map('test_ftp_conn', '/projects/:project_slug/repositories/:project_source_repository_id/test-ftp-details', array('controller'=>'project_tracking_gitolite', 'action'=>'test_ftp_connection'));
         
          //Router::map('map_repos', '/projects/:project_slug/repositories/map-remote-git', array('controller'=>'project_tracking_gitolite', 'action'=>'map_conf_repos'), array('project_slug'=>Router::MATCH_SLUG));
     }// defineRoutes
@@ -254,6 +256,25 @@ class AcGitoliteModule extends AngieModule {
             //create the rt_config_settings table to store admin settings
          DB::execute($create_rt_web_hooks);
          
+         $create_rt_ftp_details = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "rt_ftp_connections` (
+            `ftp_conn_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+            `repo_fk` INT(10) NOT NULL,
+            `ftp_host_name` VARCHAR(100) NOT NULL,
+            `ftp_port_no` INT(5) NOT NULL,
+            `ftp_username` VARCHAR(100) NOT NULL,
+            `ftp_password` VARCHAR(100) NOT NULL,
+            `ftp_branches` VARCHAR(100) NOT NULL,
+            `ftp_dir` VARCHAR(255) NOT NULL,
+            `added_by` INT(10) NOT NULL,
+            `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY  (`ftp_conn_id`)
+          ) $storage_engine $default_charset;";
+            //create the rt_config_settings table to store admin settings
+         DB::execute($create_rt_ftp_details);
+         
+         
+         
+         
          $repo_tb_name = TABLE_PREFIX . "rt_gitolite_repomaster";
          $chkcol = DB::execute("SELECT * FROM $repo_tb_name LIMIT 1");
          $add_new_col = mysql_fetch_array($chkcol);
@@ -261,6 +282,12 @@ class AcGitoliteModule extends AngieModule {
          {
             mysql_query("ALTER TABLE $repo_tb_name ADD `git_ssh_path` varchar(255) NOT NULL");
          }
+          
+         if(!isset($add_new_col['disable_notifications']))
+         {
+            mysql_query("ALTER TABLE $repo_tb_name ADD `disable_notifications` ENUM('yes', 'no') NOT NULL default 'yes'");
+         }
+         
          
          $repo_remote_tb_name = TABLE_PREFIX . "rt_remote_repos";
          $chkcol = DB::execute("SELECT * FROM $repo_remote_tb_name LIMIT 1");

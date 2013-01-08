@@ -421,7 +421,6 @@ class AcGitoliteSourceController extends SourceAdminController{
                         $chk_actual_name_exists_cnt = ProjectGitolite::check_actual_name_count($actual_git_repo_name);
                         if(is_array($chk_actual_name_exists_cnt) && isset($chk_actual_name_exists_cnt["actual_name_cnt"]))
                         {
-                           
                             $cnt = ($chk_actual_name_exists_cnt["actual_name_cnt"] > 0) ? $chk_actual_name_exists_cnt["actual_name_cnt"]+1 : "";
                             $folder_append = ($cnt != "") ? "-$cnt" : "";
                         }

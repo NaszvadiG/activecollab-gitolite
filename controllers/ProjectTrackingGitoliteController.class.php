@@ -232,6 +232,8 @@
                     /* Check form with validation error */
                     $repository_data = $this->request->post('repository');
                     
+                    /*print_r($repository_data);
+                    die();*/
                     
                     $errors = new ValidationErrors();    
                     $post_data =  $this->request->post();
@@ -307,12 +309,16 @@
                     if(is_array($post_data))
                     {
                         $repository_path_url = array('repository_path_url' => $repo_path);
+                        $notif_setting = (isset($repository_data["disable_notifications"])) ? "yes" : "no";
+                        $repo_notification_setting = array('repo_notification_setting' => $notif_setting);
                     }
                     $repository_data = array_merge($repository_data,$repository_path_url);
-                    
+                    $repository_data = array_merge($repository_data,$repo_notification_setting);
+                   
                     $this->active_repository = new GitRepository();
                     $this->active_repository->setAttributes($repository_data);
                     $this->active_repository->setCreatedBy($this->logged_user);
+                    
                     
                     $this->active_repository->save();
                     $repo_fk = $this->active_repository->getId();
@@ -328,6 +334,7 @@
                         $this->project_object_repository->setProjectId($this->active_project->getId());
                         $this->project_object_repository->setCreatedBy($this->logged_user);
                         $this->project_object_repository->setState(STATE_VISIBLE);
+                        
                         $this->project_object_repository->save();
                         
                         $repo_id = ProjectGitolite::add_repo_details($repo_fk,$project_id,$user_id,$repo_path,$repository_data,$clone_url);
@@ -359,7 +366,6 @@
                                         throw $errors;
                                     }*/
                                 }
-                               
                                
                             }
                             else
@@ -669,7 +675,8 @@
              
               $repo_details = ProjectGitolite::get_repo_details($repo_id);
                
-              
+              /*print_r($repo_details);
+              die();    */
               
                
                $repository_data = $this->request->post('repository');
@@ -705,13 +712,13 @@
                   }
                   else
                   { 
-                      die();
+                      
                       $this->response->forbidden();
                   }
               }
               else
               {
-                   die();
+                   
                   $this->response->forbidden();
               }
               
@@ -875,7 +882,9 @@
                     
                     if($repo_id)
                     {
-                        
+                        $notif_setting = (isset($repository_data["disable_notifications"])) ? "yes" : "no";    
+                        $repo_table_name = TABLE_PREFIX."rt_gitolite_repomaster";
+                        DB::execute("update $repo_table_name set disable_notifications = '".$notif_setting."' where repo_fk = '".$repo_fk."'");
                         $update_access = ProjectGitolite::update_access_levels($git_repo_id,serialize($post_data['access']));
                         if($update_access)
                         {
@@ -965,11 +974,18 @@
                 
             }
       
+         $this->wireframe->actions->add('add_ftp', 'FTP Connectiions', Router::assemble('add_ftp_conn',array('project_slug' => $this->active_project->getSlug(),
+                                             'project_source_repository_id' => $repo_id)), array(
+                 'onclick' => new FlyoutFormCallback('ftps_updated', array('width' => '1100')),
+                 'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
+                );
+         
          $this->wireframe->actions->add('add_hooks', 'Hooks', Router::assemble('add_hooks_git',array('project_slug' => $this->active_project->getSlug(),
                                              'project_source_repository_id' => $repo_id)), array(
                  'onclick' => new FlyoutFormCallback('urls_updated', array('width' => '900')),
                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
                 );
+         
           $repo_path = $repository->getRepositoryPathUrl();
          
           $repo_fk = $repository->getId();
@@ -1163,7 +1179,7 @@
    */
   function add_git_hooks()
   {
-        
+        //echo Router::assemble("hookcall");
         $project  = $this->active_project;
         $project_id = $project->getId();
         $logged_user = $this->logged_user;
@@ -1384,6 +1400,172 @@
         //close connection
         curl_close($ch);
         
+  }
+  
+  function add_ftp_connections()
+  {
+      /*$cus = new CustomFields();
+      //$cus->initForType("Users",2);
+      $flds = $cus->getCustomFieldsByType("Users");
+      
+      //$cus->initForType("Project",1);
+      if(is_array($flds) && count($flds) > 0)
+      {
+          foreach ($flds as $key => $value) {
+              $settings["$key"]["label"] = "Comments";
+              $settings["$key"]["is_enabled"] = "1";
+              $cus->setCustomFieldsByType("Users", $settings);
+              
+          }
+      }
+      print_r($flds);
+      die();*/
+      
+      //$settings["label"];
+      //$cus->setCustomFieldsByType("Project", $settings);
+      
+      $repo_branches = $this->active_repository;
+      $eng = $repo_branches->getEngine($this->active_project->getId());
+      //print_r($eng->getBranches);
+      $branches_array = $eng->getBranches();
+      $repo_branches_str = implode(",",$branches_array);
+      $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
+      
+      $repo_obj = new ProjectSourceRepository($repo_id);
+      $src_repo_id = $repo_obj->getIntegerField1();
+        
+        
+        if($this->request->isSubmitted()) // check for form submission
+        {   
+            $post_data =  $this->request->post();    
+            //print_r($post_data);
+            try {
+
+                 $errors = new ValidationErrors();    
+                 $ftpdetials = $post_data["ftpdetials"];
+                 $fld_cnt = count($ftpdetials["ftp_domain"]);
+                 //print_r($ftpdetials);
+                 //die(); 
+                 $array_urls = array();
+
+                 for ($i=0;$i<$fld_cnt;$i++) 
+                 {
+                     if($ftpdetials["ftp_domain"][$i] == "" || $ftpdetials["ftp_port"][$i] == ""  || $ftpdetials["ftp_username"][$i] == ""  || $ftpdetials["ftp_password"][$i] == ""  || $ftpdetials["branches"][$i] == ""  || $ftpdetials["ftp_dir"][$i] == "" )
+                     {
+                          $errors->addError("Please fill all connection parameters.");
+                     }
+                     else
+                     {
+                         $arra_conn[$i] = array("ftp_domain" => $ftpdetials["ftp_domain"][$i],
+                                                "ftp_port" => $ftpdetials["ftp_port"][$i],
+                                                "ftp_username" => $ftpdetials["ftp_username"][$i],
+                                                "ftp_password" => $ftpdetials["ftp_password"][$i],
+                                                "branches" => $ftpdetials["branches"][$i],
+                                                "ftp_dir" => $ftpdetials["ftp_dir"][$i]
+                                                );
+                     }
+                      /*if(!filter_var($value, FILTER_VALIDATE_URL) && $value != "")
+                      {
+                          $errors->addError("$value is not a valid URL.");
+                      }
+                      else
+                      {
+                          $array_urls[] = $value;
+                      }*/
+                  }
+                  if($errors->hasErrors()) 
+                  {
+                     throw $errors;
+                  }
+                  
+                 
+                   DB::beginWork('Add FTP Details @ ' . __CLASS__);
+
+                   if(is_array($arra_conn) && count($arra_conn) > 0)
+                   {
+                      $ftp_details_exists = ProjectGitolite::ftp_connections_exists($src_repo_id); 
+                      
+                      if(is_array($ftp_details_exists) && $ftp_details_exists["ftp_cnt"] > 0)
+                      {
+                          $ftp_table_name = TABLE_PREFIX . "rt_ftp_connections";
+                          DB::execute("DELETE FROM $ftp_table_name where repo_fk = '".$src_repo_id."'");
+                      }
+                      for($i=0;$i<$fld_cnt;$i++)
+                      {
+                            
+                          $ftp_details_add = ProjectGitolite :: add_ftp_details($arra_conn[$i],$src_repo_id,$this->logged_user->getId());
+                          if(!$ftp_details_add)
+                          {
+                               $errors->addError('Problem occured while saving data, please try again.');
+                               throw $errors;
+                          }
+                          
+                      }
+                       DB::commit('FTP details Added @ ' . __CLASS__);
+                       $this->response->ok();
+                   }
+                   else
+                   {
+                      $errors->addError("Error while saving FTP details.");
+                      throw $errors;
+                   }
+                 }
+                 catch (Exception $e)
+                 {
+
+                      DB::rollback('Failed to add FTP details @ ' . __CLASS__);
+                     $this->response->exception($e);
+                 }
+        } 
+            $ftp_details_exists = ProjectGitolite::get_connection_details($src_repo_id);
+            $this->response->assign(array(
+                       'repo_branches_str' => $repo_branches_str,
+                       'branches_array' => $branches_array,
+                       'ftp_test_url' =>  Router::assemble('test_ftp_conn',array('project_slug' => $this->active_project->getSlug(),
+                                             'project_source_repository_id' => $repo_id)),
+                       'form_action' =>  Router::assemble('add_ftp_conn',array('project_slug' => $this->active_project->getSlug(),
+                                             'project_source_repository_id' => $repo_id)),
+                       "ftp_details_exists" => $ftp_details_exists
+                      
+                        ));
+  }
+  
+  function test_ftp_connection()
+  {
+      $host = $_GET["ftp_domain"];
+      $port = $_GET["ftp_port"];
+      $user = $_GET["ftp_username"];
+      $password = $_GET["ftp_password"];
+      $ftp_dir = $_GET["ftp_dir"];
+      if($host == "" || $port == "" || $user == "" || $password == "" || $ftp_dir == "")
+      {
+          die("Please fill all connection prameters.");
+      }
+      $connect = ftp_connect($host, $port);
+      //$connect = exec("ftp kasim.rtcamp.info",$output,$return_var);
+      //print_r($output);
+      
+      if(!$connect)
+      {
+        die("Could not connect to FTP");
+      }
+      $result = ftp_login($connect, $user, $password);
+      if($result)
+      {
+          if(ftp_chdir($connect,$ftp_dir))
+          {
+               die("ok");
+          }
+          else
+          {
+               die("Directory path not found on server.");
+          }
+      }
+      else
+      {
+          die("Could not login to FTP");
+      }
+     
   }
   
 }

@@ -45,6 +45,10 @@
             App.Wireframe.Events.bind('urls_updated', function (event, repository) {
                 App.Wireframe.Flash.success(App.lang('WebHooks updated successfully'));
             });
+            
+            App.Wireframe.Events.bind('ftps_updated', function (event, repository) {
+                App.Wireframe.Flash.success(App.lang('FTP details updated successfully'));
+            });
   
         });
    

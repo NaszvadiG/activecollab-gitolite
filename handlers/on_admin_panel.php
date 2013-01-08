@@ -22,4 +22,6 @@
                                    Router::assemble('gitolite_admin'), 
                                    AngieApplication::getImageUrl('module.png', AC_GITOLITE_MODULE));
       
+      
+      
   } // ac_gitolite_handle_on_admin_panel

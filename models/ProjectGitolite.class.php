@@ -151,8 +151,8 @@
             }
             $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
             
-            DB::execute("INSERT INTO $repo_table_name (repo_fk,project_id,repo_name,git_repo_path,repo_created_by,git_ssh_path) VALUES (? ,?, ?, ?, ?, ?)",
-              $repo_fk,$active_project, trim($post_data['name']),$repo_path,$user_id,$clone_url
+            DB::execute("INSERT INTO $repo_table_name (repo_fk,project_id,repo_name,git_repo_path,repo_created_by,git_ssh_path,disable_notifications) VALUES (? ,?, ?, ?, ?, ?,?)",
+              $repo_fk,$active_project, trim($post_data['name']),$repo_path,$user_id,$clone_url,$post_data['repo_notification_setting']
             );
             return DB::lastInsertId() ;
             
@@ -445,7 +445,7 @@
            $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
            $objects_table_name = TABLE_PREFIX . 'project_objects';
            
-           $result = DB::execute("SELECT a.repo_id,a.repo_name,a.git_repo_path,b.name FROM $repo_table_name a, $objects_table_name b 
+           $result = DB::execute("SELECT a.repo_id,a.repo_name,a.git_repo_path,a.disable_notifications,b.name FROM $repo_table_name a, $objects_table_name b 
                                   where a.`repo_fk` = b.integer_field_1 and b.type = 'ProjectSourceRepository'
                                   and b.id = '".$repo_id."'");
               
@@ -776,6 +776,74 @@
         $web_hooks_table_name = TABLE_PREFIX .'rt_web_hooks';
         $update_access  =  DB::execute("update  ".$web_hooks_table_name." set  	webhook_urls = '$array_urls_str' where repo_fk = ".DB::escape($src_repo_id));
         return TRUE;
+    }
+    
+    function ftp_connections_exists($src_repo_id)
+    {
+        
+        if($src_repo_id == "" || $src_repo_id == 0)
+        {
+            return false;
+        }
+        $ftp_table_name = TABLE_PREFIX . "rt_ftp_connections";
+        $result = DB::execute("SELECT COUNT(repo_fk) as ftp_cnt from  $ftp_table_name where repo_fk = '$src_repo_id'");
+        
+        if($result)
+        {
+            $ftp_details_array = $result->getRowAt("0");
+            if(is_array($ftp_details_array) && count($ftp_details_array) > 0)
+            {
+                return $ftp_details_array;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+        else
+        {
+            return false;
+        }
+    
+    }
+    
+    function add_ftp_details($ftp_array = array(),$src_repo_id = 0,$added_by = 0)
+    {
+        if(!is_numeric($src_repo_id) || count($ftp_array) == 0 || !is_numeric($added_by))
+        {
+                return FALSE;
+        }
+        $ftp_table_name = TABLE_PREFIX .'rt_ftp_connections';
+        DB::execute("INSERT INTO $ftp_table_name (repo_fk,ftp_host_name,ftp_port_no,ftp_username,ftp_password,ftp_branches,ftp_dir,added_by) 
+                    VALUES (? ,?, ?, ?, ?, ?, ?, ?)",
+          $src_repo_id, $ftp_array["ftp_domain"], $ftp_array["ftp_port"], $ftp_array["ftp_username"], $ftp_array["ftp_password"], $ftp_array["branches"], $ftp_array["ftp_dir"],$added_by
+        );
+        return DB::lastInsertId() ;
+    
+    }
+    
+    function get_connection_details($src_repo_id)
+    {
+        if($src_repo_id == "" || $src_repo_id == 0)
+        {
+            return false;
+        }
+        $ftp_table_name = TABLE_PREFIX . "rt_ftp_connections";
+        $result = DB::execute("SELECT * from  $ftp_table_name where repo_fk = '$src_repo_id'");
+        
+        if($result)
+        {
+            while ($row = mysql_fetch_array($result->getResource())) 
+            {
+                $ftp_details_array[] = $row;
+            }
+            return $ftp_details_array;
+        }
+        else
+        {
+            return false;
+        }
     }
     
   }

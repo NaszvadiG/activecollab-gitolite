@@ -90,11 +90,15 @@
              <div class ="">
                 {wrap field=title}
                 {label for=pageTitle}Gitolite Setup Script{/label}
-                <code id="script_path">
-                  {$setup_script nofilter}
-              </code>
-              <p class="aid">{lang}Please login to your local activecollab server using SSH and run the above command.{/lang}</p>
-              {/wrap}
+                {if $web_user != ""}
+                    <code id="script_path">
+                      {$setup_script nofilter}
+                  </code>
+                      <p class="aid">{lang}Please login to your local activecollab server using SSH and run the above command.{/lang}</p>
+                 {else}
+                     <span class="ssh_code">Web user not found.</span>
+                 {/if}
+                {/wrap}
               </div>
             {/wrap}
             {wrap field=help_improve_application}
@@ -223,7 +227,7 @@
             </div>
         </div>
             {wrap_buttons}
-            <button type="button" id="import_button_no_map" class="default"><span>{lang}Continue{/lang}</span></button>
+                <button type="button" id="import_button_no_map" class="default"><span>{lang}Continue{/lang}</span></button>
             {/wrap_buttons}
      </div>
 

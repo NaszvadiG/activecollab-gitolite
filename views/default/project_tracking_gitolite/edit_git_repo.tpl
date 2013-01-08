@@ -77,6 +77,11 @@
                     {/if}
                     </div>
             </div>
+            {wrap field=name}
+              {label for=repositoryNotification required=false}{lang}Disable Notifications{/lang}{/label}
+              <input type="checkbox" name="repository[disable_notifications]" value="yes" {if $repo_details['disable_notifications'] == "yes"} checked="checked" {/if}>
+                    <p class="aid">{lang}Disable notifications every time commits are made on this repository.{/lang}</p>
+             {/wrap} 
 		
   </div>
      {wrap_buttons}

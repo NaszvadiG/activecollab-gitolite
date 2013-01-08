@@ -145,12 +145,41 @@ Gitolite Admin
 {
     padding-left: 28px !important;
 }
-.web_hook_url {
-    width: 300px !important;
+#page_action_add_ftp .title_action_button[style]
+{
+    padding-left: 28px !important;
 }
+/*.web_hook_url {
+    width: 300px !important;
+}*/
 #gitolite_hooks input[type="text"]{
      width: 400px !important;
 }
+#ftp_connections .ftp_domain {
+     width: 200px !important;
+}
+
+#ftp_connections .small_txt {
+     width: 25px !important;
+}
+
+#ftp_connections .ftp_user_name {
+     width: 125px !important;
+}
+
+
+#ftp_connections .ftp_path {
+     width: 400px !important;
+}
+/*input[type="text"]*/
+
+/*#ftp_connections .ftp_path {
+     width: 200px !important;
+}*/
+#ftp_connections #tb_ftp_connection{
+    width: 100% !important;
+}
+
 /*
 li#page_action_branches .title_action_button {
     background-image: url("http://git2.rtcamp.info/public/assets/images/ac_gitolite/default/icons/16X16-git.png");

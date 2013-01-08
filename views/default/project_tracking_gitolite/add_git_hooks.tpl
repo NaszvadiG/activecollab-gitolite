@@ -1,5 +1,4 @@
 {title}WebHook URL's{/title}
-{add_bread_crumb}Workweek Settings{/add_bread_crumb}
 {form action={$form_action} method=post id = "gitolite_hooks"}
 <input type="hidden" value="{$test_url}" id="test_url_hooks">
 <div class="content_stack_wrapper">
@@ -9,7 +8,7 @@
         </div>
         <div id="hooks_div_wrapper" class="content_stack_element_body">
           {wrap field=web_hooks}
-            <table class="form form_field validate_callback validate_days_off" id="workweek_days_off" style="{if !is_foreachable($url_array)}display: none{/if}">
+            <table class="form form_field validate_callback validate_days_off" id="tb_git_hooks" style="{if !is_foreachable($url_array)}display: none{/if}">
               <tr>
                 <th class="name">{label required=yes}Hook URL{/label}</th>
                 <th>Test Connection</th>
