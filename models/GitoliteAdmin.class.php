@@ -161,7 +161,7 @@
         function get_setup_path($path = TRUE)
         {
             $path = exec("cd ../custom/modules/ac_gitolite/ && pwd");
-            $script = "sudo bash $path/gitolite.sh git ".' '.$_SERVER['USER'];
+            $script = "sudo bash $path/gitolite.sh git ".' '.GitoliteAdmin::get_web_user();
             return $script;
         }
         
@@ -220,8 +220,13 @@
          */
         function get_web_user()
         {
-            return $_SERVER["USER"];
-            //return exec ("whoami");
+                if ( $_SERVER["USER"] != "" )
+                        return $_SERVER["USER"];
+                else {
+                        $processUser = posix_getpwuid(posix_geteuid());
+                        return $processUser['name'];
+
+                }
         }
         
         /**
