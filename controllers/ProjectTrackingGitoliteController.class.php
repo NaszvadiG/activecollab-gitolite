@@ -973,13 +973,13 @@
                           
                 
             }
-      
+      /*  Commented FTP section
          $this->wireframe->actions->add('add_ftp', 'FTP Connectiions', Router::assemble('add_ftp_conn',array('project_slug' => $this->active_project->getSlug(),
                                              'project_source_repository_id' => $repo_id)), array(
                  'onclick' => new FlyoutFormCallback('ftps_updated', array('width' => '1100')),
                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
                 );
-         
+        */ 
          $this->wireframe->actions->add('add_hooks', 'Hooks', Router::assemble('add_hooks_git',array('project_slug' => $this->active_project->getSlug(),
                                              'project_source_repository_id' => $repo_id)), array(
                  'onclick' => new FlyoutFormCallback('urls_updated', array('width' => '900')),
