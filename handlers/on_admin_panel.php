@@ -18,7 +18,7 @@
         'onclick' => new FlyoutFormCallback('gitolite_admin_data')
           ));*/
       
-      $admin_panel->addToProjects("gitolite_admin","Gitolite Settings", 
+      $admin_panel->addToProjects("gitolite_admin",lang("Gitolite Settings"), 
                                    Router::assemble('gitolite_admin'), 
                                    AngieApplication::getImageUrl('module.png', AC_GITOLITE_MODULE));
       

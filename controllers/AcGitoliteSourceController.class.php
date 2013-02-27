@@ -43,12 +43,12 @@ class AcGitoliteSourceController extends SourceAdminController{
      */
     function index() {
         parent::index();
-        $this->wireframe->actions->add('add_source_gitolite_repository', 'Add Gitolite Repository', Router::assemble('add_source_gitolite_repository'), array(
+        $this->wireframe->actions->add('add_source_gitolite_repository', lang('Add Gitolite Repository'), Router::assemble('add_source_gitolite_repository'), array(
                  'onclick' => new FlyoutFormCallback('repository_created',array('width' => 'narrow')),
                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
              );
           
-        $this->wireframe->actions->add('clone_source_git', 'Clone Remote Repository', Router::assemble('clone_source_git_repository'), array(
+        $this->wireframe->actions->add('clone_source_git', lang('Clone Remote Repository'), Router::assemble('clone_source_git_repository'), array(
                  'onclick' => new FlyoutFormCallback('repository_created',array('width' => '900')),
                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
              );

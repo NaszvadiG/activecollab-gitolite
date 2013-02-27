@@ -8,11 +8,11 @@
              
                 <thead>
                     <tr>
-                        <th colspan="3"><strong>Project's List</strong></th>
+                        <th colspan="3"><strong>{lang}Project's List{/lang}</strong></th>
                     </tr>
                     <tr>
-                        <th>Repository Name</th>
-                        <th>Select Project</th>
+                        <th>{lang}Repository Name{/lang}</th>
+                        <th>{lang}Select Project{/lang}</th>
                     </tr>
                     
                 </thead>
@@ -44,7 +44,7 @@
                 
                   <tr>
                       <td colspan="2">
-                          <em>Note: The repositories which are already mapped will not be visible under "Repository Name" lists.</em>
+                          <em>{lang}Note: The repositories which are already mapped will not be visible under "Repository Name" lists.{/lang}</em>
                       </td>
                   </tr>
                 </tbody>
@@ -57,8 +57,8 @@
     {else}
       <div id="no_keys">
             <p class="empty_page" style="">
-                No repositories to map<br/>
-                <em>Note: The repositories which are already mapped will not be shown in list. </em>
+                {lang}No repositories to map{/lang}<br/>
+                <em>{lang}Note: The repositories which are already mapped will not be shown in list.{/lang}</em>
             </p>
         </div>
      {/if}
@@ -113,7 +113,7 @@
                 
         if(postData_prjs_tmp.length == 0)
         {
-            App.Wireframe.Flash.error("Please select atleast one project to map.");
+            App.Wireframe.Flash.error(App.lang("Please select atleast one project to map."));
             return false;
         }
             

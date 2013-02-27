@@ -3,7 +3,7 @@
 {object object=$project_object_repository user=$logged_user}
   {if $filter_by_author}
   	<div class="wireframe_content_wrapper source_navbar">
-  	  <h3>{lang clean_params=false created_by=$filter_by_author.user_object history_url=$project_object_repository->getHistoryUrl()}You are viewing commits created by <b>:created_by</b> only. Click <a href=":history_url">here</a> to view all commits made to this repository{/lang}</h3>
+  	  <h3>{lang clean_params=false created_by=$filter_by_author.user_name history_url=$project_object_repository->getHistoryUrl()}You are viewing commits created by <b>:created_by</b> only. Click <a href=":history_url">here</a> to view all commits made to this repository{/lang}</h3>
   	</div>
   {/if}
  
@@ -18,7 +18,7 @@
     </div>
     
     <div class="show_thirty_more">
-    	<button type="button" id ="show_thirty_more" show_thirty_more_url = "{$show_thirty_more_url}" filter_by_author = "{$filter_by_author.user_name}">Show older revisions</button>
+    	<button type="button" id ="show_thirty_more" show_thirty_more_url = "{$show_thirty_more_url}" filter_by_author = "{$filter_by_author.user_name}">{lang}Show older revisions{/lang}</button>
     	<img alt="" src="" id="show_img_pending" /><p id="show_error_msg"></p>
     </div>
   {else}

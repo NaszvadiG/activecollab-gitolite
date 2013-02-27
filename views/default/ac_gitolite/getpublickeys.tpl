@@ -7,7 +7,7 @@
                       {link href=$add_url
 				mode=flyout_form  
 				title="Add New Public Key" success_event="public_key_added" }
-				Add New Key
+				{lang}Add New Key{/lang}
 				{/link}
                   </th>
 	    </tr>
@@ -15,7 +15,7 @@
 	      
 	      <th class="name" width="20%">{lang}Key Name{/lang}</th>
               <th class="name" width="57%">{lang}Key{/lang}</th>
-              <th class="name" width="7%">Delete</th>
+              <th class="name" width="7%">{lang}Delete{/lang}</th>
 	    </tr>
             {if is_foreachable($user_public_keys)}
 		  {foreach from=$user_public_keys item=userkeys}
@@ -27,7 +27,7 @@
 		  {/foreach}
              {else}
                  <tr id="no_keys">
-                    <td colspan="3" style="text-align:center;"><strong>No Keys Added</strong></td>
+                    <td colspan="3" style="text-align:center;"><strong>{lang}No Keys Added{/lang}</strong></td>
                 </tr>
              {/if}
 	  </table>
@@ -38,7 +38,7 @@
         <table  class="active_projects common" cellspacing="5" cellpadding = "10">
            
              <tr>
-                 <th class="name" colspan="3" style="text-align: center;"> Can't find gitolite admin</th>
+                 <th class="name" colspan="3" style="text-align: center;">{lang}Can't find gitolite admin{/lang}</th>
 	    </tr>
         
         </table>

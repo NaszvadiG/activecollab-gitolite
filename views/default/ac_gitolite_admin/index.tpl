@@ -12,7 +12,7 @@
 		          <div class="label">{lang}Server Address{/lang}</div>
                           <div class="data">
                           {if $gitoliteuser == ""}
-                              <span id="g_user">Address not set.</span>
+                              <span id="g_user">{lang}Address not set.{/lang}</span>
                            {else}
                                <span id="g_user">{$gitoliteuser}@{$server_name}</span>
                            {/if}
@@ -29,7 +29,7 @@
 		          <div class="label">{lang}Admin Path{/lang}</div>
                           {if $gitoliteuser == ""}
                               
-                              <div class="data" id="admin_path">Path not found.</div>
+                              <div class="data" id="admin_path">{lang}Path not found.{/lang}</div>
                           {else}
                               <div class="data" id="admin_path">{$gitoliteadminpath}</div>
                           {/if}
@@ -62,7 +62,7 @@
                         
 		      </div>
           <ul class="settings_panel_header_cell_actions">
-            <li>{link href=Router::assemble('gitolite_admin_change') mode=flyout_form success_event="gitolite_settings_updated" title="Gitolite Settings" class="link_button_alternative"}Change Settings{/link}</li>
+            <li>{link href=Router::assemble('gitolite_admin_change') mode=flyout_form success_event="gitolite_settings_updated" title="Gitolite Settings" class="link_button_alternative"}{lang}Change Settings{/lang}{/link}</li>
             <!--<li>{link href=Router::assemble('map_users') class="link_button_alternative"}Map Wizard{/link}</li>
             <!--<li>{link href=Router::assemble('map_repos') class="link_button_alternative"}Map Repositories{/link}</li>-->
           </ul>
@@ -78,11 +78,11 @@
           <table cellspacing="0" class="common auto list_items" id="repo_list">
                 <thead>
                     <tr>
-                        <th colspan="3"><strong>Empty Repositories</strong></th>
+                        <th colspan="3"><strong>{lang}Empty Repositories{/lang}</strong></th>
                     </tr>
                     <tr>
-                        <th>Repository Name</th>
-                        <th class="name">Options</th>
+                        <th>{lang}Repository Name{/lang}</th>
+                        <th class="name">{lang}Options{/lang}</th>
                     </tr>
                 </thead>
 
@@ -105,7 +105,7 @@
       {else}           
         <div id="no_repos">
                 <p class="empty_page" style="">
-                There are no empty repositories to display
+                {lang}There are no empty repositories to display{/lang}
                 </p>
         </div>
     {/if}
@@ -144,7 +144,7 @@
         
         $('table#repo_list').on('click','a.delete_repo',function(e){
             
-            if(!confirm('Are you sure that you want to permanently delete this repository? It will also be removed from all the projects.'))
+            if(!confirm(App.lang('Are you sure that you want to permanently delete this repository? It will also be removed from all the projects.')))
             {
                 return false;
             }
@@ -165,7 +165,7 @@
                              if ($(".delete_repo").length == 0 )
                              {
                                  $("#empty_repos").hide(); 
-                                 $(".settings_panel_body").html('<div id="no_repos"><p class="empty_page" style="">There are no empty repositories to display</p></div>'); 
+                                 $(".settings_panel_body").html('<div id="no_repos"><p class="empty_page" style="">{lang}There are no empty repositories to display{/lang}</p></div>'); 
                              }
                              App.Wireframe.Flash.success(App.lang("Repository deleted successfully"));
                     } else {

@@ -6,7 +6,7 @@
 				<h3>{lang}Script Path{/lang}</h3>
 			  </div>
 			  <div class="content_stack_element_body">
-                              <code class="ln_hght">{$setup_script}</code>
+				<code class="ln_hght">{$setup_script}</code>
 			 </div>
 		</div>
 	

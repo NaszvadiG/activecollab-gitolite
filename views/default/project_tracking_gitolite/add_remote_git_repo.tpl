@@ -27,9 +27,9 @@
                     {wrap field=type}
                         {label for=repositoryUpdateType}{lang}Commit History Update Type{/lang}{/label}
                         <select name='repository[update_type]'>
-                            <option value="1">Frequently</option>
-                            <option value="2">Hourly</option>
-                            <option value="3">Daily</option>
+                            <option value="1">{lang}Frequently{/lang}</option>
+                            <option value="2">{lang}Hourly{/lang}</option>
+                            <option value="3">{lang}Daily{/lang}</option>
                         </select>
                     {/wrap}
                     </div>
@@ -53,13 +53,13 @@
         
         
          <div class ="key_help_remote">
-             <span class="pubkey_warning">Note: Public key of PHP user (<em>{$web_user}</em>), should be added in your remote server account to access repositories.</span>
+             <span class="pubkey_warning">{lang web_user=$web_user}Note: Public key of PHP user (<em>:web_user</em>), should be added in your remote server account to access repositories.{/lang}</span>
              {if !is_array($webuser_pub_key) &&  ($webuser_pub_key == "nokey" || $webuser_pub_key == "nodir")}
                       
-                      <h3><em>To generate a new SSH key, open your terminal login to your remote server with PHP user (<em>{$web_user}</em>) and use code below. </em></h3>
+                      <h3><em>{lang web_user=$web_user}To generate a new SSH key, open your terminal login to your remote server with PHP user (<em>:web_user</em>) and use code below.{/lang}</em></h3>
                       <code class="ssh_code">ssh-keygen -t rsa
                      </code><br /><br />
-                      <h3><em>Use code below to dump your public key and add it in your remote server</em></h3>
+                      <h3><em>{lang}Use code below to dump your public key and add it in your remote server{/lang}</em></h3>
                       <code class="ssh_code">
                          cat ~/.ssh/id_rsa.pub
                       </code>
@@ -67,7 +67,7 @@
               
              {if is_array($webuser_pub_key) &&  $webuser_pub_key|@count > 0}
                       
-                      <h3><em>Please copy following key on your remote server in order to access remote repository.</em></h3>
+                      <h3><em>{lang}Please copy following key on your remote server in order to access remote repository.{/lang}</em></h3>
                       <code class="ssh_code_wrap">{$webuser_pub_key[0]}</code><br /><br />
              {/if}
                   </div>

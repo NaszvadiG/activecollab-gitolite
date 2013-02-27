@@ -7,11 +7,11 @@
           <table cellspacing="0" class="common auto list_items" id="mapping_lists" >
                 <thead>
                     <tr>
-                        <th colspan="3"><strong>Empty Repositories</strong></th>
+                        <th colspan="3"><strong>{lang}Empty Repositories{/lang}</strong></th>
                     </tr>
                     <tr>
-                        <th>User Name</th>
-                        <th class="name">Public Keys</th>
+                        <th>{lang}User Name{/lang}</th>
+                        <th class="name">{lang}Public Keys{/lang}</th>
                     </tr>
                 </thead>
 
@@ -34,7 +34,7 @@
       {else}           
         <div id="no_repos">
                 <p class="empty_page" style="">
-                    There are no empty repositories to display
+                    {lang}There are no empty repositories to display{/lang}
                 </p>
         </div>
     {/if}

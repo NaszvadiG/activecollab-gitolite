@@ -9,8 +9,8 @@
                 <thead>
                     
                     <tr>
-                        <th>Public Keys</th>
-                        <th>activeCollab Users</th>
+                        <th>{lang}Public Keys{/lang}</th>
+                        <th>{lang}activeCollab Users{/lang}</th>
                         
                     </tr>
                 </thead>
@@ -66,8 +66,8 @@
     {else}
       <div id="no_keys">
             <p class="empty_page" style="">
-                No keys to map<br/>
-                <em>Note: The keys which are already present on sever cannot be mapped. </em>
+                {lang}No keys to map{/lang}<br/>
+                <em>{lang}Note: The keys which are already present on sever cannot be mapped.{/lang} </em>
             </p>
         </div>
      {/if}
@@ -82,11 +82,11 @@
              
                 <thead>
                     <tr>
-                        <th colspan="3"><strong>Project's List</strong></th>
+                        <th colspan="3"><strong>{lang}Project's List{/lang}</strong></th>
                     </tr>
                     <tr>
-                        <th>Repository Name</th>
-                        <th>Select Project</th>
+                        <th>{lang}Repository Name{/lang}</th>
+                        <th>{lang}Select Project{/lang}</th>
                     </tr>
                     
                 </thead>
@@ -134,8 +134,8 @@
     {else}
       <div id="no_keys">
             <p class="empty_page" style="">
-                No repositories to map<br/>
-                <em>Note: The repositories which are already mapped will not be shown in list. </em>
+                {lang}No repositories to map{/lang}<br/>
+                <em>{lang}Note: The repositories which are already mapped will not be shown in list.{/lang} </em>
             </p>
         </div>
      {/if}
@@ -207,7 +207,7 @@
             
         if(postData_user_tmp.length == 0)
         {
-            App.Wireframe.Flash.error("Please select atleast one user to map.");
+            App.Wireframe.Flash.error(App.lang("Please select atleast one user to map."));
             return false;
         }
        
@@ -278,7 +278,7 @@
                 
         if(postData_prjs_tmp.length == 0)
         {
-            App.Wireframe.Flash.error("Please select atleast one project to map.");
+            App.Wireframe.Flash.error(App.lang("Please select atleast one project to map."));
             return false;
         }
         $('#map_project_loading_img').show();

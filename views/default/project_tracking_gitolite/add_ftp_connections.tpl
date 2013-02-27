@@ -12,12 +12,12 @@
           {wrap field=web_hooks}
             <table class="form form_field validate_callback validate_days_off" id="tb_ftp_connection" style="{if !is_foreachable($ftp_details_exists)}display: none{/if}">
                 <tr>
-                    <th>Host</th>
-                    <th>Port</th>
-                    <th>Username</th>
-                    <th>Password</th>
-                    <th>Branch</th>
-                    <th>Action</th>
+                    <th>{lang}Host{/lang}</th>
+                    <th>{lang}Port{/lang}</th>
+                    <th>{lang}Username{/lang}</th>
+                    <th>{lang}Password{/lang}</th>
+                    <th>{lang}Branch{/lang}</th>
+                    <th>{lang}Action{/lang}</th>
                     <th></th>
                 </tr>
                 {if is_foreachable($ftp_details_exists)}

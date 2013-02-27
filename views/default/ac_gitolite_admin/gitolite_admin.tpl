@@ -6,8 +6,8 @@
   <input type="hidden" value = "{$is_enable}" id = "is_enabled">
   <input type="hidden" value="{$git_server_location}" id="server_location">
   <input type="hidden" value="{$map_users_url}" id="map_users_url">
-   <input type="hidden" value="{$is_remote}" id="is_remote">
-   <input type="hidden" value="{$gitolite_admin_url}" id="no_map_url">
+  <input type="hidden" value="{$is_remote}" id="is_remote">
+  <input type="hidden" value="{$gitolite_admin_url}" id="no_map_url">
   
 <div id="gitolite_admin">
 
@@ -31,7 +31,7 @@
         </div>-->
         <div class="content_stack_element">
             <div class="content_stack_element_info">
-              <h3>{lang} Gitolite Server Address{/lang}</h3>
+              <h3>{lang}Gitolite Server Address{/lang}</h3>
             </div>
         
             <div class="content_stack_element_body">
@@ -55,14 +55,14 @@
                      {text_field name="gitoliteserveradd" id=gitoliteserveradd class="text_field" value = "{$server_name}"  label="Gitolite Server Address" required=true}
                      <input type="hidden" name="gitoliteadmin[gitoliteserveradd]" value="{$server_name}">
                  {/if}
-                <p class="aid" id="aid_server">e.g.{$server_name}</p>
+                <p class="aid" id="aid_server">{lang}e.g.{/lang} {$server_name}</p>
                 </div>
                 
                 </div>
                
                  {/wrap}
                  <div>
-                     <div class="gl_user_ui_orphan"><strong>Is Remote Setup ?</strong></div>
+                     <div class="gl_user_ui_orphan"><strong>{lang}Is Remote Setup ?{/lang}</strong></div>
                      <div class="gl_user_ui_orphan">
                       {if $is_enable == 0}   
                           <input type = "checkbox" id="git_server_location" name="gitoliteadmin[git_server_location]" value="remote" {if $git_server_location == "remote"} checked="checked" {/if}>
@@ -96,7 +96,7 @@
                   </code>
                       <p class="aid">{lang}Please login to your local activecollab server using SSH and run the above command.{/lang}</p>
                  {else}
-                     <span class="ssh_code">Web user not found.</span>
+                     <span class="ssh_code">{lang}Web user not found.{/lang}</span>
                  {/if}
                 {/wrap}
               </div>
@@ -109,10 +109,10 @@
                 <!--<span class="pubkey_warning">Note: Public key of PHP user (<em>{$web_user}</em>), should be added in your remote server account to access repositories.</span>-->
                 {if !is_array($webuser_pub_key) &&  ($webuser_pub_key == "nokey" || $webuser_pub_key == "nodir")}
 
-                         <h3><em>To generate a new SSH key, open your terminal login to your remote server with PHP user (<em>{$web_user}</em>) and use code below. </em></h3>
+                         <h3><em>{lang}To generate a new SSH key, open your terminal login to your remote server with PHP user (<em>:web_user</em>) and use code below.{/lang}</em></h3>
                          <code class="ssh_code">ssh-keygen -t rsa
                         </code><br /><br />
-                         <h3><em>Use code below to dump your public key and add it in your remote server</em></h3>
+                         <h3><em>{lang}Use code below to dump your public key and add it in your remote server{/lang}</em></h3>
                          <code class="ssh_code">
                             cat ~/.ssh/id_rsa.pub
                          </code>
@@ -121,20 +121,20 @@
                 {if is_array($webuser_pub_key) &&  $webuser_pub_key|@count > 0}
                     <ul>
                         <li>
-                            <h3>Login to your remote Gitolite server.</h3>
+                            <h3>{lang}Login to your remote Gitolite server.{/lang}</h3>
                         </li>
                         <li>
-                            <h3>Run following command to login with <span class = "chng_usr">{$gitoliteuser}</span> user.</h3>
+                            <h3>{lang gitoliteuser=$gitoliteuser}Run following command to login with <span class = "chng_usr">:gitoliteuser</span> user.{/lang}</h3>
                             <code class="ssh_code_wrap">sudo su - <span class = "chng_usr">{$gitoliteuser}</code> </span>
                         </li>
                         <li>
                             <!--<h3>Please add following PHP user key ({$web_user}) on your remote server's .gitolite/keydir with name {$web_user}.pub</h3>-->
-                            <h3>Run following command to create public key.</h3>
+                            <h3>{lang}Run following command to create public key.{/lang}</h3>
                             <code class="ssh_code_wrap">echo "{$webuser_pub_key[0]}" > {$web_user}.pub</code><br />
                             
                         </li>
                         <li>
-                            <h3>Setup above created key and allow above key to access gitolite-admin using following command.</h3>
+                            <h3>{lang}Setup above created key and allow above key to access gitolite-admin using following command.{/lang}</h3>
                             <code class="ssh_code_wrap">bin/gitolite setup -pk {$web_user}.pub</code>
                         </li>
                         
@@ -197,8 +197,8 @@
             <div class="content_stack_element_body">
                 {wrap field=title}
                 
-                <em>Your current gitolite setup contains some users and repositories, which you need to map with current activeCollab users and projects.<strong>If you skip this step, old gitolite users and repositories may become inaccesible. </strong></em>
-              <p class="aid">{lang}Please click "Start Import (Mapping)" button below to proceed. {/lang}</p>
+                <em>{lang}Your current gitolite setup contains some users and repositories, which you need to map with current activeCollab users and projects.<strong>If you skip this step, old gitolite users and repositories may become inaccesible.</strong>{/lang}</em>
+              <p class="aid">{lang}Please click "Start Import (Mapping)" button below to proceed.{/lang}</p>
               {/wrap}
             </div>
         </div>
@@ -219,7 +219,7 @@
             <div class="content_stack_element_body">
                 {wrap field=title}
                 
-                <em>Your current gitolite setup seems to be clean, you can proceed with adding new repositories.
+                <em>{lang}Your current gitolite setup seems to be clean, you can proceed with adding new repositories.{/lang}
                     
                 </em>
               <!--<p class="aid">{lang}Please click on import button to map data.{/lang}</p>-->

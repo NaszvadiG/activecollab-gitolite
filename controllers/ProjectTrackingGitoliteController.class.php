@@ -34,12 +34,12 @@
          
          // check whether user have access to add repositories
         if(ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
-         $this->wireframe->actions->add('add_git', 'Create Git Repository', Router::assemble('add_git_repository',array('project_slug' => $this->active_project->getSlug())), array(
+         $this->wireframe->actions->add('add_git', lang('Create Git Repository'), Router::assemble('add_git_repository',array('project_slug' => $this->active_project->getSlug())), array(
                  'onclick' => new FlyoutFormCallback('repository_created', array('width' => 'narrow')),
                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
              );
          
-          $this->wireframe->actions->add('add_remote_git', 'Clone Remote Repository', Router::assemble('add_remote_git',array('project_slug' => $this->active_project->getSlug())), array(
+          $this->wireframe->actions->add('add_remote_git', lang('Clone Remote Repository'), Router::assemble('add_remote_git',array('project_slug' => $this->active_project->getSlug())), array(
                  'onclick' => new FlyoutFormCallback('repository_created', array('width' => '900')),
                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
              );

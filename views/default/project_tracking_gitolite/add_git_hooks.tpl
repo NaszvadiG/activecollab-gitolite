@@ -11,7 +11,7 @@
             <table class="form form_field validate_callback validate_days_off" id="tb_git_hooks" style="{if !is_foreachable($url_array)}display: none{/if}">
               <tr>
                 <th class="name">{label required=yes}Hook URL{/label}</th>
-                <th>Test Connection</th>
+                <th>{lang}Test Connection{/lang}</th>
                 <th></th>
               </tr>
                 {if is_foreachable($url_array)}

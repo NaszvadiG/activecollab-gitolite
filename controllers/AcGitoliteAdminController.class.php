@@ -33,7 +33,7 @@ class AcGitoliteAdminController extends AdminController{
     function index() {
         
        
-        $this->wireframe->actions->add('need_help', 'Need Help?', Router::assemble('need_help_path'), array(
+        $this->wireframe->actions->add('need_help', lang('Need Help?'), Router::assemble('need_help_path'), array(
                  'onclick' => new FlyoutFormCallback('repository_created'),
                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
              );
@@ -148,7 +148,7 @@ class AcGitoliteAdminController extends AdminController{
                                   'gitolite_repo_test_connection_url' => Router::assemble('gitolite_test_connection'),
                                   'save_admin_settings_url' => Router::assemble('save_admin_settings'),  
                                   'setup_script' => $setup_script,
-                                  'web_user'    =>  $_SERVER['USER'],
+                                  'web_user'    =>  $web_user,
                                   'server_name' => $server_name,
                                   'is_enable' => $is_enable,
                                   'is_auto' => $is_auto,

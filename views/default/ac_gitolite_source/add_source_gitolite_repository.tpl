@@ -8,7 +8,7 @@
 		
 		
 		{wrap field=name}
-		  {label for=repositoryName required=yes}{lang}Name{/lang}{/label}
+		  {label for=repositoryName required=yes}Name{/label}
 		  {text_field name='repository[name]' id=repositoryName class='title required' maxlength="150"}
                    <p class="aid">{lang}Only a-z, A-Z, hypens(-), numbers(1,2..) are allowed (eg. wordpress-project12).{/lang}</p>
 		{/wrap}
@@ -16,20 +16,21 @@
 		<div class="clear"></div>
 		
 		{wrap field=users}
-		  {label}{lang}People In Project{/lang}{/label}
+		  {label}People In Project{/label}
                   
                   {if $no_key_warning == 1}
-                      <span class="pubkey_warning">Please <a target="_blank" href="{$view_url}">add your SSH key here</a> to set permission for yourself.</span>
+                      <span class="pubkey_warning">{lang view_url=$view_url}Please <a target="_blank" href=":view_url">add your SSH key here</a> to set permission for yourself.{/lang}</span>
                   {/if}
                   <table>
                    {if $curr_users}
                       
                            <tr>
-                               <th>Name</th>
-                               <th>No Access</th>
-                               <th>Read Only</th>
-                               <th>Read/Write</th>
+                               <th>{lang}Name{/lang}</th>
+                               <th>{lang}No Access{/lang}</th>
+                               <th>{lang}Read Only{/lang}</th>
+                               <th>{lang}Read/Write{/lang}</th>
                            </tr>
+                           
                         {foreach from=$curr_users item=entry key=name} 
                               <tr>
                                   <td>{$entry}</td>
@@ -43,12 +44,12 @@
                         <tr>
                             <td colspan="4">&nbsp;</td>
                         </tr><tr>
-                            <td colspan="4"><em> Note:&nbsp;&nbsp;Some users may not be visible here because public keys are not added.</em></td>
+                            <td colspan="4"><em> {lang}Note:&nbsp;&nbsp;Some users may not be visible here because public keys are not added.{/lang}</em></td>
                         </tr>
                  {else} 
                      
                      <tr>
-                         <td colspan="4" style="text-align: center;">No users with public keys found.</td>
+                         <td colspan="4" style="text-align: center;">{lang}No users with public keys found.{/lang}</td>
                        
                      </tr>
                  {/if}
@@ -59,11 +60,11 @@
                 <div id="sourceAuthenticateWrapper">
                     <div class="col">
                     {wrap field=type}
-                        {label for=repositoryUpdateType}{lang}Commit History Update Type{/lang}{/label}
+                        {label for=repositoryUpdateType}Commit History Update Type{/label}
                         <select name='repository[update_type]'>
-                            <option value="1">Frequently</option>
-                            <option value="2">Hourly</option>
-                            <option value="3">Daily</option>
+                            <option value="1">{lang}Frequently{/lang}</option>
+                            <option value="2">{lang}Hourly{/lang}</option>
+                            <option value="3">{lang}Daily{/lang}</option>
                         </select>
                     {/wrap}
                     </div>
@@ -94,8 +95,7 @@
 {else}
     <div id="repository_create_git">
         <div class="fields_wrapper">
-            <strong style="text-align: center">Can't find gitolite admin. Please set settings from Gitollite Admin panel 
-                    using Administration or contact administrator.</strong>
+            <strong style="text-align: center">{lang}Can't find gitolite admin. Please set settings from Gitollite Admin panel using Administration or contact administrator.{/lang}</strong>
         </div>
     </div>
 {/if}
