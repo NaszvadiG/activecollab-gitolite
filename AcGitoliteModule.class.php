@@ -16,7 +16,7 @@ class AcGitoliteModule extends AngieModule {
      */
     protected $name = 'ac_gitolite';
     
-    protected $version = '1.3.1';
+    protected $version = '1.3.2';
 
     /**
      * Define module routes
