@@ -385,7 +385,7 @@
                         throw $errors;
                     }
                     DB::commit('Repository created @ ' . __CLASS__);
-                    $this->response->respondWithData($this->project_object_repository);
+    	            $this->response->respondWithData($this->active_repository);
                  }
                 catch (Exception $e)
                 {  
