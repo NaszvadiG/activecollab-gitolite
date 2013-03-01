@@ -24,5 +24,8 @@ V 1.3.2 [2013, Feb 28]
 ================================================================================
 - Improved stability and transalation. Patch cotributed by Sebastian Tänzer from http://taenzer.me
 
+V 1.3.3 [2013, Mar 1]
+================================================================================
+- Fixed error that showed up on activeCollab 3.2.11 
 
 
