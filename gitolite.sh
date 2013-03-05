@@ -130,7 +130,7 @@ then
 	then
 		# Install Open SSH Server And Git
 		echo -e "\033[34m Installing Open SSH Server, Git and Curl... \e[0m"
-		yum -y install openssh-server git-core curl perl-Time-HiRes & >l $LOGFILE \
+		yum -y install openssh-server git-core curl perl-Time-HiRes &>> $LOGFILE \
 		|| OwnError "Unable To Install Open SSH Server, Git, Curl And perl-Time-HiRes"
 	fi
 fi
