@@ -53,13 +53,13 @@ KERNELRELEASE=`uname -r`
 
 if [ "$KERNEL" = "Linux" ]
 then
-	if [ -f /etc/redhat-release ]
-	then
-		LINUXDISTRO=RedHat
-
-	elif [ -f cat /etc/centos-release ]
+	if [ -f /etc/centos-release ]
 	then
 		LINUXDISTRO=CentOS
+
+	elif [ -f /etc/redhat-release ]
+	then
+		LINUXDISTRO=RedHat
 
 
 	elif [ -f /etc/lsb-release ]
@@ -73,7 +73,7 @@ then
 	else
         	echo | tee -ai $LOGFILE
 	       	echo -e "\033[31m Currently This Script Supports Only \
-		Redhat, CentOS, Ubuntu and Debian Linux Distro \e[0m"
+		CentOS, Redhat, Ubuntu and Debian Linux Distro \e[0m"
        		exit 200
 	fi
 fi
@@ -90,20 +90,23 @@ then
 	GITCORE=$(echo $?)
 	dpkg --list | grep curl &>> $LOGFILE
 	CURL=$(echo $?)
-	echo Checking Installed Packages = $GITCORE $OPENSSH $CURL &>> $LOGFILE
+	dpkg --list | grep sudo &>> $LOGFILE
+	SUDO=$(echo $?)
+
+	echo Checking Installed Packages = $GITCORE $OPENSSH $CURL $SUDO &>> $LOGFILE
 
 
 	# Install Git, Curl & Open SSH If It Not Installed
-	if [ $OPENSSH -ne 0 ] || [ $GITCORE -ne 0 ] || [ $CURL -ne 0 ]
+	if [ $OPENSSH -ne 0 ] || [ $GITCORE -ne 0 ] || [ $CURL -ne 0 ] || [ $SUDO -ne 0 ]
 	then
 		# Update Cache
 		echo -e "\033[34m Updating APT Cache... \e[0m" | tee -ai $LOGFILE
-		sudo apt-get update || OwnError "Unable To Update APT Cache"
+		apt-get update || OwnError "Unable To Update APT Cache"
 
 		# Install Open SSH Server And Git
 		echo -e "\033[34m Installing Open SSH Server, Git and Curl... \e[0m"
-		sudo apt-get -y install openssh-server git-core curl &>> $LOGFILE \
-		|| OwnError "Unable To Install Open SSH Server, Git and Curl "
+		apt-get -y install openssh-server git-core curl sudo &>> $LOGFILE \
+		|| OwnError "Unable To Install Open SSH Server, Git, Curl And Sudo "
 	fi
 elif [ "$LINUXDISTRO" = "RedHat" ] || [ "$LINUXDISTRO" = "CentOS" ] 
 then
@@ -117,16 +120,18 @@ then
 	GITCORE=$(echo $?)
 	rpm -qa | grep curl &>> $LOGFILE
 	CURL=$(echo $?)
-	echo Checking Installed Packages = $GITCORE $OPENSSH $CURL &>> $LOGFILE
+	rpm -qa | grep perl-Time-HiRes &>> $LOGFILE
+	PERL=$(echo $?)
+	echo Checking Installed Packages = $GITCORE $OPENSSH $CURL $PERL &>> $LOGFILE
 
 
 	# Install Git, Curl & Open SSH If It Not Installed
-	if [ $OPENSSH -ne 0 ] || [ $GITCORE -ne 0 ] || [ $CURL -ne 0 ]
+	if [ $OPENSSH -ne 0 ] || [ $GITCORE -ne 0 ] || [ $CURL -ne 0 ] || [ $PERL -ne 0 ]
 	then
 		# Install Open SSH Server And Git
 		echo -e "\033[34m Installing Open SSH Server, Git and Curl... \e[0m"
-		sudo yum -y install openssh-server git-core curl &>> $LOGFILE \
-		|| OwnError "Unable To Install Open SSH Server, Git and Curl "
+		yum -y install openssh-server git-core curl perl-Time-HiRes & >l $LOGFILE \
+		|| OwnError "Unable To Install Open SSH Server, Git, Curl And perl-Time-HiRes"
 	fi
 fi
 
@@ -176,7 +181,7 @@ then
 
 	# Redhat Is More Secure Than Debian and Ubuntu
 	# So Need To Set Read & Execute Permission For Groups/Others
-	sudo chmod 755 /home/$GITUSER
+	sudo chmod 750 /home/$GITUSER
 fi
 
 # Copy Skeleton Contents
@@ -230,7 +235,13 @@ fi
 
 # Add Web User to Git Group
 echo -e "\033[34m Adding $WEBUSER to $GITUSER Group  \e[0m" | tee -ai $LOGFILE
-sudo adduser $WEBUSER $GITUSER &>> $LOGFILE
+if [ "$LINUXDISTRO" = "Debian" ] || [ "$LINUXDISTRO" = "Ubuntu" ]
+then
+	sudo adduser $WEBUSER $GITUSER &>> $LOGFILE
+elif [ "$LINUXDISTRO" = "RedHat" ] || [ "$LINUXDISTRO" = "CentOS" ]
+then
+	sudo usermod -a -G $GITUSER $WEBUSER
+fi
 
 # Get The Web User Home Dir Path
 WEBUSERHOME=$(grep $WEBUSER: /etc/passwd | cut -d':' -f6 | head -n1)
@@ -247,7 +258,7 @@ ls $WEBUSERHOME/.ssh &>> tee -ai $LOGFILE
 if [ $? -ne 0 ]
 then
 	echo -e "\033[34m Creating .ssh Directory \e[0m" | tee -ai $LOGFILE
-	sudo mkdir $WEBUSERHOME/.ssh || OwnError "Unable To Create $WEBUSERHOME/.ssh"
+	sudo mkdir -p $WEBUSERHOME/.ssh || OwnError "Unable To Create $WEBUSERHOME/.ssh"
 	sudo chown -R $WEBUSER:$WEBUSER $WEBUSERHOME/.ssh \
 	|| OwnError "Unable To Change Ownership (chown) .ssh"
 fi
