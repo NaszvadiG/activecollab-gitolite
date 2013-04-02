@@ -161,7 +161,7 @@
         function get_setup_path($path = TRUE)
         {
             $path = exec("cd ../custom/modules/ac_gitolite/ && pwd");
-            $script = "sudo bash $path/gitolite.sh git ".' '.GitoliteAdmin::get_web_user();
+            $script = "sudo bash $path/gitolite.sh <span class='gitolite-user'>git</span> ".' '.GitoliteAdmin::get_web_user() . ' ' . GitoliteAdmin::get_server_name() .' ' . substr(LICENSE_KEY, 0, 5) ;
             return $script;
         }
         

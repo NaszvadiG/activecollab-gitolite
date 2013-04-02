@@ -185,3 +185,6 @@ li#page_action_branches .title_action_button {
     background-image: url("http://git2.rtcamp.info/public/assets/images/ac_gitolite/default/icons/16X16-git.png");
 }
 */
+.hidden{
+    display: none;
+}

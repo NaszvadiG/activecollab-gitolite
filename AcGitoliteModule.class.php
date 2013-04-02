@@ -40,6 +40,10 @@ class AcGitoliteModule extends AngieModule {
         Router::map('repository_update', '/projects/:project_slug/repositories/:project_source_repository_id/update', array('controller'=>'project_tracking_gitolite', 'action'=>'update'), array('project_source_repository_id'=>Router::MATCH_ID));
         Router::map('add_remote_git', '/projects/:project_slug/repositories/add-remote-git', array('controller'=>'project_tracking_gitolite', 'action'=>'add_remote_git_repo'));
         Router::map('save_admin_settings', 'admin/save_admin_settings', array('controller'=>'ac_gitolite_admin', 'action'=>'save_admin_settings'));
+        
+        Router::map('check_user_exists', 'admin/check_user_exists', array('controller'=>'ac_gitolite_admin', 'action'=>'check_user_exists'));
+        
+        
         Router::map('map_users', 'admin/map_users', array('controller'=>'ac_gitolite_admin', 'action'=>'map_conf_user'));
         Router::map('map_repos', 'admin/map_repos', array('controller'=>'ac_gitolite_admin', 'action'=>'map_conf_repos'));
         Router::map('render_after_clone', 'admin/render_after_clone', array('controller'=>'ac_gitolite_admin', 'action'=>'render_after_clone_conf'));

@@ -147,6 +147,7 @@ class AcGitoliteAdminController extends AdminController{
                                   'gitoliteadminpath_show' => $gitoliteadminpath_show,
                                   'gitolite_repo_test_connection_url' => Router::assemble('gitolite_test_connection'),
                                   'save_admin_settings_url' => Router::assemble('save_admin_settings'),  
+                                  'check_user_exists_url' => Router::assemble('check_user_exists'),  
                                   'setup_script' => $setup_script,
                                   'web_user'    =>  $web_user,
                                   'server_name' => $server_name,
@@ -306,6 +307,33 @@ class AcGitoliteAdminController extends AdminController{
     }
   }
   
+  function check_user_exists(){
+       if(!self::exec_enabled()){
+             die("Please enable `exec` on this sever");
+       }
+       if (!(array_var($_REQUEST, 'user'))) {
+            die('username is empty');     
+       } //if
+       $comd = "id ".array_var($_REQUEST, 'user');
+       exec($comd,$output);
+       if(!isset($_REQUEST["existing"]))
+           $_REQUEST["existing"]="false";
+       
+       if($_REQUEST["existing"] == "true"){
+             if(empty($output)){
+                 die("User doesnot exists,Please check  username");
+             }else{
+                 die("ok");
+             }
+             
+        }else{
+             if(empty($output)){
+                 die("ok");
+             }else{
+                 die("User already exists,Please choose a diffrent username");
+             }
+        }
+  }
   
   /**
    * Save admin settings.
@@ -394,7 +422,7 @@ class AcGitoliteAdminController extends AdminController{
          $settings = GitoliteAdmin :: get_admin_settings();
          if(isset($settings["gitoliteuser"]) && $settings["gitoliteuser"] != "")
          {
-            $setup_script = str_replace(" git"," ".$settings["gitoliteuser"],$setup_script);
+            $setup_script = str_replace(" <span class='gitolite-user'>git<span>"," ".$settings["gitoliteuser"],$setup_script);
          }
          
          $this->response->assign(
