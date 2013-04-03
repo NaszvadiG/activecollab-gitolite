@@ -37,18 +37,18 @@
                         {lang}Gitolite Installation{/lang}
                     </li>
                     <li class="step">
-                        {lang}Gitolite Server Type{/lang}
+                        {lang}Gitolite Location{/lang}
                     </li>
                     <li class="step">
-                        {lang}Gitolite Setup Script{/lang}
-                    </li>
-
-                    <li class="step">
-                        {lang}Gitolite Server Detail{/lang}
+                        {lang}Gitolite Config{/lang}
                     </li>
                     <li class="step">
-                        {lang}Gitolite Admin Path{/lang}
+                        {lang}SSH Port{/lang}
                     </li>
+                    <li class="step">
+                        {lang}External Commands{/lang}
+                    </li>
+                    
                     <li class="step">
                         {lang}Connecting Gitolite server{/lang}
                     </li>
@@ -67,26 +67,27 @@
                     <div class="content_stack_element_body active">
                         {wrap field=gitoliteservertype}
                         <label>
+                            <input type = "radio" id="git_installation_existing" name="gitoliteadmin_installation_type" value="existing" />
+                            {lang}YES. I already have gitolite installed.{/lang}
+                        </label> <br />
+                        <label>
                             <input type = "radio" id="git_installation_fresh" name="gitoliteadmin_installation_type" value="fresh" />
-                            {lang}I want to install gitolite server{/lang}
+                            {lang}NO. I want to install gitolite.{/lang}
                         </label>
                         <br />
-                        <label>
-                            <input type = "radio" id="git_installation_existing" name="gitoliteadmin_installation_type" value="existing" />
-                            {lang}I already setup gitolite server{/lang}
-                        </label>
+                        
                         {/wrap}
                     </div>
                     <div class="content_stack_element_body" style="display: none">
                         {wrap field=gitoliteservertype}
                         <label>
                             <input type = "radio" id="git_server_location_local" name="gitoliteadmin[git_server_location]" value="local" {if $git_server_location == "local"} checked="checked" {/if}>
-                            {lang}Local{/lang}
+                            {lang}LOCAL. Gitolite is on same machine on which this activeCollab is running{/lang}
                         </label>
                         <br />
                         <label>
                             <input type = "radio" id="git_server_location_remote" name="gitoliteadmin[git_server_location]" value="remote" {if $git_server_location == "remote"} checked="checked" {/if}>
-                            {lang}Remote{/lang}
+                            {lang}REMOTE. Gitolite is on diffrent machine{/lang}
                         </label>
                         {/wrap}
                     </div>
@@ -96,9 +97,9 @@
                         {wrap field=gitoliteuser}
                         <div class="gl_user_ui_half">
                             {if $is_enable == 0}
-                                {text_field name="gitoliteadmin[gitoliteuser]" id=gitoliteuser class="text_field" value = "{$gitoliteuser}"  label="Gitolite User" required=true}
+                                {text_field name="gitoliteadmin[gitoliteuser]" id=gitoliteuser class="text_field" value = "{$gitoliteuser}"  label="Gitolites Linux User"  required=true}
                             {else}
-                                {text_field name="gitoliteuser" id=gitoliteuser class="text_field" value = "{$gitoliteuser}"  label="Gitolite User" required=true}
+                                {text_field name="gitoliteuser" id=gitoliteuser class="text_field" value = "{$gitoliteuser}"  label="Gitolites Linux User" required=true}
                                 <input type="hidden" name="gitoliteadmin[gitoliteuser]" value="{$gitoliteuser}">
                             {/if}
                             <p class="aid">e.g. git</p>
@@ -108,9 +109,9 @@
 
                             <div class="gl_user_ui_half">
                                 {if $is_enable == 0}   
-                                    {text_field name="gitoliteadmin[gitoliteserveradd]" value = "{$server_name}" id=gitoliteserveradd label = "Gitolite Server Address" required=true}
+                                    {text_field name="gitoliteadmin[gitoliteserveradd]" value = "{$server_name}" id=gitoliteserveradd label = "Gitolite Server Domain Name/IP address" required=true}
                                 {else}  
-                                    {text_field name="gitoliteserveradd" id=gitoliteserveradd class="text_field" value = "{$server_name}"  label="Gitolite Server Address" required=true}
+                                    {text_field name="gitoliteserveradd" id=gitoliteserveradd class="text_field" value = "{$server_name}"  label="Gitolite Server Domain Name/IP address" required=true}
                                     <input type="hidden" name="gitoliteadmin[gitoliteserveradd]" value="{$server_name}">
                                 {/if}
                                 <p class="aid" id="aid_server">{lang}e.g.{/lang} {$server_name}</p>
@@ -120,7 +121,12 @@
 
                         {/wrap}
                     </div>
-                    <div class="content_stack_element_body" style="display: none">
+                        <div class="content_stack_element_body" style="display: none" data-validate="port" > 
+                            {wrap field=gitoliteadminpath}
+                                {text_field name="gitoliteadmin[git_ssh_port]" class="text_field"  value="{$git_ssh_port}" id="git_ssh_port" label="Gitolite SSH Port" required=true} 
+                            {/wrap}
+                        </div>
+                    <div class="content_stack_element_body" style="display: none" data-validate="autosetup">
                         <div id="gitolite-instruction-new">
                             {wrap field=help_improve_application}
                             {label}Setup <strong>New</strong> Gitolite Server On <span class='gitolite-type'></span> Machine{/label}
@@ -139,14 +145,14 @@
                             </div>
                             {/wrap}
                         </div>
-                        <div id="gitolite-instruction-existing">
+                        <div id="gitolite-instruction-existing" >
 
                             {wrap field=help_improve_application}
                             {label}Using Existing Gitolite Setup On <span class='gitolite-type'></span> Server{/label}
                             <div class ="">
                                 {wrap field=title}
                                 {label for=pageTitle}Follow below steps{/label}
-                                <!--<span class="pubkey_warning">Note: Public key of PHP user (<em>{$web_user}</em>), should be added in your remote server account to access repositories.</span>-->
+{*                                <!--<span class="pubkey_warning">Note: Public key of PHP user (<em>{$web_user}</em>), should be added in your remote server account to access repositories.</span>-->*}
                                 {if (!is_array($webuser_pub_key) &&  ($webuser_pub_key == "nokey" || $webuser_pub_key == "nodir")) || ( !(is_array($webuser_pub_key) && (strpos(trim($webuser_pub_key[0]),"ssh-rsa") !== false ||  strpos(trim($webuser_pub_key[0]),"ssh-dss") !== false)))}
 
                                     <h3><em>{lang}To generate a new SSH key, open your terminal login to your <span class='gitolite-type'></span> server with PHP user (<em>{$web_user}</em>) and use code below.{/lang}</em></h3>
@@ -190,13 +196,7 @@
                             {/wrap}
                         </div>
                     </div>
-                    <div class="content_stack_element_body" style="display: none" data-validate="autosetup"> 
-                        {wrap field=gitoliteadminpath}
-                        <label>{lang}Gitolite Admin Path{/lang}</label>
-                            {text_field name="gitoliteadminpath_show" value = {$gitoliteadminpath_show} id="gitoliteadminpath_show"  disabled = "disabled"}
-                            <input type="hidden" name="gitoliteadminpath" value="{$gitoliteadminpath}" id="gitoliteadminpath">
-                        {/wrap}
-                    </div>
+                    
                     <div class="content_stack_element_body" style="display: none" data-validate="autosetup" > 
                         <h3 class="error">{lang}Connecting gitolite server ...{/lang}</h3>
                     </div>
@@ -341,6 +341,16 @@
                    $(this).html(serverName);
                 });
             }
+            function port_validate(){
+                var port=$("#git_ssh_port").val();
+                if(isNaN(port)){
+                    App.Wireframe.Flash.error(App.lang("Invalid port number"))
+                }else if(parseInt(port) <0 ||  parseInt(port) > 65536){
+                     App.Wireframe.Flash.error(App.lang("Port is out of range"))
+                }else{
+                    next_step();
+                }
+            }
             $(document).ready(function() {
                 if ($("#gitolite-setup-async_process").length > 0) {
                     $("#gitolite-setup-async_process .executing").append("<img src='" + App.Wireframe.Utils.indicatorUrl() + "' />");
@@ -356,6 +366,9 @@
                             case "autosetup":
                                 start_test();
                                 break;
+                             case "port":
+                                 port_validate();
+                                 break;
                         }
                     } else {
                         next_step();
@@ -473,6 +486,7 @@
                     var serveraddress = $('#gitoliteserveradd').val();
 
                     var admin_dir = $('#gitolite_test_dir').val();
+                    var ssh_port=$("#git_ssh_port").val();
                     var array_process=new Array("connect","permission","setup");
                     if(!errorFlag){
                         next_step();
@@ -490,7 +504,7 @@
                                         }
                                         
                     $(".content_stack_element_body.last").hide();
-                    $.get(test_connection_url, {user: gitoliteuser, engine: "GitRepository", async: true, dir: admin_dir,type:git_server_location, server: serveraddress,case:array_process[rCount-1]},
+                    $.get(test_connection_url, {user: gitoliteuser, engine: "GitRepository", port:ssh_port, async: true, dir: admin_dir,type:git_server_location, server: serveraddress,case:array_process[rCount-1]},
                             function(data) {
                                 $('#test_connection_loading_img').hide();
                                 if (jQuery.trim(data) == 'ok') {

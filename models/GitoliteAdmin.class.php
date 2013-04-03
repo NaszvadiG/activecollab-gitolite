@@ -30,11 +30,18 @@
                {
                    $config_settings = @unserialize($settings['config_settings']);
                }
+               $cloneurl= $config_settings['gitoliteuser']."@".$config_settings['gitoliteserveradd'].":";
+               
+               if(intval($config_settings['git_ssh_port']) !=22){
+                  $cloneurl = "ssh://".$cloneurl. $config_settings['git_ssh_port'] ."/"  ; 
+               }
                $results = array(
                                 'gitoliteuser'=> $config_settings['gitoliteuser'],
                                 'gitoliteserveradd'=> $config_settings['gitoliteserveradd'],
                                 'gitoliteadminpath' => $config_settings['gitoliteadminpath'],
-                                'git_server_location' => $config_settings['git_server_location']
+                                'git_server_location' => $config_settings['git_server_location'],
+                                'git_ssh_port' => $config_settings['git_ssh_port'],
+                                'git_clone_url' =>$cloneurl
                         );
                //'initialize_repo' => $config_settings['initialize_repo'],
                //'ignore_files' => $config_settings['ignore_files']

@@ -140,6 +140,7 @@ class AcGitoliteAdminController extends AdminController{
        $this->response->assign(
                             array('gitoliteuser' =>      $gitoliteuser,
                                   'gitoliteserveradd' => $settings['gitoliteserveradd'],
+                                   'git_ssh_port'=>isset($settings['git_ssh_port'])?$settings['git_ssh_port']:22,
                                   'git_server_location' => $git_server_location,
                                   'gitoliteadmins' =>    $admins,
                                   'webuser' =>           $web_user,
@@ -238,7 +239,7 @@ class AcGitoliteAdminController extends AdminController{
         }
         switch(array_var($_REQUEST, 'case')){
             case "connect":
-                $comd = "ssh -T ".array_var($_GET, 'user')."@".array_var($_GET, 'server')." | grep gitolite-admin | grep 'R W'";
+                $comd = "ssh -p " . array_var($_GET, 'port') ." -T ".array_var($_GET, 'user')."@".array_var($_GET, 'server')." | grep gitolite-admin | grep 'R W'";
                 exec($comd,$output);
                 if(count($output) > 0  && preg_match("/R W/",$output[0]) && preg_match("/gitolite-admin/",$output[0])){
                     die( "ok");

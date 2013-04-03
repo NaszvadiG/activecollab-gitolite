@@ -994,7 +994,7 @@
           if(is_array($chk_gitolite) && sizeof($chk_gitolite) > 0 && $chk_gitolite['chk_gitolite'] > 0)
           {
                 $settings = GitoliteAdmin :: get_admin_settings();
-                $clone_url = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'].":".$this->active_repository->getName().".git";
+                $clone_url = $settings['git_clone_url'].$this->active_repository->getName().".git";
                 $permissions = @unserialize($chk_gitolite['permissions']);
                 if($permissions !== false || $permissions === 'b:0;')
                 {
