@@ -223,7 +223,7 @@ class AcGitoliteAdminController extends AdminController{
      * @return string message
      */
     
-    function test_connection(){
+  function test_connection(){
        
         if (!(array_var($_GET, 'dir')) || !(array_var($_GET, 'user')) || !(array_var($_GET, 'server'))) {
             die(lang('Please fill in all the connection parameters'));     
@@ -236,39 +236,88 @@ class AcGitoliteAdminController extends AdminController{
         {
              die("Please enable `exec` on this sever");
         }
-        
-        $comd = "ssh -T ".array_var($_GET, 'user')."@".array_var($_GET, 'server')." | grep gitolite-admin | grep 'R W'";
-        exec($comd,$output);
-        
-        if(count($output) > 0)
-        {
-            if (preg_match("/R W/",$output[0]) && preg_match("/gitolite-admin/",$output[0]))
-            {
-               if(!is_dir(array_var($_GET, 'dir')))
-               {
+        switch(array_var($_REQUEST, 'case')){
+            case "connect":
+                $comd = "ssh -T ".array_var($_GET, 'user')."@".array_var($_GET, 'server')." | grep gitolite-admin | grep 'R W'";
+                exec($comd,$output);
+                if(count($output) > 0  && preg_match("/R W/",$output[0]) && preg_match("/gitolite-admin/",$output[0])){
+                    die( "ok");
+                }else{
+                     die("Unable to connect to server");
+                }
+                break;
+            case "permission":
+                if(!is_dir(array_var($_GET, 'dir'))){
+                    if(is_writable(array_var($_GET, 'dir'))){
+                        if(isset($_REQUEST["type"]) && $_REQUEST["type"]=="local"){
+                            $comd="echo ~" . array_var($_GET, 'user');
+                            exec($comd,$output);
+                            if(!empty($output) && $output[0] != "~" . array_var($_GET, 'user')){    
+                                if(is_readable($output[0] . "/repositories")){
+                                    die("ok");
+                                }else{
+                                    die($output[0] . "/repositories is not readable" );
+                                }
+                            }else{
+                                die("No Home directory Found for user " . array_var($_GET, 'user'));
+                            }
+                        }else
+                            die("ok");
+                    }else{
+                        die(array_var($_GET, 'dir') . " is not writable");
+                    }
+                    
+                }else{
+                    if(is_writable(array_var($_GET, 'dir'))){
+                        if(isset($_REQUEST["type"]) && $_REQUEST["type"]=="local"){
+                            $comd="echo ~" . array_var($_GET, 'user');
+                            exec($comd,$output);
+                            if(!empty($output) && $output[0] != "~" . array_var($_GET, 'user')){    
+                                if(is_readable($output[0] . "/repositories")){
+                                    die("ok");
+                                }else{
+                                    die($output[0] . "/repositories is not readable" );
+                                }
+                            }else{
+                                die("No Home directory Found for user " . array_var($_GET, 'user'));
+                            }
+                        }else
+                            die("ok");
+                    }else{
+                        die(array_var($_GET, 'dir') . " is not writable");
+                    }
+                }
+                
+                break;
+            case "setup":
+                if(!is_dir(array_var($_GET, 'dir'))){
                     if(mkdir (array_var($_GET, 'dir')))
                     {
-
                         $comd = "cd ".array_var($_GET, 'dir')." &&  git clone ".array_var($_GET, 'user')."@".array_var($_GET, 'server').":gitolite-admin.git || pwd";
                         unset($output);
                         exec($comd,$output);
-                       
                         if(count($output))
                         {
+                           $cmd="cd ". array_var($_GET, 'dir') . "gitolite-admin && git config user.name";
+                           if(empty($output)){
+                               $cmd="git config user.name " . GitoliteAdmin::get_web_user();
+                               $cmd="git config user.email" . GitoliteAdmin::get_web_user() ."@" . array_var($_GET, 'server');
+                           }
                            $conf_path = GIT_FILES_PATH."/gitolite/gitolite-admin/conf/gitolite.conf";
                            $admin_path = GIT_FILES_PATH."/gitolite/gitolite-admin/conf/";
                            $fh = fopen($conf_path, "a+");
                            $webuser = exec("whoami");
+                           
+                           fwrite($fh, "repo "."ac_rt_demo"."\n");
+                           fwrite($fh, "RW+" ."\t"."="."\t".$webuser."\n");
+                           
                            fwrite($fh, "repo "."@all"."\n");
                            fwrite($fh, "RW+" ."\t"."="."\t".$webuser."\n");
+                           fclose($fh);
                            //chdir($admin_path);
                            unset($output);
-                          
-                          
+                           //set global 
                            exec("cd $admin_path && git commit -am 'add php user on all repos' && git push",$output);
-                          
-                          
-                           
                            die("ok");
                         }
                         else
@@ -280,33 +329,64 @@ class AcGitoliteAdminController extends AdminController{
                    {
                         die("Unable to create folder ".array_var($_GET, 'dir')); 
                    }
-            }
-            else
-            {
-               if(is_dir(array_var($_GET, 'dir')."gitolite-admin"))
-               {
-                   die("ok");
-               }
-              else
-              {
-                    $comd = "cd ".array_var($_GET, 'dir')." &&  git clone ".array_var($_GET, 'user')."@".array_var($_GET, 'server').":gitolite-admin.git || pwd";
-                    exec($comd,$output);
+                    
+                }else{
+                     if (is_dir(array_var($_GET, 'dir') . "gitolite-admin")) {
+                        $cmd="cd ". array_var($_GET, 'dir') . "gitolite-admin && git config user.name";
+                        if(empty($output)){
+                           $cmd="git config user.name " . GitoliteAdmin::get_web_user();
+                           $cmd="git config user.email" . GitoliteAdmin::get_web_user() ."@" . array_var($_GET, 'server');
+                        }
+                        $this->_create_demo_repo();
+                        die("ok");
+                    } else {
+                        $comd = "cd " . array_var($_GET, 'dir') . " &&  git clone " . array_var($_GET, 'user') . "@" . array_var($_GET, 'server') . ":gitolite-admin.git || pwd";
+                        exec($comd, $output);
+                        $cmd="cd ". array_var($_GET, 'dir') . "gitolite-admin && git config user.name";
+                        if(empty($output)){
+                           $cmd="git config user.name " . GitoliteAdmin::get_web_user();
+                           $cmd="git config user.email" . GitoliteAdmin::get_web_user() ."@" . array_var($_GET, 'server');
+                        }
+                        $this->_create_demo_repo();
+                        die("ok");
+                    }
+                }
+                break;
+        }
+        die("Some error !!");
+  }
+  function _create_demo_repo(){
+        $conf_path = GIT_FILES_PATH."/gitolite/gitolite-admin/conf/gitolite.conf";
+        $admin_path = GIT_FILES_PATH."/gitolite/gitolite-admin/conf/";
+        
+        $content = file_get_contents($conf_path);
+        if(strpos($content, "ac_rt_demo") === false){
+            $fh = fopen($conf_path, "a+");
+            $webuser = exec("whoami");
+            fwrite($fh, "\nrepo  ac_rt_demo \n");
+            fwrite($fh, "\tRW+ \t = \t".$webuser."\n");
+            fclose($fh);
+            exec("cd $admin_path && git commit -am 'add demo repo' && git push",$output);
+        }else{
+            exec("cd $admin_path && git commit -am 'retry add demo repo' --allow-empty && git push",$output);
+        }
+         if (isset($_REQUEST["type"]) && $_REQUEST["type"] == "local") {
+            $comd = "echo ~" . array_var($_REQUEST, 'user');
+            $output=array();
+            exec($comd, $output);
+            if (!empty($output) && is_dir($output[0]) &&  $output[0] != "~" . array_var($_GET, 'user')) {
+                if (is_readable($output[0] . "/repositories/ac_rt_demo.git")) {
                     die("ok");
-              }
-
+                } else {
+                    die($output[0] . "/repositories/ac_rt_demo.git is not readable");
+                }
+            } else {
+                die("No Home directory Found for user " . array_var($_GET, 'user'));
             }
         }
         else
-        {
-            die("Unable to connect to server");
-        }
-    }
-    else
-    {
-        die("Unable to connect to server");
-    }
+            die("ok");
   }
-  
   function check_user_exists(){
        if(!self::exec_enabled()){
              die("Please enable `exec` on this sever");
