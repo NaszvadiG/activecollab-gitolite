@@ -324,7 +324,7 @@
                     $repo_fk = $this->active_repository->getId();
                     if($repo_fk)
                     {
-                        $clone_url = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'].":".$repo_name;
+                        $clone_url = $settings['git_clone_url'].$repo_name;
                         $body = $clone_url;
                         
                         $this->project_object_repository->setName($this->active_repository->getName());
@@ -352,10 +352,10 @@
                                 
                                 if($is_remote)
                                 {
-                                   $git_server = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'];
+                                   $git_server = $settings['git_clone_url'];
                                    //$command = "cd ".$settings['gitoliteadminpath']." && git clone ".$git_server.":".$repo_name;
                                    chdir(GIT_FILES_PATH);
-                                   $command = "git clone ".$git_server.":".$repo_name;
+                                   $command = "git clone ".$git_server.$repo_name;
                                    exec($command,$output,$return_var);
                                     /*@set_time_limit(0);
                                     $pull_all_branches = ProjectGitolite::pull_branches($repo_path);

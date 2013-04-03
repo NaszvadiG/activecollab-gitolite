@@ -237,6 +237,11 @@ class AcGitoliteAdminController extends AdminController{
         {
              die("Please enable `exec` on this sever");
         }
+        
+        $cloneurl= array_var($_GET, 'user')."@".array_var($_GET, 'server').":";
+        if (intval(array_var($_GET, 'port')) != 22) {
+            $cloneurl = "ssh://" . $cloneurl . array_var($_GET, 'port') . "/";
+        }
         switch(array_var($_REQUEST, 'case')){
             case "connect":
                 $comd = "ssh -p " . array_var($_GET, 'port') ." -T ".array_var($_GET, 'user')."@".array_var($_GET, 'server')." | grep gitolite-admin | grep 'R W'";
@@ -294,7 +299,7 @@ class AcGitoliteAdminController extends AdminController{
                 if(!is_dir(array_var($_GET, 'dir'))){
                     if(mkdir (array_var($_GET, 'dir')))
                     {
-                        $comd = "cd ".array_var($_GET, 'dir')." &&  git clone ".array_var($_GET, 'user')."@".array_var($_GET, 'server').":gitolite-admin.git || pwd";
+                        $comd = "cd ".array_var($_GET, 'dir')." &&  git clone ".$cloneurl."gitolite-admin.git || pwd";
                         unset($output);
                         exec($comd,$output);
                         if(count($output))
@@ -341,7 +346,7 @@ class AcGitoliteAdminController extends AdminController{
                         $this->_create_demo_repo();
                         die("ok");
                     } else {
-                        $comd = "cd " . array_var($_GET, 'dir') . " &&  git clone " . array_var($_GET, 'user') . "@" . array_var($_GET, 'server') . ":gitolite-admin.git || pwd";
+                        $comd = "cd " . array_var($_GET, 'dir') . " &&  git clone " . $cloneurl. "gitolite-admin.git || pwd";
                         exec($comd, $output);
                         $cmd="cd ". array_var($_GET, 'dir') . "gitolite-admin && git config user.name";
                         if(empty($output)){
@@ -778,10 +783,10 @@ class AcGitoliteAdminController extends AdminController{
                             {
                                
                                 DB::commit('Repository mapped @ ' . __CLASS__);
-                                $git_server = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'];
+                                $git_server = $settings['git_clone_url'];
                                 chdir(GIT_FILES_PATH);
                                 //cd ".GIT_FILES_PATH." && 
-                                $command = "git clone ".$git_server.":".$repo_name." $folder_name";
+                                $command = "git clone ".$git_server.$repo_name." $folder_name";
                                 //$command = "git clone ".$git_server.":".$repo_name;
                                 exec($command,$output,$return_var);
                                 $out = GitoliteAdmin::update_remote_repo($repo_fk);
