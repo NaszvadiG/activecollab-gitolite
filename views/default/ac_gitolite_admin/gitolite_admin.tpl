@@ -32,7 +32,7 @@
 
         <div class="content_stack_element">
             <div class="content_stack_element_info">
-                <ul class="async_process" id="gitolite-setup-async_process">
+                <ul class="async_process my_process" id="gitolite-setup-async_process">
                     <li class="step executing">
                         {lang}Gitolite Installation{/lang}
                     </li>
@@ -66,11 +66,12 @@
                 <div class="content_stack_wrapper">
                     <div class="content_stack_element_body active">
                         {wrap field=gitoliteservertype}
-                        <label>
-                            <input type = "radio" id="git_installation_existing" name="gitoliteadmin_installation_type" value="existing" />
+                        <label class="header">
+                            <input type = "radio" id="git_installation_existing" name="gitoliteadmin_installation_type" checked="checked" value="existing" />
                             {lang}YES. I already have gitolite installed.{/lang}
                         </label> <br />
-                        <label>
+                        <br />
+                        <label class="header">
                             <input type = "radio" id="git_installation_fresh" name="gitoliteadmin_installation_type" value="fresh" />
                             {lang}NO. I want to install gitolite.{/lang}
                         </label>
@@ -80,12 +81,13 @@
                     </div>
                     <div class="content_stack_element_body" style="display: none">
                         {wrap field=gitoliteservertype}
-                        <label>
+                        <label class="header">
                             <input type = "radio" id="git_server_location_local" name="gitoliteadmin[git_server_location]" value="local" {if $git_server_location == "local"} checked="checked" {/if}>
                             {lang}LOCAL. Gitolite is on same machine on which this activeCollab is running{/lang}
                         </label>
                         <br />
-                        <label>
+                        <br />
+                        <label class="header">
                             <input type = "radio" id="git_server_location_remote" name="gitoliteadmin[git_server_location]" value="remote" {if $git_server_location == "remote"} checked="checked" {/if}>
                             {lang}REMOTE. Gitolite is on diffrent machine{/lang}
                         </label>
@@ -97,9 +99,9 @@
                         {wrap field=gitoliteuser}
                         <div class="gl_user_ui_half">
                             {if $is_enable == 0}
-                                {text_field name="gitoliteadmin[gitoliteuser]" id=gitoliteuser class="text_field" value = "{$gitoliteuser}"  label="Gitolites Linux User"  required=true}
+                                {text_field name="gitoliteadmin[gitoliteuser]" id=gitoliteuser class="text_field small" value = "{$gitoliteuser}"  label="Gitolite's Linux User"  required=true}
                             {else}
-                                {text_field name="gitoliteuser" id=gitoliteuser class="text_field" value = "{$gitoliteuser}"  label="Gitolites Linux User" required=true}
+                                {text_field name="gitoliteuser" id=gitoliteuser class="text_field small" value = "{$gitoliteuser}"  label="Gitolite's Linux User" required=true}
                                 <input type="hidden" name="gitoliteadmin[gitoliteuser]" value="{$gitoliteuser}">
                             {/if}
                             <p class="aid">e.g. git</p>
@@ -131,17 +133,28 @@
                             {wrap field=help_improve_application}
                             {label}Setup <strong>New</strong> Gitolite Server On <span class='gitolite-type'></span> Machine{/label}
                             <div>
-                                {wrap field=title}
-                                {label for=pageTitle}Gitolite Setup Script{/label}
-                                {if $web_user != ""}
-                                    <code id="script_path">
-                                        {$setup_script nofilter}
-                                    </code>
-                                    <p class="aid">{lang}Please login to your <span class='gitolite-type'></span> activecollab server using SSH and run the above command.{/lang}</p>
-                                {else}
-                                    <span class="ssh_code">{lang}Web user not found.{/lang}</span>
-                                {/if}
-                                {/wrap}
+                                <ul>
+                                    <li>
+                                        {label for=pageTitle}Login to your <span class='gitolite-type'></span> server{/label}
+                                    <p>{lang}Please login to your <span class='gitolite-type'></span> activecollab server using SSH and run the below command.{/lang}</p>
+                                    </li>
+                                    <li>
+                                        {wrap field=title}
+                                        {label for=pageTitle}Run Gitolite Setup Script{/label}
+                                        {if $web_user != ""}
+                                            <code id="script_path">
+                                                {$setup_script nofilter}
+                                            </code>
+
+                                        {else}
+                                            <span class="ssh_code">{lang}Web user not found.{/lang}</span>
+                                        {/if}
+                                        {/wrap}
+                                    </li>
+                                        
+                                </ul>
+                                
+                                                                
                             </div>
                             {/wrap}
                         </div>
@@ -198,14 +211,17 @@
                     </div>
                     
                     <div class="content_stack_element_body" style="display: none" data-validate="autosetup" > 
-                        <h3 class="error">{lang}Connecting gitolite server ...{/lang}</h3>
+                        <h3>{lang}Connecting gitolite server ...{/lang}</h3>
+                        <h3 class="error"></h3>
                     </div>
                     <div class="content_stack_element_body" style="display: none" data-validate="autosetup"> 
-                        <h3 class="error">{lang}Checking Permision...{/lang}...</h3>
+                        <label class="header">{lang}Checking Permision...{/lang}...</label>
+                        <label class="error"></label>
                         <br />                            
                     </div>
                     <div class="content_stack_element_body" style="display: none" data-validate="autosetup"> 
-                        <h3 class="error">{lang}Final Gitolite setup{/lang}</h3>
+                        <label class="header">{lang}Final Gitolite setup{/lang}</label>
+                         <label class="error"></label>
                          <div id="gitolite-not-readable" >
                             {label for=pageTitle}Follow below steps{/label}
                             <h3><em>{lang}To make <spna class = "gitolite-user">{$gitoliteuser}</spna>  readable by PHP user (<em>{$web_user}</em>) use code below.{/lang}</em></h3>
@@ -227,7 +243,8 @@
                     </div>
                     <div class="content_stack_element_body" style="display: none">
                         {wrap field=gitoliteservertype}
-                        <h3>{lang}Setup Done, Please click Save Setting{/lang}</h3>
+                         
+                        <label class="header">{lang}Setup Done, Please click Save Setting{/lang}</label>
                         {/wrap}
                     </div>
                     <div class="content_stack_element_body last">
@@ -303,7 +320,25 @@
 </div>
 {/form}
 {literal}
-    
+    <style>
+        label.header{
+            font-size: 14px;
+        }
+        .my_process li{
+            font-size: 14px;
+        }
+        input[type=text].small{
+            width:100px;
+        }
+        .error{
+            display: block;
+            font-size: 16px;
+            margin-top: 10px;
+            border: 1px solid red;
+            margin-bottom: 10px;
+            background: pink;
+        }
+    </style>
     <script type="text/javascript">
 
         function next_step() {
