@@ -68,12 +68,12 @@
                         {wrap field=gitoliteservertype}
                         <label class="header">
                             <input type = "radio" id="git_installation_existing" name="gitoliteadmin_installation_type" checked="checked" value="existing" />
-                            {lang}YES. I already have gitolite installed.{/lang}
+                            {lang}YES - I already have gitolite installed.{/lang}
                         </label> <br />
                         <br />
                         <label class="header">
                             <input type = "radio" id="git_installation_fresh" name="gitoliteadmin_installation_type" value="fresh" />
-                            {lang}NO. I want to install gitolite.{/lang}
+                            {lang}NO - I want to install gitolite.{/lang}
                         </label>
                         <br />
 
@@ -83,13 +83,13 @@
                         {wrap field=gitoliteservertype}
                         <label class="header">
                             <input type = "radio" id="git_server_location_local" name="gitoliteadmin[git_server_location]" value="local" {if $git_server_location == "local"} checked="checked" {/if}>
-                            {lang}LOCAL. Gitolite is on same machine on which this activeCollab is running{/lang}
+                            {lang}LOCAL - Gitolite is on same machine on which this activeCollab is running{/lang}
                         </label>
                         <br />
                         <br />
                         <label class="header">
                             <input type = "radio" id="git_server_location_remote" name="gitoliteadmin[git_server_location]" value="remote" {if $git_server_location == "remote"} checked="checked" {/if}>
-                            {lang}REMOTE. Gitolite is on diffrent machine{/lang}
+                            {lang}REMOTE - Gitolite is on diffrent machine{/lang}
                         </label>
                         {/wrap}
                     </div>
@@ -336,6 +336,12 @@
             margin-bottom: 10px;
             background: pink;
         }
+        #gitolite_admin .content_stack_element{
+            background: white;
+        }
+        #gitolite_admin .content_stack_element_info{
+            background: #f6f6f6;
+        }
     </style>
     <script type="text/javascript">
 
@@ -353,6 +359,7 @@
                 $(currentExecuting).addClass("ok");
                 $(currentExecuting).addClass("executed");
                 $(currentExecuting).next().addClass("executing");
+                
             } else {
                 return false;
             }
@@ -390,6 +397,7 @@
             }
             $("#gitolite-setup-next").click(function() {
                 //content_stack_element.active
+                $(".content_stack_element_body .error").hide();
                 var thisElement = $(".content_stack_element_body.active");
                 if ($(thisElement).data("validate") != undefined) {
                     switch ($(thisElement).data("validate")) {
@@ -570,6 +578,7 @@
                         errorFlag = true;
                         rCount--;
                         App.Wireframe.Flash.error(App.lang(data));
+                        $(".content_stack_element_body.active .error").show();
                         $(".content_stack_element_body.active .error").html(data);
                         $(".content_stack_element_body.last").show();
 

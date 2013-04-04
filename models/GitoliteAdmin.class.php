@@ -32,7 +32,7 @@
                }
                $cloneurl= $config_settings['gitoliteuser']."@".$config_settings['gitoliteserveradd'].":";
                
-               if(intval($config_settings['git_ssh_port']) !=22){
+               if($config_settings['git_ssh_port'] != "" &&  intval($config_settings['git_ssh_port']) !=22){
                   $cloneurl = "ssh://".$cloneurl. $config_settings['git_ssh_port'] ."/"  ; 
                }
                $results = array(

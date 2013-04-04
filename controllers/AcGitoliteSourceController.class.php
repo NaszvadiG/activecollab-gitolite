@@ -162,7 +162,9 @@ class AcGitoliteSourceController extends SourceAdminController{
                     /* Check form with validation error */
                     $repository_data = $this->request->post('repository');
                     
-                    
+                    if(!isset($repository_data["repo_notification_setting"])){
+                        $repository_data["repo_notification_setting"]="no";
+                    }
                     $errors = new ValidationErrors();    
                     $post_data =  $this->request->post();
                     
