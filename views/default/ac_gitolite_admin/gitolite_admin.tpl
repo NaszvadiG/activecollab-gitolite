@@ -48,7 +48,7 @@
                     <li class="step">
                         {lang}External Commands{/lang}
                     </li>
-                    
+
                     <li class="step">
                         {lang}Connecting Gitolite server{/lang}
                     </li>
@@ -76,7 +76,7 @@
                             {lang}NO. I want to install gitolite.{/lang}
                         </label>
                         <br />
-                        
+
                         {/wrap}
                     </div>
                     <div class="content_stack_element_body" style="display: none">
@@ -123,11 +123,11 @@
 
                         {/wrap}
                     </div>
-                        <div class="content_stack_element_body" style="display: none" data-validate="port" > 
-                            {wrap field=gitoliteadminpath}
-                                {text_field name="gitoliteadmin[git_ssh_port]" class="text_field"  value="{$git_ssh_port}" id="git_ssh_port" label="Gitolite SSH Port" required=true} 
-                            {/wrap}
-                        </div>
+                    <div class="content_stack_element_body" style="display: none" data-validate="port" > 
+                        {wrap field=gitoliteadminpath}
+                            {text_field name="gitoliteadmin[git_ssh_port]" class="text_field"  value="{$git_ssh_port}" id="git_ssh_port" label="Gitolite SSH Port" required=true} 
+                        {/wrap}
+                    </div>
                     <div class="content_stack_element_body" style="display: none" data-validate="autosetup">
                         <div id="gitolite-instruction-new">
                             {wrap field=help_improve_application}
@@ -136,7 +136,7 @@
                                 <ul>
                                     <li>
                                         {label for=pageTitle}Login to your <span class='gitolite-type'></span> server{/label}
-                                    <p>{lang}Please login to your <span class='gitolite-type'></span> activecollab server using SSH and run the below command.{/lang}</p>
+                                        <p>{lang}Please login to your <span class='gitolite-type'></span> activecollab server using SSH and run the below command.{/lang}</p>
                                     </li>
                                     <li>
                                         {label for=pageTitle}Run Gitolite Setup Script{/label}
@@ -148,12 +148,12 @@
                                         {else}
                                             <span class="ssh_code">{lang}Web user not found.{/lang}</span>
                                         {/if}
-                                        
+
                                     </li>
-                                        
+
                                 </ul>
-                                
-                                                                
+
+
                             </div>
                             {/wrap}
                         </div>
@@ -164,7 +164,7 @@
                             <div class ="">
                                 {wrap field=title}
                                 {label for=pageTitle}Follow below steps{/label}
-{*                                <!--<span class="pubkey_warning">Note: Public key of PHP user (<em>{$web_user}</em>), should be added in your remote server account to access repositories.</span>-->*}
+                                {*                                <!--<span class="pubkey_warning">Note: Public key of PHP user (<em>{$web_user}</em>), should be added in your remote server account to access repositories.</span>-->*}
                                 {if (!is_array($webuser_pub_key) &&  ($webuser_pub_key == "nokey" || $webuser_pub_key == "nodir")) || ( !(is_array($webuser_pub_key) && (strpos(trim($webuser_pub_key[0]),"ssh-rsa") !== false ||  strpos(trim($webuser_pub_key[0]),"ssh-dss") !== false)))}
 
                                     <h3><em>{lang}To generate a new SSH key, open your terminal login to your <span class='gitolite-type'></span> server with PHP user (<em>{$web_user}</em>) and use code below.{/lang}</em></h3>
@@ -208,7 +208,7 @@
                             {/wrap}
                         </div>
                     </div>
-                    
+
                     <div class="content_stack_element_body" style="display: none" data-validate="autosetup" > 
                         <h3>{lang}Connecting gitolite server ...{/lang}</h3>
                         <h3 class="error"></h3>
@@ -220,8 +220,8 @@
                     </div>
                     <div class="content_stack_element_body" style="display: none" data-validate="autosetup"> 
                         <label class="header">{lang}Final Gitolite setup{/lang}</label>
-                         <label class="error"></label>
-                         <div id="gitolite-not-readable" >
+                        <label class="error"></label>
+                        <div id="gitolite-not-readable" >
                             {label for=pageTitle}Follow below steps{/label}
                             <h3><em>{lang}To make <spna class = "gitolite-user">{$gitoliteuser}</spna>  readable by PHP user (<em>{$web_user}</em>) use code below.{/lang}</em></h3>
                             <code class="ssh_code">vim ~<span class = "gitolite-user">{$gitoliteuser}</span>/.gitolite.rc
@@ -235,14 +235,14 @@
                             <code class="ssh_code">
                                 sudo rm -r  ~git/repositories/ac_rt_demo.git/
                             </code>
-                            
+
                             <h3><em>{lang}Click next to check again{/lang}</em></h3>
                         </div>   
-                        
+
                     </div>
                     <div class="content_stack_element_body" style="display: none">
                         {wrap field=gitoliteservertype}
-                         
+
                         <label class="header">{lang}Setup Done, Please click Save Setting{/lang}</label>
                         {/wrap}
                     </div>
@@ -357,358 +357,358 @@
                 return false;
             }
         }
-            function show_instructions() {
-                var serverName = $("#gitoliteserveradd").val();
-                var isfresh=false;
-                if ($("#git_installation_fresh").attr("checked") != undefined) {
-                    isfresh=true;
-                }
-                if(isfresh){
-                    $("#gitolite-instruction-new").show();
-                    $("#gitolite-instruction-existing").hide();
-                }else{
-                    $("#gitolite-instruction-new").hide();
-                    $("#gitolite-instruction-existing").show();
-                }
-                $(".gitolite-type").each(function (){
-                   $(this).html(serverName);
-                });
+        function show_instructions() {
+            var serverName = $("#gitoliteserveradd").val();
+            var isfresh = false;
+            if ($("#git_installation_fresh").attr("checked") != undefined) {
+                isfresh = true;
             }
-            function port_validate(){
-                var port=$("#git_ssh_port").val();
-                if(isNaN(port)){
-                    App.Wireframe.Flash.error(App.lang("Invalid port number"))
-                }else if(parseInt(port) <0 ||  parseInt(port) > 65536){
-                     App.Wireframe.Flash.error(App.lang("Port is out of range"))
-                }else{
+            if (isfresh) {
+                $("#gitolite-instruction-new").show();
+                $("#gitolite-instruction-existing").hide();
+            } else {
+                $("#gitolite-instruction-new").hide();
+                $("#gitolite-instruction-existing").show();
+            }
+            $(".gitolite-type").each(function() {
+                $(this).html(serverName);
+            });
+        }
+        function port_validate() {
+            var port = $("#git_ssh_port").val();
+            if (isNaN(port)) {
+                App.Wireframe.Flash.error(App.lang("Invalid port number"))
+            } else if (parseInt(port) < 0 || parseInt(port) > 65536) {
+                App.Wireframe.Flash.error(App.lang("Port is out of range"))
+            } else {
+                next_step();
+            }
+        }
+        $(document).ready(function() {
+            if ($("#gitolite-setup-async_process").length > 0) {
+                $("#gitolite-setup-async_process .executing").append("<img src='" + App.Wireframe.Utils.indicatorUrl() + "' />");
+            }
+            $("#gitolite-setup-next").click(function() {
+                //content_stack_element.active
+                var thisElement = $(".content_stack_element_body.active");
+                if ($(thisElement).data("validate") != undefined) {
+                    switch ($(thisElement).data("validate")) {
+                        case "userexist":
+                            check_user_exits();
+                            break;
+                        case "autosetup":
+                            start_test();
+                            break;
+                        case "port":
+                            port_validate();
+                            break;
+                    }
+                } else {
+                    next_step();
+                }
+
+            });
+            $("#gitolite-setup-prev").click(function() {
+                //content_stack_element.active
+
+                if (errorFlag) {
+                    errorFlag = false;
+                } else {
+                    rCount--;
+                    if (rCount < 0)
+                        rCount = 0;
+                }
+
+
+                var thisElement = $(".content_stack_element_body.active");
+                if ($(thisElement).prev().length > 0) {
+                    $(thisElement).hide();
+                    $(thisElement).removeClass("active");
+                    $(thisElement).prev().addClass("active");
+                    $(thisElement).prev().show();
+                    var currentExecuting = $("#gitolite-setup-async_process .executing");
+                    $("#gitolite-setup-async_process .executing img").remove();
+
+                    if ($(currentExecuting).prev().find("img").length > 0)
+                        $(currentExecuting).prev().find("img").attr("src", App.Wireframe.Utils.indicatorUrl());
+                    else
+                        $(currentExecuting).prev().prepend("<img src='" + App.Wireframe.Utils.indicatorUrl() + "' />");
+
+                    $(currentExecuting).removeClass("executing");
+                    $(currentExecuting).addClass("ok");
+                    $(currentExecuting).addClass("executed");
+                    $(currentExecuting).prev().addClass("executing");
+                } else {
+                    return false;
+                }
+            });
+            function check_user_exits(object) {
+                var isExisting = true;
+                if ($("#git_installation_fresh").attr("checked") != undefined) {
+                    isExisting = false;
+                }
+                if ($("#git_server_location_local").attr("checked") != undefined) {
+                    $.post($("#check_user_exists_url").val(), {user: $("#gitoliteuser").val(), existing: isExisting}, function(data) {
+                        if (data == "ok") {
+                            show_instructions();
+                            next_step();
+                        } else {
+                            App.Wireframe.Flash.error(App.lang(data));
+                        }
+
+                    })
+                } else {
+                    show_instructions();
                     next_step();
                 }
             }
-            $(document).ready(function() {
-                if ($("#gitolite-setup-async_process").length > 0) {
-                    $("#gitolite-setup-async_process .executing").append("<img src='" + App.Wireframe.Utils.indicatorUrl() + "' />");
+
+            $("#maptext").hide();
+            $("#nomaptext").hide();
+
+            if ($('#is_enabled').val() == 1)
+            {
+                $("#gitoliteuser").attr("disabled", "disabled");
+                $("#gitoliteserveradd").attr("disabled", "disabled");
+                $("#git_server_location").attr("disabled", "disabled");
+
+            }
+
+            $("#gitoliteadminpath_show").width(450);
+            function update_git_user() {
+                if ($('#gitoliteuser').val() != "") {
+                    $(".gitolite-user").each(function() {
+                        $(this).html($('#gitoliteuser').val());
+                    })
                 }
-                $("#gitolite-setup-next").click(function() {
-                    //content_stack_element.active
-                    var thisElement = $(".content_stack_element_body.active");
-                    if ($(thisElement).data("validate") != undefined) {
-                        switch ($(thisElement).data("validate")) {
-                            case "userexist":
-                                check_user_exits();
-                                break;
-                            case "autosetup":
-                                start_test();
-                                break;
-                             case "port":
-                                 port_validate();
-                                 break;
-                        }
-                    } else {
-                        next_step();
-                    }
+            }
+            if ($('#gitoliteuser').val() != "")
+            {
+                update_git_user();
+                /**var git_user = $('#old_value').val();
+                 var oldhtml = $('#script_path').html();
+                 
+                 var newhtml = oldhtml.replace(/ git/g, " " + $('#gitoliteuser').val());
+                 $('#script_path').html(newhtml) **/
+            }
+            $('#gitoliteuser').blur(function() {
+                /**
+                 var git_user = $('#gitoliteuser').val();
+                 var oldhtml = $('#script_path').html();
+                 var newhtml = oldhtml.replace(' ' + $('#old_value').val(), " " + $('#gitoliteuser').val());
+                 $('#script_path').html(newhtml) */
+                update_git_user();
+                /*
+                 $('#old_value').val($('#gitoliteuser').val())
+                 // change in instructions for login
+                 var oldhtml = $('#old_value').val();
+                 var newhtml = oldhtml.replace($('#old_value').val(), " " + $('#gitoliteuser').val());
+                 $('.chng_usr').html(newhtml) */
+            });
 
-                });
-                $("#gitolite-setup-prev").click(function() {
-                    //content_stack_element.active
-                    
-                    if(errorFlag){
-                        errorFlag=false;
-                    }else{
-                        rCount--;    
-                        if(rCount<0)
-                            rCount=0;
-                    }
-                   
-                    
-                    var thisElement = $(".content_stack_element_body.active");
-                    if ($(thisElement).prev().length > 0) {
-                        $(thisElement).hide();
-                        $(thisElement).removeClass("active");
-                        $(thisElement).prev().addClass("active");
-                        $(thisElement).prev().show();
-                        var currentExecuting = $("#gitolite-setup-async_process .executing");
-                        $("#gitolite-setup-async_process .executing img").remove();
+            $('#test_connection_loading_img').hide();
 
-                        if ($(currentExecuting).prev().find("img").length > 0)
-                            $(currentExecuting).prev().find("img").attr("src", App.Wireframe.Utils.indicatorUrl());
-                        else
-                            $(currentExecuting).prev().prepend("<img src='" + App.Wireframe.Utils.indicatorUrl() + "' />");
+            $('#save_settings').hide();
+            $('#save_settings_remote').hide();
+            var rCount = 0;
+            var errorFlag = false;
+            function start_test() {
+                var test_connection_url = $('#gitolite_repo_test_connection_url').val();
+                var gitoliteuser = $('#gitoliteuser').val();
+                rCount++;
+                var serveraddress = $('#gitoliteserveradd').val();
 
-                        $(currentExecuting).removeClass("executing");
-                        $(currentExecuting).addClass("ok");
-                        $(currentExecuting).addClass("executed");
-                        $(currentExecuting).prev().addClass("executing");
-                    } else {
-                        return false;
-                    }
-                });
-                function check_user_exits(object) {
-                    var  isExisting=true;
-                    if($("#git_installation_fresh").attr("checked") != undefined){
-                        isExisting=false;
-                    }
-                    if ($("#git_server_location_local").attr("checked") != undefined) {
-                        $.post($("#check_user_exists_url").val(), {user: $("#gitoliteuser").val(),existing:isExisting}, function(data) {
-                            if (data == "ok") {
-                                show_instructions();
-                                next_step();
-                            } else {
-                                App.Wireframe.Flash.error(App.lang(data));
-                            }
-
-                        })
-                    } else {
-                        show_instructions();
-                        next_step();
-                    }
+                var admin_dir = $('#gitolite_test_dir').val();
+                var ssh_port = $("#git_ssh_port").val();
+                var array_process = new Array("connect", "permission", "setup");
+                if (!errorFlag) {
+                    next_step();
+                    errorFlag = false;
                 }
-
-                $("#maptext").hide();
-                $("#nomaptext").hide();
-
-                if ($('#is_enabled').val() == 1)
+                $("#gitolite-not-readable").hide();
+                var git_server_location = "";
+                if ($('#git_server_location_remote').is(":checked"))
                 {
-                    $("#gitoliteuser").attr("disabled", "disabled");
-                    $("#gitoliteserveradd").attr("disabled", "disabled");
-                    $("#git_server_location").attr("disabled", "disabled");
-
+                    git_server_location = "remote";
+                }
+                else
+                {
+                    git_server_location = "local";
                 }
 
-                $("#gitoliteadminpath_show").width(450);
-                function update_git_user(){
-                    if ($('#gitoliteuser').val() != ""){
-                            $(".gitolite-user").each(function (){
-                                $(this).html($('#gitoliteuser').val());
-                            })
-                    }
-                }
-                if ($('#gitoliteuser').val() != "")
-                {   
-                    update_git_user();
-                    /**var git_user = $('#old_value').val();
-                    var oldhtml = $('#script_path').html();
-                    
-                    var newhtml = oldhtml.replace(/ git/g, " " + $('#gitoliteuser').val());
-                    $('#script_path').html(newhtml) **/
-                }
-                $('#gitoliteuser').blur(function() {
-                    /**
-                    var git_user = $('#gitoliteuser').val();
-                    var oldhtml = $('#script_path').html();
-                    var newhtml = oldhtml.replace(' ' + $('#old_value').val(), " " + $('#gitoliteuser').val());
-                    $('#script_path').html(newhtml) */
-                    update_git_user();
-                    /*
-                    $('#old_value').val($('#gitoliteuser').val())
-                    // change in instructions for login
-                    var oldhtml = $('#old_value').val();
-                    var newhtml = oldhtml.replace($('#old_value').val(), " " + $('#gitoliteuser').val());
-                    $('.chng_usr').html(newhtml) */
-                });
-
-                $('#test_connection_loading_img').hide();
-
-                $('#save_settings').hide();
-                $('#save_settings_remote').hide();
-                var rCount = 0;
-                var errorFlag=false;
-                function start_test(){
-                    var test_connection_url = $('#gitolite_repo_test_connection_url').val();
-                    var gitoliteuser = $('#gitoliteuser').val();
-                    rCount++;
-                    var serveraddress = $('#gitoliteserveradd').val();
-
-                    var admin_dir = $('#gitolite_test_dir').val();
-                    var ssh_port=$("#git_ssh_port").val();
-                    var array_process=new Array("connect","permission","setup");
-                    if(!errorFlag){
-                        next_step();
-                        errorFlag=false;
-                    }
-                    $("#gitolite-not-readable").hide();
-                     var git_server_location = "";
-                                        if ($('#git_server_location_remote').is(":checked"))
-                                        {
-                                            git_server_location = "remote";
-                                        }
-                                        else
-                                        {
-                                            git_server_location = "local";
-                                        }
-                                        
-                    $(".content_stack_element_body.last").hide();
-                    $.get(test_connection_url, {user: gitoliteuser, engine: "GitRepository", port:ssh_port, async: true, dir: admin_dir,type:git_server_location, server: serveraddress,case:array_process[rCount-1]},
-                            function(data) {
-                                $('#test_connection_loading_img').hide();
-                                if (jQuery.trim(data) == 'ok') {
-                                    if(array_process.length > rCount){
-                                        start_test();
-                                    }else{
-                                        next_step();
-                                        App.Wireframe.Flash.success(App.lang("Connection Established"));
-                                         var git_server_location = "";
-                                        if ($('#git_server_location_remote').is(":checked"))
-                                        {
-                                            git_server_location = "remote";
-                                        }
-                                        else
-                                        {
-                                            git_server_location = "local";
-                                        }
-                                        if (git_server_location == "remote" && $('#is_enabled').val() == 0)
-                                        {
-                                            $('#save_settings_remote').show();
-                                        }
-                                        else
-                                        {
-                                            $('#save_settings').show();
-                                        }
-                                    }
-                                } else {
-                                    $("#gitolite-not-readable").hide();
-                                    //$("#gitolite-setup-prev").click();
-                                    errorFlag=true;
-                                    rCount--;
-                                    App.Wireframe.Flash.error(App.lang(data));
-                                     $(".content_stack_element_body.active .error").html(data);
-                                    $(".content_stack_element_body.last").show();
-                                    
-                                    if(array_process[rCount] =="setup"){
-                                        if(data.indexOf("not readable") > 0)
-                                            $("#gitolite-not-readable").show();
-                                        
-                                    }
-                                }
-                            });
-                    
-                }
-                
-                $('#test_gitolite_connection').click(function(event) {
-                    var test_connection_url = $('#gitolite_repo_test_connection_url').val();
-                    var gitoliteuser = $('#gitoliteuser').val();
-
-                    var serveraddress = $('#gitoliteserveradd').val();
-
-                    var admin_dir = $('#gitolite_test_dir').val();
-                    $('#test_connection_loading_img').show();
-
-                    $.get(test_connection_url, {user: gitoliteuser, engine: "GitRepository", async: true, dir: admin_dir, server: serveraddress},
-                            function(data) {
-                                $('#test_connection_loading_img').hide();
-                                if (jQuery.trim(data) == 'ok') {
-                                    $("#test_gitolite_connection").hide();
-                                    var git_server_location = $('input[name=gitoliteadmin[git_server_location]]:radio:checked').val();
-                                    if ($('#git_server_location').is(":checked"))
-                                    {
-                                        var git_server_location = "remote";
-                                    }
-                                    else
-                                    {
-                                        var git_server_location = "local";
-                                    }
-                                    if (git_server_location == "remote" && $('#is_enabled').val() == 0)
-                                    {
-                                        $('#save_settings_remote').show();
-                                    }
-                                    else
-                                    {
-                                        $('#save_settings').show();
-                                    }
-                                    App.Wireframe.Flash.success(App.lang("Connection Established"));
-
-
-                                } else {
-                                    App.Wireframe.Flash.error(App.lang(data));
-
-                                }
-                            });
-                    
-                });
-
-                // save gitolite settings and go for merging steps
-                // if not saved already
-                //if($('#is_enabled').val() == 0 && $('#is_remote').val() == 1)    
-                //{
-                $('#save_settings_remote').click(function(event) {
-
-                    var save_admin_settings_url = $('#save_admin_settings_url').val();
-                    var gitoliteuser = $('#gitoliteuser').val();
-
-                    var serveraddress = $('#gitoliteserveradd').val();
-                    //var repository_url = $('#repositoryUrl').val();
-                    //var repository_url = "/opt/lampp/htdocs/gitsource3/ac3-tweaks";
-                    var admin_dir = $('#gitolite_test_dir').val();
-                    $('#test_connection_loading_img').show();
-
-                    //var git_server_location = $('input[name=gitoliteadmin[git_server_location]]:radio:checked').val();
-                    if ($('#git_server_location').is(":checked"))
-                    {
-                        var git_server_location = "remote";
-                    }
-                    else
-                    {
-                        var git_server_location = "local";
-                    }
-                    /*git_server_location */
-                    //$.get(test_connection_url,{url: repository_url, engine: "GitRepository", async : true,dir:admin_dir},
-                    $.get(save_admin_settings_url, {user: gitoliteuser, engine: "GitRepository", async: true, dir: admin_dir, server: serveraddress, server_location: git_server_location},
-                    function(data) {
-                        $('#test_connection_loading_img').hide();
-                        if (jQuery.trim(data) == 'map') {
-                            $("#save_settings").hide();
-                            //$('#next_step_1').show();
-                            //App.Wireframe.Content.set("sadasdasdas")
-                            $("#maptext").show();
-
-                            $('#import_button').click(function() {
-                                document.location.href = $('#map_users_url').val();
-                            });
-
-                            $("#gitolite_admin").hide();
-                            App.Wireframe.Flash.success(App.lang("Admin settings saved successfully."));
-
-                        } else if (jQuery.trim(data) == 'nomap') {
-                            $("#save_settings").hide();
-                            $("#nomaptext").show();
-
-                            $('#import_button_no_map').click(function() {
-                                document.location.href = $('#no_map_url').val();
-                            });
-
-                            $("#gitolite_admin").hide();
-                            
-
-                            //App.Wireframe.Flash.error(App.lang(data));
-
+                $(".content_stack_element_body.last").hide();
+                $.get(test_connection_url, {user: gitoliteuser, engine: "GitRepository", port: ssh_port, async: true, dir: admin_dir, type: git_server_location, server: serveraddress, case: array_process[rCount - 1]},
+                function(data) {
+                    $('#test_connection_loading_img').hide();
+                    if (jQuery.trim(data) == 'ok') {
+                        if (array_process.length > rCount) {
+                            start_test();
                         } else {
-                            App.Wireframe.Flash.error(App.lang(data));
+                            next_step();
+                            App.Wireframe.Flash.success(App.lang("Connection Established"));
+                            var git_server_location = "";
+                            if ($('#git_server_location_remote').is(":checked"))
+                            {
+                                git_server_location = "remote";
+                            }
+                            else
+                            {
+                                git_server_location = "local";
+                            }
+                            if (git_server_location == "remote" && $('#is_enabled').val() == 0)
+                            {
+                                $('#save_settings_remote').show();
+                            }
+                            else
+                            {
+                                $('#save_settings').show();
+                            }
+                        }
+                    } else {
+                        $("#gitolite-not-readable").hide();
+                        //$("#gitolite-setup-prev").click();
+                        errorFlag = true;
+                        rCount--;
+                        App.Wireframe.Flash.error(App.lang(data));
+                        $(".content_stack_element_body.active .error").html(data);
+                        $(".content_stack_element_body.last").show();
+
+                        if (array_process[rCount] == "setup") {
+                            if (data.indexOf("not readable") > 0)
+                                $("#gitolite-not-readable").show();
 
                         }
-                    });
-                });
-                //}
-
-
-
-
-                //if some field is changed we need to put form in edit mode
-                $(".content_stack_wrapper").find('input, select, textarea').bind('change keypress', function() {
-                    if (!$("#test_connection").is(':visible')) {
-                        //$("#test_gitolite_connection").show();
-                        $('#save_settings').hide();
                     }
-                    ;
-
                 });
 
-                $(".content_stack_wrapper").find('radio').bind('click', function() {
-                    if (!$("#test_connection").is(':visible')) {
-                       // $("#test_gitolite_connection").show();
-                        $('#save_settings').hide();
+            }
+
+            $('#test_gitolite_connection').click(function(event) {
+                var test_connection_url = $('#gitolite_repo_test_connection_url').val();
+                var gitoliteuser = $('#gitoliteuser').val();
+
+                var serveraddress = $('#gitoliteserveradd').val();
+
+                var admin_dir = $('#gitolite_test_dir').val();
+                $('#test_connection_loading_img').show();
+
+                $.get(test_connection_url, {user: gitoliteuser, engine: "GitRepository", async: true, dir: admin_dir, server: serveraddress},
+                function(data) {
+                    $('#test_connection_loading_img').hide();
+                    if (jQuery.trim(data) == 'ok') {
+                        $("#test_gitolite_connection").hide();
+                        var git_server_location = $('input[name=gitoliteadmin[git_server_location]]:radio:checked').val();
+                        if ($('#git_server_location').is(":checked"))
+                        {
+                            var git_server_location = "remote";
+                        }
+                        else
+                        {
+                            var git_server_location = "local";
+                        }
+                        if (git_server_location == "remote" && $('#is_enabled').val() == 0)
+                        {
+                            $('#save_settings_remote').show();
+                        }
+                        else
+                        {
+                            $('#save_settings').show();
+                        }
+                        App.Wireframe.Flash.success(App.lang("Connection Established"));
+
+
+                    } else {
+                        App.Wireframe.Flash.error(App.lang(data));
+
                     }
-                    ;
-
                 });
+
+            });
+
+            // save gitolite settings and go for merging steps
+            // if not saved already
+            //if($('#is_enabled').val() == 0 && $('#is_remote').val() == 1)    
+            //{
+            $('#save_settings_remote').click(function(event) {
+
+                var save_admin_settings_url = $('#save_admin_settings_url').val();
+                var gitoliteuser = $('#gitoliteuser').val();
+
+                var serveraddress = $('#gitoliteserveradd').val();
+                //var repository_url = $('#repositoryUrl').val();
+                //var repository_url = "/opt/lampp/htdocs/gitsource3/ac3-tweaks";
+                var admin_dir = $('#gitolite_test_dir').val();
+                $('#test_connection_loading_img').show();
+
+                //var git_server_location = $('input[name=gitoliteadmin[git_server_location]]:radio:checked').val();
+                if ($('#git_server_location').is(":checked"))
+                {
+                    var git_server_location = "remote";
+                }
+                else
+                {
+                    var git_server_location = "local";
+                }
+                /*git_server_location */
+                //$.get(test_connection_url,{url: repository_url, engine: "GitRepository", async : true,dir:admin_dir},
+                $.get(save_admin_settings_url, {user: gitoliteuser, engine: "GitRepository", async: true, dir: admin_dir, server: serveraddress, server_location: git_server_location},
+                function(data) {
+                    $('#test_connection_loading_img').hide();
+                    if (jQuery.trim(data) == 'map') {
+                        $("#save_settings").hide();
+                        //$('#next_step_1').show();
+                        //App.Wireframe.Content.set("sadasdasdas")
+                        $("#maptext").show();
+
+                        $('#import_button').click(function() {
+                            document.location.href = $('#map_users_url').val();
+                        });
+
+                        $("#gitolite_admin").hide();
+                        App.Wireframe.Flash.success(App.lang("Admin settings saved successfully."));
+
+                    } else if (jQuery.trim(data) == 'nomap') {
+                        $("#save_settings").hide();
+                        $("#nomaptext").show();
+
+                        $('#import_button_no_map').click(function() {
+                            document.location.href = $('#no_map_url').val();
+                        });
+
+                        $("#gitolite_admin").hide();
+
+
+                        //App.Wireframe.Flash.error(App.lang(data));
+
+                    } else {
+                        App.Wireframe.Flash.error(App.lang(data));
+
+                    }
+                });
+            });
+            //}
+
+
+
+
+            //if some field is changed we need to put form in edit mode
+            $(".content_stack_wrapper").find('input, select, textarea').bind('change keypress', function() {
+                if (!$("#test_connection").is(':visible')) {
+                    //$("#test_gitolite_connection").show();
+                    $('#save_settings').hide();
+                }
+                ;
+
+            });
+
+            $(".content_stack_wrapper").find('radio').bind('click', function() {
+                if (!$("#test_connection").is(':visible')) {
+                    // $("#test_gitolite_connection").show();
+                    $('#save_settings').hide();
+                }
+                ;
+
+            });
 
 
         });
