@@ -254,7 +254,7 @@ class AcGitoliteAdminController extends AdminController{
                 }
                 break;
             case "permission":
-                if(!is_dir(GIT_FILES_PATH)){
+                if(is_dir(GIT_FILES_PATH)){
                     if(is_writable(GIT_FILES_PATH)){
                         die("ok");
                     }else{
