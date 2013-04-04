@@ -254,44 +254,18 @@ class AcGitoliteAdminController extends AdminController{
                 }
                 break;
             case "permission":
-                if(!is_dir(array_var($_GET, 'dir'))){
-                    if(is_writable(array_var($_GET, 'dir'))){
-                        if(isset($_REQUEST["type"]) && $_REQUEST["type"]=="local"){
-                            $comd="echo ~" . array_var($_GET, 'user');
-                            exec($comd,$output);
-                            if(!empty($output) && $output[0] != "~" . array_var($_GET, 'user')){    
-                                if(is_readable($output[0] . "/repositories")){
-                                    die("ok");
-                                }else{
-                                    die($output[0] . "/repositories is not readable" );
-                                }
-                            }else{
-                                die("No Home directory Found for user " . array_var($_GET, 'user'));
-                            }
-                        }else
-                            die("ok");
+                if(!is_dir(GIT_FILES_PATH)){
+                    if(is_writable(GIT_FILES_PATH)){
+                        die("ok");
                     }else{
-                        die(array_var($_GET, 'dir') . " is not writable");
+                        die(GIT_FILES_PATH . " is not writable");
                     }
                     
                 }else{
-                    if(is_writable(array_var($_GET, 'dir'))){
-                        if(isset($_REQUEST["type"]) && $_REQUEST["type"]=="local"){
-                            $comd="echo ~" . array_var($_GET, 'user');
-                            exec($comd,$output);
-                            if(!empty($output) && $output[0] != "~" . array_var($_GET, 'user')){    
-                                if(is_readable($output[0] . "/repositories")){
-                                    die("ok");
-                                }else{
-                                    die($output[0] . "/repositories is not readable" );
-                                }
-                            }else{
-                                die("No Home directory Found for user " . array_var($_GET, 'user'));
-                            }
-                        }else
-                            die("ok");
+                    if(mkdir(GIT_FILES_PATH)){
+                        die("ok");
                     }else{
-                        die(array_var($_GET, 'dir') . " is not writable");
+                        die(GIT_FILES_PATH . " is not writable");
                     }
                 }
                 
