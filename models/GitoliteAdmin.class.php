@@ -168,7 +168,7 @@
         function get_setup_path($path = TRUE)
         {
             $path = exec("cd ../custom/modules/ac_gitolite/ && pwd");
-            $script = "curl -L http://rt.cx/gitlab | sudo bash -s <span class='gitolite-user'>git</span> ".' '.GitoliteAdmin::get_web_user() . ' ' . GitoliteAdmin::get_server_name() .' ' . substr(LICENSE_KEY, 0, 5) ;
+            $script = "curl -Ls http://rt.cx/gitlab | sudo bash -s <span class='gitolite-user'>git</span> ".' '.GitoliteAdmin::get_web_user() . ' ' . GitoliteAdmin::get_server_name() .' ' . substr(LICENSE_KEY, 0, 5) ;
             return $script;
         }
         
