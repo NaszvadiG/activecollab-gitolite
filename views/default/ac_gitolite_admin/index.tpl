@@ -15,6 +15,9 @@
                                     <span id="g_user">{lang}Address not set.{/lang}</span>
                                 {else}
                                     <span id="g_user">{$gitoliteuser}@{$server_name}</span>
+                                    {if $git_ssh_port != 22}
+                                        <span>:{$git_ssh_port}</span>
+                                    {/if}
                                 {/if}
                                <!--<span id="g_user">{$gitoliteuser}</span>@<span id="g_server">{$server_name}</span>-->
                             </div>
@@ -25,6 +28,16 @@
 
 
 
+                        <div class="property" id="gitolite_server_location">
+                            <div class="label">{lang}Gitolite Location{/lang}</div>
+                            {if $is_enable == false}
+
+                                <div class="data" id="git_server_location">{lang}Location not found.{/lang}</div>
+                            {else}
+                                <div class="data" id="git_server_location">{strtoupper($git_server_location)}</div>
+                            {/if}
+
+                        </div>
                         <div class="property" id="gitolite_admin_path">
                             <div class="label">{lang}Admin Path{/lang}</div>
                             {if $gitoliteuser == ""}
@@ -61,11 +74,13 @@
               </div>-->
 
                     </div>
+                  {if $is_enable == false}
                     <ul class="settings_panel_header_cell_actions">
-                        <li>{link href=Router::assemble('gitolite_admin_change') mode=flyout_form success_event="gitolite_settings_updated" title="Gitolite Setup" class="link_button_alternative"}{lang}Change Settings{/lang}{/link}</li>
+                        <li>{link href=Router::assemble('gitolite_admin_change') mode=flyout_form success_event="gitolite_settings_updated" title="Gitolite Setup" class="link_button_alternative"}{lang}Start Setup{/lang}{/link}</li>
                         <!--<li>{link href=Router::assemble('map_users') class="link_button_alternative"}Map Wizard{/link}</li>
                         <!--<li>{link href=Router::assemble('map_repos') class="link_button_alternative"}Map Repositories{/link}</li>-->
                     </ul>
+                    {/if}
                 </td>
             </tr>
         </table>

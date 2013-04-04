@@ -139,7 +139,6 @@
                                     <p>{lang}Please login to your <span class='gitolite-type'></span> activecollab server using SSH and run the below command.{/lang}</p>
                                     </li>
                                     <li>
-                                        {wrap field=title}
                                         {label for=pageTitle}Run Gitolite Setup Script{/label}
                                         {if $web_user != ""}
                                             <code id="script_path">
@@ -149,7 +148,7 @@
                                         {else}
                                             <span class="ssh_code">{lang}Web user not found.{/lang}</span>
                                         {/if}
-                                        {/wrap}
+                                        
                                     </li>
                                         
                                 </ul>
@@ -334,7 +333,6 @@
             display: block;
             font-size: 16px;
             margin-top: 10px;
-            border: 1px solid red;
             margin-bottom: 10px;
             background: pink;
         }

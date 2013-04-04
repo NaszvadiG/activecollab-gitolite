@@ -50,7 +50,7 @@ class AcGitoliteAdminController extends AdminController{
         //$gitoliteuser = ($settings['gitoliteuser'] == "") ? "git" : $settings['gitoliteuser'];
         //$gitoliteuser = ($settings['gitoliteuser'] == "") ? "git" : $settings['gitoliteuser'];
         $git_server_location = ($settings['git_server_location'] == "") ? "local" : $settings['git_server_location'];
-        
+        $git_ssh_port= (!isset($settings['git_ssh_port']) || $settings['git_ssh_port'] == "") ? 22 : $settings['git_ssh_port'];
         //$is_auto = ($settings['initialize_repo'] == "") ? "No" : $settings['initialize_repo'];
         
         if($settings['gitoliteuser'] == "")
@@ -89,10 +89,11 @@ class AcGitoliteAdminController extends AdminController{
                   'gitoliteadminpath' => $gitoliteadminpath,
                   'server_name' => $server_name,
                   'git_server_location' => $git_server_location,
-                  'delete_url' => $delete_url
+                  'delete_url' => $delete_url,
+                  'git_ssh_port'=>$git_ssh_port,
+                  'is_enable'=>$is_enable
     		));
          //'is_auto' => $is_auto,
-       
     }
     
     /** 
