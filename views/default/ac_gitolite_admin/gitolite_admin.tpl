@@ -563,14 +563,14 @@
                             {
                                 git_server_location = "local";
                             }
-                            if (git_server_location == "remote" && $('#is_enabled').val() == 0)
-                            {
-                                $('#save_settings_remote').show();
-                            }
-                            else
-                            {
+                            //if (git_server_location == "remote" && $('#is_enabled').val() == 0)
+                           // {
+                          //      $('#save_settings_remote').show();
+                           // }
+                           // else
+                           // {
                                 $('#save_settings').show();
-                            }
+                           // }
                         }
                     } else {
                         $("#gitolite-not-readable").hide();
