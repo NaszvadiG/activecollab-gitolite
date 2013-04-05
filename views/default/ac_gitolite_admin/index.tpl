@@ -32,7 +32,7 @@
                             <div class="label">{lang}Gitolite Location{/lang}</div>
                             {if $is_enable == false}
 
-                                <div class="data" id="git_server_location">{lang}Location not found.{/lang}</div>
+                                <div class="data" id="git_server_location">{lang}Location not set.{/lang}</div>
                             {else}
                                 <div class="data" id="git_server_location">{strtoupper($git_server_location)}</div>
                             {/if}
@@ -42,7 +42,7 @@
                             <div class="label">{lang}Admin Path{/lang}</div>
                             {if $gitoliteuser == ""}
 
-                                <div class="data" id="admin_path">{lang}Path not found.{/lang}</div>
+                                <div class="data" id="admin_path">{lang}Path not set.{/lang}</div>
                             {else}
                                 <div class="data" id="admin_path">{$gitoliteadminpath}</div>
                             {/if}
@@ -130,22 +130,10 @@
     <script type="text/javascript">
 
         App.Wireframe.Events.bind('gitolite_settings_updated.content', function(event, settings) {
-
-
             $("#g_user").html(settings['gitoliteuser'] + "@" + settings['gitoliteserveradd']);
             $("#admin_path").html(settings['gitoliteadminpath_admin'])
-            
-            $("#gitolite_server_location").hide();
+            $("#git_server_location").html(settings['git_server_location']);
             $("#button_start_setup").hide();
-            //$("#g_server").html(settings['gitoliteserveradd']); 
-            /*if(settings['initialize_repo'])
-             {
-             $("#show_auto_init").html(settings['initialize_repo']); 
-             }
-             else
-             {
-             $("#show_auto_init").html("No"); 
-             }*/
             App.Wireframe.Flash.success(App.lang('Gitolite settings has been changed successfully'));
         });
         $(document).ready(function() {

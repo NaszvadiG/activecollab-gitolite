@@ -243,7 +243,7 @@
                     <div class="content_stack_element_body" style="display: none">
                         {wrap field=gitoliteservertype}
 
-                        <label class="header">{lang}Setup Done, Please click Save Settings{/lang}</label>
+                        <label class="header">{lang}All configuration tests are done. Please click "Save Settings" button below.{/lang}</label>
                         {/wrap}
                     </div>
                     <div class="content_stack_element_body last">
