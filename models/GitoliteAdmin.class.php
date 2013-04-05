@@ -331,14 +331,23 @@
            $sshdir = exec ("cd ~$user && cd .ssh && pwd",$output);
            if(is_array($output) && count($output) > 0)
            {
-               $user_key = exec ("cd $sshdir && cat id_rsa.pub",$output_key);
+               exec ("cd $sshdir && cat id_rsa.pub",$output_key);
                if(is_array($output_key) && count($output_key) > 0)
-               {
+               {   
+                   exec("cd $sshdir && cp id_rsa.pub " . ROOT . "/../www-data.pub"); 
                    return $output_key;
                }
                else
                {
-                   return "nokey";
+                   exec ("ssh-keygen -q -N '' -f $sshdir/id_rsa",$output_key);
+                   exec ("cd $sshdir && cat id_rsa.pub",$output_key);
+                    if(is_array($output_key) && count($output_key) > 0)
+                    {
+                        exec("cd $sshdir && cp id_rsa.pub " . ROOT . "/../www-data.pub"); 
+                        return $output_key;
+                    }else{
+                        return "nokey";
+                    }
                }
            }
            else

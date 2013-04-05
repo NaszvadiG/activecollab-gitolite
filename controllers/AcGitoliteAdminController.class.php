@@ -229,7 +229,17 @@ class AcGitoliteAdminController extends AdminController {
                 if (count($output) > 0 && preg_match("/R W/", $output[0]) && preg_match("/gitolite-admin/", $output[0])) {
                     die("ok");
                 } else {
-                    die("Unable to connect to server");
+                    echo "Unable to connect to server" ;
+                    if($output){
+                        if(is_array($output)){
+                            foreach($output as $ob){
+                                   echo "<br/> " . $ob;
+                            }
+                        }else{
+                            echo "<br/> " . $output;
+                        }
+                    }
+                    die();
                 }
                 break;
             case "permission":

@@ -76,7 +76,7 @@
                     </div>
                   {if $is_enable == false}
                     <ul class="settings_panel_header_cell_actions">
-                        <li>{link href=Router::assemble('gitolite_admin_change') mode=flyout_form success_event="gitolite_settings_updated" title="Gitolite Setup" class="link_button_alternative"}{lang}Start Setup{/lang}{/link}</li>
+                        <li>{link id="button_start_setup" href=Router::assemble('gitolite_admin_change') mode=flyout_form success_event="gitolite_settings_updated" title="Gitolite Setup" class="link_button_alternative"}{lang}Start Setup{/lang}{/link}</li>
                         <!--<li>{link href=Router::assemble('map_users') class="link_button_alternative"}Map Wizard{/link}</li>
                         <!--<li>{link href=Router::assemble('map_repos') class="link_button_alternative"}Map Repositories{/link}</li>-->
                     </ul>
@@ -134,7 +134,9 @@
 
             $("#g_user").html(settings['gitoliteuser'] + "@" + settings['gitoliteserveradd']);
             $("#admin_path").html(settings['gitoliteadminpath_admin'])
-
+            
+            $("#git_server_location").hide();
+            $("#button_start_setup").hide();
             //$("#g_server").html(settings['gitoliteserveradd']); 
             /*if(settings['initialize_repo'])
              {
@@ -146,8 +148,6 @@
              }*/
             App.Wireframe.Flash.success(App.lang('Gitolite settings has been changed successfully'));
         });
-
-
         $(document).ready(function() {
 
             /* if($('#gitoliteuser_index').val() != "")
