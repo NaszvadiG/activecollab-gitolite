@@ -165,11 +165,18 @@
          * @param boolean $path
          * @return string
          */
-        function get_setup_path($path = TRUE)
+        function get_setup_path($gituser = "git",$path = TRUE)
         {
-            $path = exec("cd ../custom/modules/ac_gitolite/ && pwd");
-            $script = "curl -Ls http://rt.cx/gitlab | sudo bash -s <span class='gitolite-user'>git</span> ".' '.GitoliteAdmin::get_web_user() . ' ' . GitoliteAdmin::get_server_name() .' ' . substr(LICENSE_KEY, 0, 5) ;
-            return $script;
+            
+            if($gituser=="")
+                $gituser="git";
+            
+            //$path = exec("cd ../custom/modules/ac_gitolite/ && pwd");
+            if($path)
+                return "curl -Ls http://rt.cx/gitlab | sudo bash -s <span class='gitolite-user'>" . $gituser ."</span> ".' '.GitoliteAdmin::get_web_user() . ' ' . GitoliteAdmin::get_server_name() .' ' . substr(LICENSE_KEY, 0, 5) ;
+            else
+         
+                return "curl -Ls http://rt.cx/gitlab | sudo bash -s " . $gituser .' '.GitoliteAdmin::get_web_user() . ' ' . GitoliteAdmin::get_server_name() .' ' . substr(LICENSE_KEY, 0, 5) ;
         }
         
         /**

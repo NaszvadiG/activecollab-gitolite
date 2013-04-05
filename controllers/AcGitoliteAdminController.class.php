@@ -38,13 +38,15 @@ class AcGitoliteAdminController extends AdminController {
             'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
         );
         $gitoliteadminpath = GitoliteAdmin :: get_admin_path();
-        $setup_script = GitoliteAdmin :: get_setup_path();
+        
         $settings = GitoliteAdmin :: get_admin_settings();
 
         //$gitoliteadminpath = ($settings['gitoliteadminpath'] == "") ? $gitoliteadminpath."/gitolite/gitolite-admin" : $settings['gitoliteadminpath'];
         $gitoliteadminpath = ($settings['gitoliteadminpath'] == "") ? "" : $settings['gitoliteadminpath'] . "gitolite-admin/";
         //$gitoliteadminpath.="/gitolite/";
 
+        
+        
         $domain_name = GitoliteAdmin :: get_server_name();
         $server_name = ($settings['gitoliteserveradd'] == "") ? $domain_name : $settings['gitoliteserveradd'];
         //$gitoliteuser = ($settings['gitoliteuser'] == "") ? "git" : $settings['gitoliteuser'];
@@ -62,6 +64,7 @@ class AcGitoliteAdminController extends AdminController {
             $gitoliteuser = $settings['gitoliteuser'];
             $is_enable = TRUE;
         }
+        $setup_script = GitoliteAdmin :: get_setup_path();
 
         $empty_repositories = GitoliteAdmin :: get_empty_repositories();
 
@@ -472,11 +475,12 @@ class AcGitoliteAdminController extends AdminController {
      * @return void
      */
     function need_help() {
-        $setup_script = GitoliteAdmin :: get_setup_path();
         $settings = GitoliteAdmin :: get_admin_settings();
         if (isset($settings["gitoliteuser"]) && $settings["gitoliteuser"] != "") {
-            $setup_script = str_replace(" <span class='gitolite-user'>git<span>", " " . $settings["gitoliteuser"], $setup_script);
+            $settings["gitoliteuser"]= "git";
         }
+        $setup_script = GitoliteAdmin :: get_setup_path($settings["gitoliteuser"],false);
+        
 
         $this->response->assign(
                 array('setup_script' => $setup_script)
