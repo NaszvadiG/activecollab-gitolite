@@ -135,7 +135,7 @@
             $("#g_user").html(settings['gitoliteuser'] + "@" + settings['gitoliteserveradd']);
             $("#admin_path").html(settings['gitoliteadminpath_admin'])
             
-            $("#git_server_location").hide();
+            $("#gitolite_server_location").hide();
             $("#button_start_setup").hide();
             //$("#g_server").html(settings['gitoliteserveradd']); 
             /*if(settings['initialize_repo'])
