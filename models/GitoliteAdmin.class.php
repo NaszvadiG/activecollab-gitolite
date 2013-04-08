@@ -334,7 +334,7 @@
                exec ("cd $sshdir && cat id_rsa.pub",$output_key);
                if(is_array($output_key) && count($output_key) > 0)
                {   
-                   exec("cd $sshdir && cp id_rsa.pub " . ROOT . "/../www-data.pub"); 
+                   exec("cd $sshdir && cp id_rsa.pub " . ROOT . "/../mypubkey.pub"); 
                    return $output_key;
                }
                else
@@ -343,7 +343,7 @@
                    exec ("cd $sshdir && cat id_rsa.pub",$output_key);
                     if(is_array($output_key) && count($output_key) > 0)
                     {
-                        exec("cd $sshdir && cp id_rsa.pub " . ROOT . "/../www-data.pub"); 
+                        exec("cd $sshdir && cp id_rsa.pub " . ROOT . "/../mypubkey.pub"); 
                         return $output_key;
                     }else{
                         return "nokey";

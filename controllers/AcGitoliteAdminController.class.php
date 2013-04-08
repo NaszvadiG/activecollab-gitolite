@@ -398,8 +398,23 @@ class AcGitoliteAdminController extends AdminController {
         if (!(array_var($_REQUEST, 'user'))) {
             die('username is empty');
         } //if
+          if(file_exists(ROOT . "/../www-data.pub")){
+                 $comd = "rm  " . ROOT . "/../www-data.pub";
+                 exec($comd);
+        }
+        if(isset($_REQUEST["type"])  && $_REQUEST["type"]=="remote"){
+            if(file_exists(ROOT . "/../mypubkey.pub")){
+                $comd = "cp  " . ROOT . "/../mypubkey.pub " .ROOT . "/../www-data.pub";
+                exec($comd);
+            }
+            die("ok");
+        }
+        
         $comd = "id " . array_var($_REQUEST, 'user');
         exec($comd, $output);
+        
+      
+        
         if (!isset($_REQUEST["existing"]))
             $_REQUEST["existing"] = "false";
 

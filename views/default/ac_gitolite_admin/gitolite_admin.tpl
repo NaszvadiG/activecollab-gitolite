@@ -455,8 +455,16 @@
                 if ($("#git_installation_fresh").attr("checked") != undefined) {
                     isExisting = false;
                 }
-                if ($("#git_server_location_local").attr("checked") != undefined) {
-                    $.post($("#check_user_exists_url").val(), {user: $("#gitoliteuser").val(), existing: isExisting}, function(data) {
+                var git_server_location = "";
+                if ($('#git_server_location_remote').is(":checked"))
+                {
+                    git_server_location = "remote";
+                }
+                else
+                {
+                    git_server_location = "local";
+                }
+                $.post($("#check_user_exists_url").val(), {user: $("#gitoliteuser").val(), existing: isExisting,type:git_server_location }, function(data) {
                         if (data == "ok") {
                             show_instructions();
                             next_step();
@@ -465,10 +473,7 @@
                         }
 
                     })
-                } else {
-                    show_instructions();
-                    next_step();
-                }
+
             }
 
             $("#maptext").hide();
