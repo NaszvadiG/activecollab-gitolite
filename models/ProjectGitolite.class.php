@@ -287,8 +287,6 @@ class ProjectGitolite {
                 }
             }
             $sql = "SELECT a.* ,b.id FROM " . $repo_table_name . " a JOIN " . $source_table_name . " b ON a.repo_fk = b.id  where gitolite_config is null limit 1";
-            echo $sql;
-            exit;
             $result_gitconfig_empty = DB::execute($sql);
             $file_name = "/tmp/gitolite_" . microtime();
             $file_name = str_replace(" ", "-", $file_name);
