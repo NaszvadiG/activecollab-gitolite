@@ -158,67 +158,69 @@ class ProjectGitolite {
             return FALSE;
         }
         $access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';
-        
-        
-        
         DB::execute("INSERT INTO $access_table_name (repo_id,permissions,user_id,group_id) VALUES (?, ?, ?, ?)", $repo_id, $permissions, $user_id, $group_id
         );
-        $last_id= DB::lastInsertId();
-        ProjectGitolite::update_repo_conf_column($repo_id,$permissions);
+        $last_id = DB::lastInsertId();
+        ProjectGitolite::update_repo_conf_column($repo_id, $permissions);
         return $last_id;
     }
-    
+
     function update_repo_conf_on_public_key($user) {
-        
+
         $access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';
         $result = DB::execute("select  repo_id,permissions  from $access_table_name where permissions like '%i:$user;%'");
         if ($result) {
             while ($row = mysql_fetch_assoc($result->getResource())) {
-                ProjectGitolite::update_repo_conf_column( $row["repo_id"], unserialize($row["permissions"]));
+                ProjectGitolite::update_repo_conf_column($row["repo_id"], unserialize($row["permissions"]));
             }
         }
         return false;
     }
-    
+
     public function update_repo_conf_column($repo_id, $access_level = false) {
         $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
         $public_key_table_name = TABLE_PREFIX . 'rt_gitolite_user_public_keys';
-        if($access_level==false){
+        if ($access_level == false) {
             $access_level_row = get_access_levels($repo_id);
-            if($access_level_row && isset($access_level_row["permissions"])){
+            if ($access_level_row && isset($access_level_row["permissions"])) {
                 $access_level = unserialize($access_level_row["permissions"]);
             }
         }
         $repo_conf_str = "";
         $access_array = array(GITOLITE_READACCESS => 'R', GITOLITE_MANAGEACCESS => 'RW+');
-        $result = DB::execute("SELECT * FROM " . $repo_table_name . " where repo_id = '" . $repo_id . "'");
+        $result = DB::execute("SELECT * FROM " . $repo_table_name . " where repo_id = " . $repo_id . " limit 1");
         if ($result) {
-             if($row = mysql_fetch_assoc($result->getResource())) {
-                 if (! array_key_exists('gitolite_config', $row)) {
+            if ($row = mysql_fetch_assoc($result->getResource())) {
+                if (!array_key_exists('gitolite_config', $row)) {
                     mysql_query("ALTER TABLE $repo_table_name ADD column `gitolite_config` text NULL");
-                 }
-                 $repo_conf_str = ""; //repo " .  $row['repo_name'] . "\n";
-                 if(is_array($access_level)){
-                     $str = "";
-                     $sep = "";
-                     foreach($access_level as $user => $permission){
-                         $str .= $sep . $user;
-                         $sep= ","    ;
-                     }
-                     $sql = "select user_id,pub_file_name  from  $public_key_table_name where  is_deleted = '0' and user_id in ($str) order by user_id;";
-                     $key_result = DB::execute($sql);
-                     if ($key_result) {
-                         while ($my_key_row = mysql_fetch_assoc($key_result->getResource())) {
-                             $access = (isset($access_array[$access_level[$my_key_row["user_id"]]])) ? $access_array[$access_level[$my_key_row["user_id"]]] : false;
-                             if($access){
-                                $repo_conf_str .= "\t" . $access ."\t=\t" . $my_key_row["pub_file_name"] . "\n";
-                             }
-                         }
-                     }
-                     $sql = "update " . $repo_table_name . " set gitolite_config='" . $repo_conf_str ."' where repo_id = '" . $repo_id . "'";
-                     DB::execute($sql);
-                 }
-             }
+                }
+                $repo_conf_str = ""; //repo " .  $row['repo_name'] . "\n";
+                if (!is_array($access_level) && $access_level != "") {
+                    $access_level = unserialize($access_level);
+                }
+                $prjobj = new Project($row['project_id']);
+                $prjusers = $prjobj->users()->getIds();
+                if (is_array($prjusers)) {
+                    $str = "";
+                    $sep = "";
+                    foreach ($prjusers as $user) {
+                        $str .= $sep . $user;
+                        $sep = ",";
+                    }
+                    $sql = "select user_id,pub_file_name  from  $public_key_table_name where  is_deleted = '0' and user_id in ($str) order by user_id;";
+                    $key_result = DB::execute($sql);
+                    if ($key_result) {
+                        while ($my_key_row = mysql_fetch_assoc($key_result->getResource())) {
+                            $access = (isset($access_array[$access_level[$my_key_row["user_id"]]])) ? $access_array[$access_level[$my_key_row["user_id"]]] : false;
+                            if ($access) {
+                                $repo_conf_str .= "\t" . $access . "\t=\t" . $my_key_row["pub_file_name"] . "\n";
+                            }
+                        }
+                    }
+                    $sql = "update " . $repo_table_name . " set gitolite_config='" . $repo_conf_str . "' where repo_id =" . $repo_id;
+                    DB::execute($sql);
+                }
+            }
         }
         return true;
     }
@@ -284,11 +286,31 @@ class ProjectGitolite {
                     }
                 }
             }
+            $sql = "select repo_id from $repo_table_name   where gitolite_config is null limit 1";
+            $result_gitconfig_empty = DB::execute($sql);
+            $file_name = "/tmp/gitolite_" . microtime();
+            $file_name = str_replace(" ", "-", $file_name);
+            $file_name = str_replace(".", "_", $file_name);
+            
+            if (!$result_gitconfig_empty) {
+                $sql = "SELECT CONCAT('repo ', repo_name),gitolite_config INTO OUTFILE '$file_name'
+                        FIELDS ESCAPED BY '' TERMINATED BY '\n' OPTIONALLY ENCLOSED BY ''
+                        LINES TERMINATED BY '\n'  
+                        FROM $repo_table_name ";
+                $result = DB::execute($sql);
+
+                if (file_exists($file_name)) {
+                    $conf_content = file_get_contents($file_name);
+                    fwrite($fh, $conf_content);
+                    fclose($fh);
+                    @unlink($file_name);
+                    return true;
+                }else{
+                    echo "ypypoyy ";
+                }
+            }
 
             $result = DB::execute("SELECT a.* ,b.id FROM " . $repo_table_name . " a JOIN " . $source_table_name . " b ON a.repo_fk = b.id");
-
-
-
             try {
                 if ($result) {
                     //fetch all gitolite repositories
@@ -315,10 +337,9 @@ class ProjectGitolite {
                         // write repository name in conf file
 
                         fwrite($fh, "repo " . $row['repo_name'] . "\n");
+                        $str_repo_conf = "";
                         if (is_foreachable($prjusers)) {
-
                             foreach ($prjusers as $keyusers => $valueusers) {
-
                                 $pubkeys = DB::execute("SELECT * FROM " . $public_key_table_name . " where user_id = '" . $keyusers . "' and is_deleted = '0'");
                                 if (is_object($pubkeys)) {
 
@@ -328,17 +349,21 @@ class ProjectGitolite {
 
                                         if ($access != "" && $rowkeys['pub_file_name'] != "") {
                                             fwrite($fh, $access . "\t" . "=" . "\t" . $rowkeys['pub_file_name'] . "\n");
+                                            $str_repo_conf.= "\t" . $access . "\t" . "=" . "\t" . $rowkeys['pub_file_name'] . "\n";
                                         }
                                     } // while
                                 }// if public keys added
                             } // foreach 
                         } // if project user exists
+                        if ($str_repo_conf != "") {
+                            $sql = "update " . $repo_table_name . " set gitolite_config='" . $str_repo_conf . "' where repo_id =" . $row['repo_id'];
+                            DB::execute($sql);
+                        }
                     } // while
                 } // repo exists
             } catch (Exception $e) {
                 echo $e;
             }
-
             return true;
         }   // if file exists
         else {
@@ -378,10 +403,10 @@ class ProjectGitolite {
         if ($repo_id == 0 || $repo_id == "" || $permissions == "") {
             return FALSE;
         }
-         $this->update_repo_conf_column(DB::escape($repo_id),$permissions);
         /* echo "update  ".$access_table_name." set permissions = '$permissions' where repo_id = ".DB::escape($repo_id);
           die(); */
         $update_access = DB::execute("update  " . $access_table_name . " set permissions = '$permissions' where repo_id = " . DB::escape($repo_id));
+        ProjectGitolite::update_repo_conf_column(DB::escape($repo_id), $permissions);
         return TRUE;
     }
 

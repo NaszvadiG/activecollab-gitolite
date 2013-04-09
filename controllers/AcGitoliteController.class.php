@@ -173,6 +173,8 @@ class AcGitoliteController extends UsersController {
                     $dirpath = $settings['gitoliteadminpath'] . "gitolite-admin/keydir/";
                     $path = $dirpath . $filename . ".pub";
                     @unlink($path);
+                    $active_user = $this->active_user;
+                    ProjectGitolite::update_repo_conf_on_public_key($active_user->getId());   
                     $command = "cd " . $dirpath . " && git add * && git commit -am 'deleted key $filename.pub' && git push  || echo 'Not found'";
                     exec($command, $output);
                 }
