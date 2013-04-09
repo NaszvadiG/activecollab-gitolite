@@ -15,8 +15,20 @@ class AcGitoliteModule extends AngieModule {
      * @var string
      */
     protected $name = 'ac_gitolite';
+    /**
+     * Module version
+     *
+     * @var string
+     */
     protected $version = '1.3.4';
-
+    
+    /**
+     * Name of the project object class (or classes) that this module uses
+     *
+     * @var string
+     */
+    protected $ac_gitolite_classes = 'AcGitoliteModule';
+    
     /**
      * Define module routes
      */
@@ -145,7 +157,8 @@ class AcGitoliteModule extends AngieModule {
         parent::install($position, $bulk);
 
         Router::cleanUpCache(true);
-        cache_clear();
+         if (function_exists("cache_clear"))
+            cache_clear();
     }
 
 // install
@@ -268,7 +281,7 @@ class AcGitoliteModule extends AngieModule {
         if (!isset($add_new_col['git_ssh_path'])) {
             mysql_query("ALTER TABLE $repo_tb_name ADD column `git_ssh_path` varchar(255) NOT NULL");
         }
-        if (!isset($add_new_col['git_ssh_path'])) {
+        if (!isset($add_new_col['gitolite_config'])) {
             mysql_query("ALTER TABLE $repo_tb_name ADD column `gitolite_config` text NULL");
         }
 

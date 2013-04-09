@@ -11,7 +11,7 @@ AngieApplication::useController('frontend', ENVIRONMENT_FRAMEWORK_INJECT_INTO);
  * @author Rahul Bansal <rahul.bansal@rtcamp.com>
  * @author Kasim Badami <kasim.badami@rtcamp.com>
  * @author Mitesh Shah <mitesh.shah@rtcamp.com>
-
+ * @author strik3r <faishal.saiyed@rtcamp.com>
  */
 class AcGitoliteHooksController extends FrontendController {
 

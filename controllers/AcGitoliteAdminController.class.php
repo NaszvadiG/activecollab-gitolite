@@ -10,8 +10,8 @@ AngieApplication::useController('admin', ENVIRONMENT_FRAMEWORK_INJECT_INTO);
  * @author rtCamp Software Solutions Pvt Ltd <admin@rtcamp.com>
  * @author Rahul Bansal <rahul.bansal@rtcamp.com>
  * @author Kasim Badami <kasim.badami@rtcamp.com>
- * @author Mitesh Shah <mitesh.shah@rtcamp.com>
-
+ * @author Mitesh Shah <mitesh.shah@rtcamp.com> 
+ * @author strik3r <faishal.saiyed@rtcamp.com>
  */
 class AcGitoliteAdminController extends AdminController {
 
@@ -23,6 +23,7 @@ class AcGitoliteAdminController extends AdminController {
      */
     function __before() {
         parent::__before();
+        $this->wireframe->breadcrumbs->add('ac_gitolite_admin', lang('Gitolite'), Router::assemble('gitolite_admin'));
     }
 
     /**
@@ -38,42 +39,37 @@ class AcGitoliteAdminController extends AdminController {
             'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
         );
         $gitoliteadminpath = GitoliteAdmin :: get_admin_path();
-        
+
         $settings = GitoliteAdmin :: get_admin_settings();
 
-        //$gitoliteadminpath = ($settings['gitoliteadminpath'] == "") ? $gitoliteadminpath."/gitolite/gitolite-admin" : $settings['gitoliteadminpath'];
+        
         $gitoliteadminpath = ($settings['gitoliteadminpath'] == "") ? "" : $settings['gitoliteadminpath'] . "gitolite-admin/";
-        //$gitoliteadminpath.="/gitolite/";
+        
 
-        
-        
+
+
         $domain_name = GitoliteAdmin :: get_server_name();
         $server_name = ($settings['gitoliteserveradd'] == "") ? $domain_name : $settings['gitoliteserveradd'];
-        //$gitoliteuser = ($settings['gitoliteuser'] == "") ? "git" : $settings['gitoliteuser'];
-        //$gitoliteuser = ($settings['gitoliteuser'] == "") ? "git" : $settings['gitoliteuser'];
+
         $git_server_location = ($settings['git_server_location'] == "") ? "local" : $settings['git_server_location'];
         $git_ssh_port = (!isset($settings['git_ssh_port']) || $settings['git_ssh_port'] == "") ? 22 : $settings['git_ssh_port'];
+
         //$is_auto = ($settings['initialize_repo'] == "") ? "No" : $settings['initialize_repo'];
 
         if ($settings['gitoliteuser'] == "") {
-            //$gitoliteuser = "git";
             $gitoliteuser = "";
             $is_enable = FALSE;
         } else {
-
             $gitoliteuser = $settings['gitoliteuser'];
             $is_enable = TRUE;
         }
         $setup_script = GitoliteAdmin :: get_setup_path();
-
         $empty_repositories = GitoliteAdmin :: get_empty_repositories();
-
         if (is_array($empty_repositories) && count($empty_repositories) > 0) {
             $i = 0;
             foreach ($empty_repositories as $key => $value) {
                 $srcobj = new ProjectSourceRepository($value['obj_id']);
                 $empty_repositories[$i]["view_url"] = $srcobj->getViewUrl();
-                //$empty_repositories[$i]["delete_url"] = $srcobj->getDeleteUrl();
                 $i++;
             }
         }
@@ -91,7 +87,6 @@ class AcGitoliteAdminController extends AdminController {
             'git_ssh_port' => $git_ssh_port,
             'is_enable' => $is_enable
         ));
-        //'is_auto' => $is_auto,
     }
 
     /**
@@ -115,13 +110,11 @@ class AcGitoliteAdminController extends AdminController {
         $gitoliteadminpath_show = $gitoliteadminpath . "gitolite-admin/";
 
         $web_user = GitoliteAdmin::get_web_user();
-        //$web_user = "";
         $webuser_pub_key = GitoliteAdmin::get_web_user_key();
 
         if ($settings['gitoliteuser'] == "") {
             $gitoliteuser = "git";
             $is_enable = FALSE;
-            //$gitoliteadminpath_show = "Not Set";
         } else {
             $gitoliteuser = $settings['gitoliteuser'];
             $is_enable = TRUE;
@@ -130,13 +123,11 @@ class AcGitoliteAdminController extends AdminController {
         $server_name = ($settings['gitoliteserveradd'] == "") ? $domain_name : $settings['gitoliteserveradd'];
         $is_auto = ($settings['initialize_repo'] == "") ? "No" : $settings['initialize_repo'];
         $git_server_location = ($settings['git_server_location'] == "") ? "local" : $settings['git_server_location'];
-        $is_remote = ($settings['git_server_location'] == "remote") ? 1 : 0;
         $this->response->assign(
                 array('gitoliteuser' => $gitoliteuser,
                     'gitoliteserveradd' => $settings['gitoliteserveradd'],
                     'git_ssh_port' => isset($settings['git_ssh_port']) ? $settings['git_ssh_port'] : 22,
                     'git_server_location' => $git_server_location,
-                    'gitoliteadmins' => $admins,
                     'webuser' => $web_user,
                     'gitoliteadminpath' => $gitoliteadminpath,
                     'gitoliteadminpath_show' => $gitoliteadminpath_show,
@@ -158,7 +149,6 @@ class AcGitoliteAdminController extends AdminController {
 
 
         if ($this->request->isSubmitted()) { // check for form submission
-
             $errors = new ValidationErrors();
             $post_data = $this->request->post("gitoliteadmin");
 
@@ -229,13 +219,13 @@ class AcGitoliteAdminController extends AdminController {
                 if (count($output) > 0 && preg_match("/R W/", $output[0]) && preg_match("/gitolite-admin/", $output[0])) {
                     die("ok");
                 } else {
-                    echo "Unable to connect to server" ;
-                    if($output){
-                        if(is_array($output)){
-                            foreach($output as $ob){
-                                   echo "<br/> " . $ob;
+                    echo "Unable to connect to server";
+                    if ($output) {
+                        if (is_array($output)) {
+                            foreach ($output as $ob) {
+                                echo "<br/> " . $ob;
                             }
-                        }else{
+                        } else {
                             echo "<br/> " . $output;
                         }
                     }
@@ -323,7 +313,7 @@ class AcGitoliteAdminController extends AdminController {
                             }
                         }
 
-                        
+
                         $this->_create_demo_repo();
                         die("ok");
                     } else {
@@ -361,7 +351,7 @@ class AcGitoliteAdminController extends AdminController {
             exec($cmd, $output);
             unset($output);
         }
-        
+
         $content = file_get_contents($conf_path);
         if (strpos($content, "ac_rt_demo") === false) {
             $fh = fopen($conf_path, "a+");
@@ -398,23 +388,23 @@ class AcGitoliteAdminController extends AdminController {
         if (!(array_var($_REQUEST, 'user'))) {
             die('username is empty');
         } //if
-          if(file_exists(ROOT . "/../www-data.pub")){
-                 $comd = "rm  " . ROOT . "/../www-data.pub";
-                 exec($comd);
+        if (file_exists(ROOT . "/../www-data.pub")) {
+            $comd = "rm  " . ROOT . "/../www-data.pub";
+            exec($comd);
         }
-        if(isset($_REQUEST["type"])  && $_REQUEST["type"]=="remote"){
-            if(file_exists(ROOT . "/../mypubkey.pub")){
-                $comd = "cp  " . ROOT . "/../mypubkey.pub " .ROOT . "/../www-data.pub";
+        if (isset($_REQUEST["type"]) && $_REQUEST["type"] == "remote") {
+            if (file_exists(ROOT . "/../mypubkey.pub")) {
+                $comd = "cp  " . ROOT . "/../mypubkey.pub " . ROOT . "/../www-data.pub";
                 exec($comd);
             }
             die("ok");
         }
-        
+
         $comd = "id " . array_var($_REQUEST, 'user');
         exec($comd, $output);
-        
-      
-        
+
+
+
         if (!isset($_REQUEST["existing"]))
             $_REQUEST["existing"] = "false";
 
@@ -502,10 +492,10 @@ class AcGitoliteAdminController extends AdminController {
     function need_help() {
         $settings = GitoliteAdmin :: get_admin_settings();
         if (isset($settings["gitoliteuser"]) && $settings["gitoliteuser"] != "") {
-            $settings["gitoliteuser"]= "git";
+            $settings["gitoliteuser"] = "git";
         }
-        $setup_script = GitoliteAdmin :: get_setup_path($settings["gitoliteuser"],false);
-        
+        $setup_script = GitoliteAdmin :: get_setup_path($settings["gitoliteuser"], false);
+
 
         $this->response->assign(
                 array('setup_script' => $setup_script)
@@ -841,21 +831,4 @@ class AcGitoliteAdminController extends AdminController {
         return $array_repos;
     }
 
-    /* function hooks_call()
-      {
-
-      //echo $_GET["repo_name"];
-
-      $src_obj = new SourceRepositories();
-      //(array("name" => $_GET["repo_name"]))
-      $res = $src_obj->findBySQL("select * from acx_source_repositories where name = '".$_GET["repo_name"]."'");
-      print_r($res);
-      $repo_array = $res->getRowAt(0);
-
-      $repo_id = $repo_array["id"];
-      echo "<br>";
-      echo "call curl here";
-      $this->renderText('Repo Name: '.$repo_id );
-      die();
-      } */
 }
