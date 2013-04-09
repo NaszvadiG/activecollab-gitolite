@@ -20,7 +20,7 @@ class AcGitoliteModule extends AngieModule {
      *
      * @var string
      */
-    protected $version = '1.3.4';
+    protected $version = '1.3.5';
     
     /**
      * Name of the project object class (or classes) that this module uses

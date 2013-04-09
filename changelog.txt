@@ -28,4 +28,17 @@ V 1.3.3 [2013, Mar 1]
 ================================================================================
 - Fixed error that showed up on activeCollab 3.2.11 
 
+V 1.3.4 [2013, Apr 8]
+================================================================================
+- Refactor setup wizard 
+
+V 1.3.5 [2013, Apr 9]
+================================================================================
+- refactoring code
+    -> Public key validation added
+    -> Removed unused code 
+    -> New gitolite conf file creation algo added
+    -> activeCollab 3.3 comptability
+
+
 
