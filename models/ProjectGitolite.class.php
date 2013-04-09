@@ -305,8 +305,6 @@ class ProjectGitolite {
                     fclose($fh);
                     @unlink($file_name);
                     return true;
-                }else{
-                    echo "ypypoyy ";
                 }
             }
 
