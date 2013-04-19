@@ -250,24 +250,58 @@
          * @return boolean status
          */
         
-        function clone_remote_repo($repo_url,$work_git_path, $actual_git_repo_name)
+        function clone_remote_repo($repo_url,$work_git_path, $actual_git_repo_name,&$error_msg = "")
         {
             if($repo_url == "" || $work_git_path == "" || $actual_git_repo_name == "")
             {
                 return FALSE;
             }
             
-            $path = exec("cd $work_git_path && git clone $repo_url $actual_git_repo_name",$output,$return_var);
-           
-            if($return_var == 0)
+            $path = exec("cd $work_git_path && git clone $repo_url $actual_git_repo_name  2>&1",$output,$return_var);
+            
+            if($return_var === 0)
             {
                 return TRUE;
             }
             else
             {
-                return FALSE;
+                //May be ssh error 
+                $tem_url = strtolower($repo_url);
+               if (strpos($tem_url, '@') !== false) {
+                    $tem_url = split("@", $tem_url);
+                    if (count($tem_url) > 1)
+                        $tem_url = $tem_url[1];
+                    $tem_url = split(":", $tem_url);
+                    if (count($tem_url) > 0)
+                        $tem_url = $tem_url[0];
+                }else {
+                    $tem_url = split("://", $tem_url);
+                    if (count($tem_url) > 1)
+                        $tem_url = $tem_url[1];
+                    else
+                        $tem_url = $tem_url[0];
+                    
+                    $tem_url = split("/", $tem_url);
+                    if (count($tem_url) > 0)
+                        $tem_url = $tem_url[0];
+                    
+                    $tem_url = split(":", $tem_url);
+                    
+                    if (count($tem_url) > 0)
+                        $tem_url = $tem_url[0];
+                    
+                }
+                exec("ssh-keyscan {$tem_url} >> ~/.ssh/known_hosts");
+                $output =array();
+                $path = exec("cd $work_git_path && git clone $repo_url $actual_git_repo_name 2>&1",$output,$return_var);
+                if($return_var === 0)
+                {
+                    return TRUE;
+                }else{
+                    $error_msg = $output;
+                    return FALSE;
+                }
             }
-           
             return FALSE;
         }
         

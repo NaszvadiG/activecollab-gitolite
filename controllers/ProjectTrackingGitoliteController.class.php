@@ -540,10 +540,14 @@
                         
                         
                         
-                        $return_status =  GitoliteAdmin::clone_remote_repo($repo_url,$work_git_path,$folder_name);
+                        $return_status =  GitoliteAdmin::clone_remote_repo($repo_url,$work_git_path,$folder_name,$error_message);
                         if(!$return_status)
                         {
-                            $errors->addError('Problem occured while cloning repository.');
+                            //$errors->addError('Problem occured while cloning repository.' . $error_message);
+                            for ($rCount  = 1 ; count($error_message) > $rCount ; $rCount ++){
+                                $errors->addError($error_message[$rCount]);
+                                
+                            }
                             throw $errors;
                         }
                         
