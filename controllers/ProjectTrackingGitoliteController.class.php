@@ -898,7 +898,7 @@
                                 
                             $command = "cd ".$dir." && git add * && git commit -am 'render conf file' && git push  || echo 'Not found'";
                             exec($command,$output,$return_var);
-
+                            
                             /*$git_server = $settings['gitoliteuser']."@".$settings['gitoliteserveradd'];
                             $command = "cd ".$settings['gitoliteadminpath']." && git clone ".$git_server.":".$repo_name;
                             exec($command,$output,$return_var);*/
