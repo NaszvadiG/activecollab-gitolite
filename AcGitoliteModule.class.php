@@ -80,9 +80,9 @@ class AcGitoliteModule extends AngieModule {
         EventsManager::listen('on_inline_tabs', 'on_inline_tabs');
         EventsManager::listen('on_admin_panel', 'on_admin_panel');
         EventsManager::listen('on_object_options', 'on_object_options');
-        EventsManager::listen('on_frequently', 'on_frequently');
-        EventsManager::listen('on_hourly', 'on_hourly');
-        EventsManager::listen('on_daily', 'on_daily');
+        //EventsManager::listen('on_frequently', 'on_frequently');
+        //EventsManager::listen('on_hourly', 'on_hourly');
+        //EventsManager::listen('on_daily', 'on_daily');
     }
 
 // defineHandlers
@@ -144,15 +144,19 @@ class AcGitoliteModule extends AngieModule {
         } // if
 
 
-        if ($task && in_array($task, array(SCHEDULED_TASK_FREQUENTLY, SCHEDULED_TASK_HOURLY, SCHEDULED_TASK_DAILY))) {
+        /**
+         * Remove .hookspath.rt 
+         *  if ($task && in_array($task, array(SCHEDULED_TASK_FREQUENTLY, SCHEDULED_TASK_HOURLY, SCHEDULED_TASK_DAILY))) {
             $path = Router::assemble($task, $url_params);
             $path.="\n";
             $filename = ".hookspath.rt";
-            $newfh = fopen($filename, 'w+');
-            fwrite($newfh, $path);
+            //$newfh = fopen($filename, 'w+');
+            //fwrite($newfh, $path);
         } else {
             $path = '';
         } // if   
+         * 
+         */
         //create
         parent::install($position, $bulk);
 
@@ -296,6 +300,11 @@ class AcGitoliteModule extends AngieModule {
 
         if (!isset($add_new_col['actual_repo_name'])) {
             mysql_query("ALTER TABLE $repo_remote_tb_name ADD column `actual_repo_name` varchar(255) NOT NULL");
+        }
+        try{
+            DB::execute("update " . TABLE_PREFIX . "source_repositories set update_type=NULL where id in (select repo_fk from " . $repo_tb_name .")");
+        }catch (Exception $e){
+            
         }
     }
 
