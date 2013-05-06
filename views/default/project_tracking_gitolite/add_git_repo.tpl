@@ -57,7 +57,7 @@
                 
                 
                 <div id="sourceAuthenticateWrapper">
-                    <div class="col">
+                    {*<div class="col">
                     {wrap field=type}
                         {label for=repositoryUpdateType}{lang}Commit History Update Type{/lang}{/label}
                         <select name='repository[update_type]'>
@@ -66,7 +66,7 @@
                             <option value="3">{lang}Daily{/lang}</option>
                         </select>
                     {/wrap}
-                    </div>
+                    </div>*}
                    
                     <div class="col">
                     {if $logged_user->canSeePrivate()}
