@@ -550,7 +550,7 @@
                 }
 
                 $(".content_stack_element_body.last").hide();
-                $.get(test_connection_url, {user: gitoliteuser, engine: "GitRepository", port: ssh_port, async: true, dir: admin_dir, type: git_server_location, server: serveraddress, case: array_process[rCount - 1]},
+                $.post(test_connection_url, {user: gitoliteuser, engine: "GitRepository", port: ssh_port, async: true, dir: admin_dir, type: git_server_location, server: serveraddress, case: array_process[rCount - 1]},
                 function(data) {
                     $('#test_connection_loading_img').hide();
                     if (jQuery.trim(data) == 'ok') {
