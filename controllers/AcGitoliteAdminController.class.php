@@ -470,7 +470,7 @@ class AcGitoliteAdminController extends AdminController {
      * @return string message
      */
     function delete_repo() {
-        $repoid = array_var($_REQUEST, 'repoid');
+        $repoid = array_var($_GET, 'repoid');
         if ($repoid != "") {
             $this->active_repository = SourceRepositories::findById($repoid);
             $this->active_repository->delete();
@@ -516,11 +516,11 @@ class AcGitoliteAdminController extends AdminController {
      * Map remote conf users with activeclollab users
      */
     function map_conf_user() {
-        if (isset($_REQUEST["user_ids"])) {
+        if (isset($_GET["user_ids"])) {
 
-            $user_ids = $_REQUEST["user_ids"];
-            $pub_keys = $_REQUEST["pub_keys_str"];
-            $pub_key_access = $_REQUEST["pub_key_access"];
+            $user_ids = $_GET["user_ids"];
+            $pub_keys = $_GET["pub_keys_str"];
+            $pub_key_access = $_GET["pub_key_access"];
 
             // start mapping keys
             try {
@@ -617,10 +617,10 @@ class AcGitoliteAdminController extends AdminController {
                 }
             }
         }
-        if (isset($_REQUEST["prj_name"])) {
+        if (isset($_GET["prj_name"])) {
 
-            $prj_id = $_REQUEST["prj_name"];
-            $repo_name = $_REQUEST["repo_name"];
+            $prj_id = $_GET["prj_name"];
+            $repo_name = $_GET["repo_name"];
             $user_id = $this->logged_user->getId();
             $project_obj = new Project($prj_id);
             $users_details = $project_obj->users()->describe($this->logged_user, true, true, STATE_VISIBLE);

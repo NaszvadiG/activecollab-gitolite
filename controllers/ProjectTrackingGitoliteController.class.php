@@ -655,7 +655,7 @@
       * @throws ValidationErrors
       */
      function edit_git_repo(){
-         $repo_id = array_var($_REQUEST, 'project_source_repository_id'); //project objects id
+         $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
          
          $is_gitolite  = GitoliteAdmin :: is_gitolite();
          if(!ProjectSourceRepositories::canAdd($this->logged_user, $this->active_project)) {
@@ -953,7 +953,7 @@
         ));
          */
          
-          $repo_id = array_var($_REQUEST, 'project_source_repository_id'); //project objects id
+          $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
           $project = $this->active_project;
           $repository = $this->active_repository;
          
@@ -1188,7 +1188,7 @@
         $project_id = $project->getId();
         $logged_user = $this->logged_user;
         $user_id = $logged_user->getId();
-        $repo_id = array_var($_REQUEST, 'project_source_repository_id'); //project objects id
+        $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
         
         
         $repo_obj = new ProjectSourceRepository($repo_id);
@@ -1290,7 +1290,7 @@
    */
   function test_hooks_url()
   {
-        $url = $_REQUEST["testing_url"];
+        $url = $_GET["testing_url"];
         $fields = array(
             'repo_name' => urlencode($this->active_repository->getName())
         );
@@ -1433,7 +1433,7 @@
       //print_r($eng->getBranches);
       $branches_array = $eng->getBranches();
       $repo_branches_str = implode(",",$branches_array);
-      $repo_id = array_var($_REQUEST, 'project_source_repository_id'); //project objects id
+      $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
       
       $repo_obj = new ProjectSourceRepository($repo_id);
       $src_repo_id = $repo_obj->getIntegerField1();
@@ -1536,11 +1536,11 @@
   
   function test_ftp_connection()
   {
-      $host = $_REQUEST["ftp_domain"];
-      $port = $_REQUEST["ftp_port"];
-      $user = $_REQUEST["ftp_username"];
-      $password = $_REQUEST["ftp_password"];
-      $ftp_dir = $_REQUEST["ftp_dir"];
+      $host = $_GET["ftp_domain"];
+      $port = $_GET["ftp_port"];
+      $user = $_GET["ftp_username"];
+      $password = $_GET["ftp_password"];
+      $ftp_dir = $_GET["ftp_dir"];
       if($host == "" || $port == "" || $user == "" || $password == "" || $ftp_dir == "")
       {
           die("Please fill all connection prameters.");

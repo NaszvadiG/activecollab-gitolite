@@ -184,26 +184,13 @@
          * @return string server name
          */
         function get_server_name()
-        {   
-            /**
-             * Change for subdomain handler in script 
-             */
-            
-            //$server_name = array_shift(explode(".",$_SERVER['HTTP_HOST']));
-            //return $_SERVER['HTTP_HOST'];
-            
-            $return_str= '';
-            preg_match('/^(?:www\.)?(?:(.+)\.)?(.+\..+)$/i', 'localhost', $matches);
+        {
+            $server_name = array_shift(explode(".",$_SERVER['HTTP_HOST']));
+            preg_match('/^(?:www\.)?(?:(.+)\.)?(.+\..+)$/i', $_SERVER['HTTP_HOST'], $matches);
             if(is_array($matches) && count($matches) > 0)
             {
-                if(isset($matches[1]) && trim($matches[1]) != ''){
-                    $return_str .= $matches[1] . ".";
-                }
-                $return_str .=  $matches[2];
-            }else{
-                $return_str =  $_SERVER['HTTP_HOST'];
+                return $matches[2];
             }
-            return $return_str;
         }
         
         /**
