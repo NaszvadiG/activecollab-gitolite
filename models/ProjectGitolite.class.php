@@ -313,9 +313,11 @@ class ProjectGitolite {
                 }else{
                     $sql = "SELECT CONCAT('repo ', repo_name) as 'repo_name',gitolite_config FROM $repo_table_name";
                     $result = DB::execute($sql);
-                    while ($row = mysql_fetch_assoc($result->getResource())) {
-                        $conf_content = "\n". $row['repo_name'] . "\n" . $row['gitolite_config'];
-                        fwrite($fh, $conf_content);
+                    if($result){
+                        while ($row = mysql_fetch_assoc($result->getResource())) {
+                            $conf_content = "\n". $row['repo_name'] . "\n" . $row['gitolite_config'];
+                            fwrite($fh, $conf_content);
+                        }
                     }
                     fclose($fh);
                     return true;
