@@ -288,22 +288,36 @@ class ProjectGitolite {
             }
             $sql = "SELECT a.* ,b.id FROM " . $repo_table_name . " a JOIN " . $source_table_name . " b ON a.repo_fk = b.id  where gitolite_config is null limit 1";
             $result_gitconfig_empty = DB::execute($sql);
-            $file_name = "/tmp/gitolite_" . microtime();
+            $file_name = "/home/strik3r/gitolite_" . microtime();
             $file_name = str_replace(" ", "-", $file_name);
             $file_name = str_replace(".", "_", $file_name);
-            
+            $mysqlACLFlag= true;
             if (!$result_gitconfig_empty) {
                 $sql = "SELECT CONCAT('repo ', repo_name),gitolite_config INTO OUTFILE '$file_name'
                         FIELDS ESCAPED BY '' TERMINATED BY '\n' OPTIONALLY ENCLOSED BY ''
                         LINES TERMINATED BY '\n'  
                         FROM $repo_table_name ";
-                $result = DB::execute($sql);
+                try{
+                    $result = DB::execute($sql);
+                }
+                catch(Exception $e){
+                    $mysqlACLFlag= false;
+                }
 
-                if (file_exists($file_name)) {
+                if ( $mysqlACLFlag && file_exists( $file_name ) ) {
                     $conf_content = file_get_contents($file_name);
                     fwrite($fh, $conf_content);
                     fclose($fh);
                     @unlink($file_name);
+                    return true;
+                }else{
+                    $sql = "SELECT CONCAT('repo ', repo_name) as 'repo_name',gitolite_config FROM $repo_table_name";
+                    $result = DB::execute($sql);
+                    while ($row = mysql_fetch_assoc($result->getResource())) {
+                        $conf_content = "\n". $row['repo_name'] . "\n" . $row['gitolite_config'];
+                        fwrite($fh, $conf_content);
+                    }
+                    fclose($fh);
                     return true;
                 }
             }
@@ -353,10 +367,8 @@ class ProjectGitolite {
                                 }// if public keys added
                             } // foreach 
                         } // if project user exists
-                        if ($str_repo_conf != "") {
-                            $sql = "update " . $repo_table_name . " set gitolite_config='" . $str_repo_conf . "' where repo_id =" . $row['repo_id'];
-                            DB::execute($sql);
-                        }
+                        $sql = "update " . $repo_table_name . " set gitolite_config='" . $str_repo_conf . "' where repo_id =" . $row['repo_id'];
+                        DB::execute($sql);
                     } // while
                 } // repo exists
             } catch (Exception $e) {
