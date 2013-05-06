@@ -124,7 +124,7 @@
         
         $('#map_project_loading_img').show();
            
-        //$.get(test_connection_url,{url: repository_url, engine: "GitRepository", async : true,dir:admin_dir},
+        //$.post(test_connection_url,{url: repository_url, engine: "GitRepository", async : true,dir:admin_dir},
         $.each(postData_prjs, function(index, el) {  
             //alert(postData_prjs[index])
                
@@ -133,7 +133,7 @@
             {    
                 $('#repo_'+postData_repos[index]).show();
                 //alert('#repo_'+postData_repos[index])
-                $.get(map_project_url,{prj_name: postData_prjs[index],repo_name: postData_repos[index], async : true},
+                $.post(map_project_url,{prj_name: postData_prjs[index],repo_name: postData_repos[index], async : true},
                 function(data){
                         $('#map_project_loading_img').hide();
                         if (jQuery.trim(data) == 'ok') {

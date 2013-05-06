@@ -214,8 +214,8 @@
          
         
         $('#map_user_loading_img').show();
-	//$.get(test_connection_url,{url: repository_url, engine: "GitRepository", async : true,dir:admin_dir},
-        $.get(map_users_url,{pub_keys_str: postData_pub,user_ids: postData,pub_key_access : postData_key_access, async : true},
+	//$.post(test_connection_url,{url: repository_url, engine: "GitRepository", async : true,dir:admin_dir},
+        $.post(map_users_url,{pub_keys_str: postData_pub,user_ids: postData,pub_key_access : postData_key_access, async : true},
 	function(data){
             $('#map_user_loading_img').hide();
             if (jQuery.trim(data) == 'ok') {
@@ -283,7 +283,7 @@
         }
         $('#map_project_loading_img').show();
            
-        //$.get(test_connection_url,{url: repository_url, engine: "GitRepository", async : true,dir:admin_dir},
+        //$.post(test_connection_url,{url: repository_url, engine: "GitRepository", async : true,dir:admin_dir},
         var cnt = 0;    
         $.each(postData_prjs, function(index, el) {  
             //alert(postData_prjs[index])
@@ -294,7 +294,7 @@
                 //cnt = cnt+1;
                 $('#repo_'+postData_repos[index]).show();
                 //alert('#repo_'+postData_repos[index])
-                $.get(map_project_url,{prj_name: postData_prjs[index],repo_name: postData_repos[index], async : true},
+                $.post(map_project_url,{prj_name: postData_prjs[index],repo_name: postData_repos[index], async : true},
                 function(data){
                         //$('#map_project_loading_img').hide();
                         if (jQuery.trim(data) == 'ok') {
@@ -315,7 +315,7 @@
                                         $('#repo_'+postData_repos[index]).hide();
                                         if(cnt == postData_prjs.length)   
                                         {
-                                            $.get(render_after_clone_url,{render: true, async : true},
+                                            $.post(render_after_clone_url,{render: true, async : true},
                                              function(data){
                                                   $('#map_project_loading_img').hide();
                                                   if (jQuery.trim(data) == 'ok') {

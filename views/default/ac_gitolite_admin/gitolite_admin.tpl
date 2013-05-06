@@ -606,7 +606,7 @@
                 var admin_dir = $('#gitolite_test_dir').val();
                 $('#test_connection_loading_img').show();
 
-                $.get(test_connection_url, {user: gitoliteuser, engine: "GitRepository", async: true, dir: admin_dir, server: serveraddress},
+                $.post(test_connection_url, {user: gitoliteuser, engine: "GitRepository", async: true, dir: admin_dir, server: serveraddress},
                 function(data) {
                     $('#test_connection_loading_img').hide();
                     if (jQuery.trim(data) == 'ok') {
@@ -664,8 +664,8 @@
                     var git_server_location = "local";
                 }
                 /*git_server_location */
-                //$.get(test_connection_url,{url: repository_url, engine: "GitRepository", async : true,dir:admin_dir},
-                $.get(save_admin_settings_url, {user: gitoliteuser, engine: "GitRepository", async: true, dir: admin_dir, server: serveraddress, server_location: git_server_location},
+                //$.post(test_connection_url,{url: repository_url, engine: "GitRepository", async : true,dir:admin_dir},
+                $.post(save_admin_settings_url, {user: gitoliteuser, engine: "GitRepository", async: true, dir: admin_dir, server: serveraddress, server_location: git_server_location},
                 function(data) {
                     $('#test_connection_loading_img').hide();
                     if (jQuery.trim(data) == 'map') {

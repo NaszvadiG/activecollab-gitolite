@@ -75,7 +75,7 @@
                  var ftp_dir = $('#ftp_dir-'+click_id).val();      
                 
                 $('#button-'+click_button).attr("disabled", "disabled");
-                $.get(test_connection_url,{ftp_domain: ftp_domain,ftp_port: ftp_port,ftp_username: ftp_username,ftp_password: ftp_password,ftp_branch: ftp_branch,ftp_dir : ftp_dir, async : true},
+                $.post(test_connection_url,{ftp_domain: ftp_domain,ftp_port: ftp_port,ftp_username: ftp_username,ftp_password: ftp_password,ftp_branch: ftp_branch,ftp_dir : ftp_dir, async : true},
 		function(data){
 			$('#test_connection_loading_img').hide();
 			if (jQuery.trim(data) == 'ok') {

@@ -159,7 +159,7 @@
                 var id = $(this).attr('id');
                 //alert(id)
                 $("#" + id).html('<img src = ' + image_url + '>');
-                $.get(delete_url, {repoid: id, async: true},
+                $.post(delete_url, {repoid: id, async: true},
                 function(data) {
                     //$('#delete_loading_img').hide();
                     //$("#" + id).html

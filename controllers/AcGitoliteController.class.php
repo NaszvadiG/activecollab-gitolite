@@ -148,7 +148,7 @@ class AcGitoliteController extends UsersController {
                     $this->response->respondWithData($show_data, array('as' => 'settings'));
                 }
             } catch (Exception $e) {
-                $this->response->exception("Can't save key this time, might be key you are adding is already added");
+                                $this->response->exception("Can't save key this time, might be key you are adding is already added. " . $e->getMessage());
             }
         }
     }

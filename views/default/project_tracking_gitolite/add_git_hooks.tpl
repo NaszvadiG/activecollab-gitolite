@@ -49,7 +49,7 @@
 		var test_connection_url = $('#test_url_hooks').val();
                 var url_to_test = $('#'+click_id).val();
                 $('#'+click_button).attr("disabled", "disabled");
-                $.get(test_connection_url,{testing_url: url_to_test, async : true},
+                $.post(test_connection_url,{testing_url: url_to_test, async : true},
 		function(data){
 			$('#test_connection_loading_img').hide();
 			if (jQuery.trim(data) == 'ok') {
