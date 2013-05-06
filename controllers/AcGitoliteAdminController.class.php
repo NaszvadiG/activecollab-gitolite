@@ -197,10 +197,10 @@ class AcGitoliteAdminController extends AdminController {
 
     function test_connection() {
 
-        if (!(array_var($_GET, 'dir')) || !(array_var($_GET, 'user')) || !(array_var($_GET, 'server'))) {
+        if (!(array_var($_REQUEST, 'dir')) || !(array_var($_REQUEST, 'user')) || !(array_var($_REQUEST, 'server'))) {
             die(lang('Please fill in all the connection parameters'));
         }
-        if (!(array_var($_GET, 'dir'))) {
+        if (!(array_var($_REQUEST, 'dir'))) {
             die('Gitolite admin path not found');
         } //if
 
@@ -208,13 +208,13 @@ class AcGitoliteAdminController extends AdminController {
             die("Please enable `exec` on this sever");
         }
 
-        $cloneurl = array_var($_GET, 'user') . "@" . array_var($_GET, 'server') . ":";
-        if (intval(array_var($_GET, 'port')) != 22) {
-            $cloneurl = "ssh://" . $cloneurl . array_var($_GET, 'port') . "/";
+        $cloneurl = array_var($_REQUEST, 'user') . "@" . array_var($_REQUEST, 'server') . ":";
+        if (intval(array_var($_REQUEST, 'port')) != 22) {
+            $cloneurl = "ssh://" . $cloneurl . array_var($_REQUEST, 'port') . "/";
         }
         switch (array_var($_REQUEST, 'case')) {
             case "connect":
-                $comd = "ssh -p " . array_var($_GET, 'port') . " -T " . array_var($_GET, 'user') . "@" . array_var($_GET, 'server') . " | grep gitolite-admin | grep 'R W'";
+                $comd = "ssh -p " . array_var($_REQUEST, 'port') . " -T " . array_var($_REQUEST, 'user') . "@" . array_var($_REQUEST, 'server') . " | grep gitolite-admin | grep 'R W'";
                 exec($comd, $output);
                 if (count($output) > 0 && preg_match("/R W/", $output[0]) && preg_match("/gitolite-admin/", $output[0])) {
                     die("ok");
@@ -249,18 +249,18 @@ class AcGitoliteAdminController extends AdminController {
 
                 break;
             case "setup":
-                if (!is_dir(array_var($_GET, 'dir'))) {
-                    if (mkdir(array_var($_GET, 'dir'))) {
-                        $comd = "cd " . array_var($_GET, 'dir') . " &&  git clone " . $cloneurl . "gitolite-admin.git || pwd";
+                if (!is_dir(array_var($_REQUEST, 'dir'))) {
+                    if (mkdir(array_var($_REQUEST, 'dir'))) {
+                        $comd = "cd " . array_var($_REQUEST, 'dir') . " &&  git clone " . $cloneurl . "gitolite-admin.git || pwd";
                         unset($output);
                         exec($comd, $output);
                         if (count($output)) {
-                            $cmd = "cd " . array_var($_GET, 'dir') . "gitolite-admin && git config user.name";
+                            $cmd = "cd " . array_var($_REQUEST, 'dir') . "gitolite-admin && git config user.name";
                             exec($cmd, $output);
                             if (empty($output)) {
-                                $cmd = "cd " . array_var($_GET, 'dir') . "gitolite-admin && git config user.name " . GitoliteAdmin::get_web_user();
+                                $cmd = "cd " . array_var($_REQUEST, 'dir') . "gitolite-admin && git config user.name " . GitoliteAdmin::get_web_user();
                                 exec($cmd, $output);
-                                $cmd = "cd " . array_var($_GET, 'dir') . "gitolite-admin && git config user.email" . GitoliteAdmin::get_web_user() . "@" . array_var($_GET, 'server');
+                                $cmd = "cd " . array_var($_REQUEST, 'dir') . "gitolite-admin && git config user.email" . GitoliteAdmin::get_web_user() . "@" . array_var($_REQUEST, 'server');
                                 exec($cmd, $output);
                             }
                             $conf_path = GIT_FILES_PATH . "/gitolite/gitolite-admin/conf/gitolite.conf";
@@ -283,16 +283,16 @@ class AcGitoliteAdminController extends AdminController {
                             die("Unable to connect server");
                         }
                     } else {
-                        die("Unable to create folder " . array_var($_GET, 'dir'));
+                        die("Unable to create folder " . array_var($_REQUEST, 'dir'));
                     }
                 } else {
-                    if (is_dir(array_var($_GET, 'dir') . "gitolite-admin")) {
+                    if (is_dir(array_var($_REQUEST, 'dir') . "gitolite-admin")) {
 
-                        $cmd = "cd " . array_var($_GET, 'dir') . "gitolite-admin && git remote -v";
+                        $cmd = "cd " . array_var($_REQUEST, 'dir') . "gitolite-admin && git remote -v";
                         unset($output);
                         exec($cmd, $output);
                         if (empty($output)) {
-                            $comd = "mv  " . array_var($_GET, 'dir') . "gitolite-admin " . array_var($_GET, 'dir') . "gitolite-admin.$(date +%s) && cd " . array_var($_GET, 'dir') . " &&  git clone " . $cloneurl . "gitolite-admin.git || pwd";
+                            $comd = "mv  " . array_var($_REQUEST, 'dir') . "gitolite-admin " . array_var($_REQUEST, 'dir') . "gitolite-admin.$(date +%s) && cd " . array_var($_REQUEST, 'dir') . " &&  git clone " . $cloneurl . "gitolite-admin.git || pwd";
                             unset($output);
                             exec($comd, $output);
                             if (count($output)) {
@@ -301,8 +301,8 @@ class AcGitoliteAdminController extends AdminController {
                                 die("Unable to connect git server");
                             }
                         } else {
-                            if (strpos(strtolower($output[0]), strtolower(array_var($_GET, 'user') . "@" . array_var($_GET, 'server'))) === false) {
-                                $comd = "mv  " . array_var($_GET, 'dir') . "gitolite-admin " . array_var($_GET, 'dir') . "gitolite-admin.$(date +%s) && cd " . array_var($_GET, 'dir') . " &&  git clone " . $cloneurl . "gitolite-admin.git || pwd";
+                            if (strpos(strtolower($output[0]), strtolower(array_var($_REQUEST, 'user') . "@" . array_var($_REQUEST, 'server'))) === false) {
+                                $comd = "mv  " . array_var($_REQUEST, 'dir') . "gitolite-admin " . array_var($_REQUEST, 'dir') . "gitolite-admin.$(date +%s) && cd " . array_var($_REQUEST, 'dir') . " &&  git clone " . $cloneurl . "gitolite-admin.git || pwd";
                                 unset($output);
                                 exec($comd, $output);
                                 if (count($output)) {
@@ -317,15 +317,15 @@ class AcGitoliteAdminController extends AdminController {
                         $this->_create_demo_repo();
                         die("ok");
                     } else {
-                        $comd = "cd " . array_var($_GET, 'dir') . " &&  git clone " . $cloneurl . "gitolite-admin.git || pwd";
+                        $comd = "cd " . array_var($_REQUEST, 'dir') . " &&  git clone " . $cloneurl . "gitolite-admin.git || pwd";
                         exec($comd, $output);
-                        $cmd = "cd " . array_var($_GET, 'dir') . "gitolite-admin && git config user.name";
+                        $cmd = "cd " . array_var($_REQUEST, 'dir') . "gitolite-admin && git config user.name";
                         unset($output);
                         exec($comd, $output);
                         if (empty($output)) {
-                            $cmd = "cd " . array_var($_GET, 'dir') . "gitolite-admin && git config user.name " . GitoliteAdmin::get_web_user();
+                            $cmd = "cd " . array_var($_REQUEST, 'dir') . "gitolite-admin && git config user.name " . GitoliteAdmin::get_web_user();
                             exec($cmd, $output);
-                            $cmd = "cd " . array_var($_GET, 'dir') . "gitolite-admin && git config user.email" . GitoliteAdmin::get_web_user() . "@" . array_var($_GET, 'server');
+                            $cmd = "cd " . array_var($_REQUEST, 'dir') . "gitolite-admin && git config user.email" . GitoliteAdmin::get_web_user() . "@" . array_var($_REQUEST, 'server');
                             exec($cmd, $output);
                         }
                         $this->_create_demo_repo();
@@ -340,13 +340,13 @@ class AcGitoliteAdminController extends AdminController {
     function _create_demo_repo() {
         $conf_path = GIT_FILES_PATH . "/gitolite/gitolite-admin/conf/gitolite.conf";
         $admin_path = GIT_FILES_PATH . "/gitolite/gitolite-admin/conf/";
-        $cmd = "cd " . array_var($_GET, 'dir') . "gitolite-admin && git config user.name";
+        $cmd = "cd " . array_var($_REQUEST, 'dir') . "gitolite-admin && git config user.name";
         exec($cmd, $output);
         if (empty($output)) {
-            $cmd = "cd " . array_var($_GET, 'dir') . "gitolite-admin && git config user.name " . GitoliteAdmin::get_web_user();
+            $cmd = "cd " . array_var($_REQUEST, 'dir') . "gitolite-admin && git config user.name " . GitoliteAdmin::get_web_user();
 
             exec($cmd, $output);
-            $cmd = "cd " . array_var($_GET, 'dir') . "gitolite-admin && git config user.email" . GitoliteAdmin::get_web_user() . "@" . array_var($_GET, 'server');
+            $cmd = "cd " . array_var($_REQUEST, 'dir') . "gitolite-admin && git config user.email" . GitoliteAdmin::get_web_user() . "@" . array_var($_REQUEST, 'server');
 
             exec($cmd, $output);
             unset($output);
@@ -367,14 +367,14 @@ class AcGitoliteAdminController extends AdminController {
             $comd = "echo ~" . array_var($_REQUEST, 'user');
             $output = array();
             exec($comd, $output);
-            if (!empty($output) && is_dir($output[0]) && $output[0] != "~" . array_var($_GET, 'user')) {
+            if (!empty($output) && is_dir($output[0]) && $output[0] != "~" . array_var($_REQUEST, 'user')) {
                 if (is_readable($output[0] . "/repositories/ac_rt_demo.git")) {
                     die("ok");
                 } else {
                     die($output[0] . "/repositories/ac_rt_demo.git is not readable");
                 }
             } else {
-                die("No Home directory Found for user " . array_var($_GET, 'user'));
+                die("No Home directory Found for user " . array_var($_REQUEST, 'user'));
             }
         }
         else
@@ -429,15 +429,15 @@ class AcGitoliteAdminController extends AdminController {
      */
     function save_admin_settings() {
 
-        if (!(array_var($_GET, 'dir')) || !(array_var($_GET, 'user')) || !(array_var($_GET, 'server')) || !(array_var($_GET, 'server_location'))) {
+        if (!(array_var($_REQUEST, 'dir')) || !(array_var($_REQUEST, 'user')) || !(array_var($_REQUEST, 'server')) || !(array_var($_REQUEST, 'server_location'))) {
             die(lang('Please fill in all the connection parameters'));
         }
         try {
 
-            $save_data["gitoliteuser"] = array_var($_GET, 'user');
-            $save_data["gitoliteserveradd"] = array_var($_GET, 'server');
-            $save_data["gitoliteadminpath"] = array_var($_GET, 'dir');
-            $save_data["git_server_location"] = array_var($_GET, 'server_location');
+            $save_data["gitoliteuser"] = array_var($_REQUEST, 'user');
+            $save_data["gitoliteserveradd"] = array_var($_REQUEST, 'server');
+            $save_data["gitoliteadminpath"] = array_var($_REQUEST, 'dir');
+            $save_data["git_server_location"] = array_var($_REQUEST, 'server_location');
 
 
             DB::beginWork('Save admin settings @ ' . __CLASS__);
