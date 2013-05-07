@@ -303,6 +303,14 @@ class AcGitoliteModule extends AngieModule {
         }
         try{
             DB::execute("update " . TABLE_PREFIX . "source_repositories set update_type=NULL where id in (select repo_fk from " . $repo_tb_name .")");
+            $chkcol =  DB::execute("select * from " . TABLE_PREFIX . "source_users limit 1");
+            $add_new_col = mysql_fetch_array($chkcol);
+            if (!isset($add_new_col['id'])) {
+                try{mysql_query("ALTER TABLE  " . TABLE_PREFIX . "source_users  DROP PRIMARY KEY");}catch(Exception $e){}
+                mysql_query("ALTER TABLE  " . TABLE_PREFIX . "source_users  ADD  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY");
+            }
+        
+            
         }catch (Exception $e){
             
         }

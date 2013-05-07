@@ -477,14 +477,6 @@
                     
                     $hooks_table_name = TABLE_PREFIX."rt_web_hooks";
                     $get_repo_hooks = DB::execute("SELECT * from $hooks_table_name where repo_fk = '".$repo_id."'");
-                    if($get_repo_hooks)
-                    {
-                        $array_pay_load = array();
-                        // get last commit 
-                        $comm = new SourceCommits();
-                        $before = $source_repositories->getLastCommit($branch,1);
-                        $array_pay_load["before"] = $before->getName();
-                    }
                     
                     $source_repositories->update($logs['data'], $branch);
                     //print_r($logs['data']);
@@ -498,7 +490,8 @@
                           {
                                  
                                  
-                                 
+                                $before = $source_repositories->getLastCommit($branch,1);
+                                $array_pay_load["before"] = $before->getName();
                                  $array_pay_load["repository"] = array(
                                                                        "url" => $source_repositories->getViewUrl(),
                                                                        "name" => $source_repositories->getName(),
