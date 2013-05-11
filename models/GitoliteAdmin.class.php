@@ -278,7 +278,8 @@ class GitoliteAdmin {
         if ($path == "") {
             return false;
         }
-        $path = exec("cd $path && git pull");
+        $path = exec("cd $path && git pull --all");
+        var_dump($path);
         return true;
     }
 
@@ -308,6 +309,17 @@ class GitoliteAdmin {
               JOIN ".$source_table_name." b ON a.repo_fk = b.id and b.update_type = '$update_type'"); */
         }
         return true;
+    }
+    function update_repo_code($repo_id){
+        $remote_repos_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
+            $source_table_name = TABLE_PREFIX . 'source_repositories';
+            $result = DB::execute("SELECT a.*,b.update_type FROM " . $remote_repos_table_name . " a 
+                                       JOIN " . $source_table_name . " b ON a.repo_fk = b.id and a.repo_fk = '$repo_id'");
+            if ($result) {
+                while ($row_repos = mysql_fetch_assoc($result->getResource())) {
+                    self::pull_repo_commits($row_repos["git_repo_path"]);
+                }
+            }
     }
 
     /**
@@ -348,12 +360,13 @@ class GitoliteAdmin {
 
         $source_obj = new SourceRepositories();
         $source_repositories = $source_obj->findById($repo_id);
-
+    
+        self::update_repo_code($repo_id);
         if ($source_repositories) {
 
             $results = "";
             foreach ($source_repositories as $source_repository) {
-
+                
                 $project_source_repositories = ProjectSourceRepositories::findByParent($source_repositories);
 
 
@@ -432,9 +445,6 @@ class GitoliteAdmin {
                         $array_commits = array();
 
                         if (is_foreachable($logs['data'])) {
-
-
-
                             $array_pay_load["repository"] = array(
                                 "url" => $source_repositories->getViewUrl(),
                                 "name" => $source_repositories->getName(),
@@ -552,9 +562,16 @@ class GitoliteAdmin {
                     //} //if
                 } // foreach
             }
-            return empty($results) ? lang('No repositories for update') : lang('Updated repositories: \n') . $results;
+            if (empty($results)){
+                
+                //self::update_repo_code($repo_id);
+                
+            } else{
+                lang('Updated repositories: \n') . $results;
+            }
         } else {
-            return lang('No repositories for update');
+           // self::update_repo_code($repo_id);
+            echo lang('No repositories for update');
         }
     }
 
