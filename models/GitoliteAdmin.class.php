@@ -494,7 +494,7 @@ class GitoliteAdmin {
                             }
 
                             $array_pay_load["after"] = $last_commit_payload;
-                            $array_pay_load["ref"] = "refs/heads/master";
+                            $array_pay_load["ref"] = "refs/heads/" . $branch;
                         }
 
                         //foreach($array_commits as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
