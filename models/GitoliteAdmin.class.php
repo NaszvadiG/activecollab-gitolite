@@ -361,7 +361,7 @@ class GitoliteAdmin {
         $source_obj = new SourceRepositories();
         $source_repositories = $source_obj->findById($repo_id);
     
-        self::update_repo_code($repo_id);
+        
         if ($source_repositories) {
 
             $results = "";
@@ -412,7 +412,7 @@ class GitoliteAdmin {
                         $revision_to = $head_revision;
                     } //if
 
-
+                    
                     $logs = $repository_engine->getLogs($revision_from, $revision_to);
                     if (!is_null($repository_engine->error)) {
                         continue;

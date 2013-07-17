@@ -72,13 +72,13 @@ class AcGitoliteController extends UsersController {
                 if (!($fetch_actual_key[0] == "ssh-rsa" || $fetch_actual_key[0] == "ssh-dss")) {
                     $errors->addError("Key is invalid. It must begin with 'ssh-rsa' or 'ssh-dss'. Check that you're copying the public half of the key", 'public_keys');
                 } else {
-                    $tempStr = base64_decode($fetch_actual_key[1], true);
+                    $tempStr = base64_decode($fetch_actual_key[1]);
                     if ($tempStr) {
                         if (strpos($tempStr, $fetch_actual_key[0]) === false) {
                             $errors->addError("Key is invalid. Check that you're copying the public half of the key", 'public_keys');
                         }
                     } else {
-                        $errors->addError("Key is invalid. Check that you're copying the public half of the key", 'public_keys');
+                        //$errors->addError("Key is invalid. Check that you're copying the public half of the key2", 'public_keys');
                     }
                 }
                 $actual_key = $fetch_actual_key[1];

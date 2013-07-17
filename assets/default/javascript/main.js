@@ -38,8 +38,6 @@ App.widgets.HooksWrap = function () {
     }
 }();
 
- 
-
 App.widgets.FTPConn = function () {
     return {
         init: function (wrapper_id) {

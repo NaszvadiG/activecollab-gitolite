@@ -63,6 +63,8 @@ class AcGitoliteModule extends AngieModule {
         Router::map('repository_add_existing', '/projects/:project_slug/repositories/add-existing', array('controller' => 'project_tracking_gitolite', 'action' => 'add_existing'));
         Router::map('add_source_gitolite_repository', '/admin/tools/source/add-gitolite-repo', array('controller' => 'ac_gitolite_source', 'action' => 'add_source_gitolite_repository'));
         Router::map('add_hooks_git', '/projects/:project_slug/repositories/:project_source_repository_id/add-git-hook', array('controller' => 'project_tracking_gitolite', 'action' => 'add_git_hooks'), array('project_source_repository_id' => Router::MATCH_ID));
+        Router::map('add_deploy_keys', '/projects/:project_slug/repositories/:project_source_repository_id/add-deploy-key', array('controller' => 'project_tracking_gitolite', 'action' => 'add_deploy_keys'), array('project_source_repository_id' => Router::MATCH_ID));
+        
         Router::map('test_hooks_url', '/projects/:project_slug/repositories/:project_source_repository_id/test-hooks-url', array('controller' => 'project_tracking_gitolite', 'action' => 'test_hooks_url'), array('project_source_repository_id' => Router::MATCH_ID));
         Router::map('hookcall', 'hookcall', array('controller' => 'ac_gitolite_hooks', 'action' => 'hooks_call'));
         Router::map('add_ftp_conn', '/projects/:project_slug/repositories/:project_source_repository_id/add-ftp-details', array('controller' => 'project_tracking_gitolite', 'action' => 'add_ftp_connections'));
@@ -314,6 +316,17 @@ class AcGitoliteModule extends AngieModule {
         }catch (Exception $e){
             
         }
+        $create_rt_deploy_keys = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "rt_deploy_keys` (
+            `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+            `repo_fk` INT(10) NOT NULL,
+            `keys` Text NOT NULL,
+            `added_by` INT(10) NOT NULL,
+            `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY  (`id`)
+          ) $storage_engine $default_charset;";
+        //create the rt_config_settings table to store admin settings
+        DB::execute($create_rt_deploy_keys);
+        
     }
 
     /**
