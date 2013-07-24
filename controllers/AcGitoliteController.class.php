@@ -86,16 +86,28 @@ class AcGitoliteController extends UsersController {
                 /* Check for duplications Key name and Key */
                 if (!$errors->hasErrors()) {
                     $dup_cnt = GitoliteAc::check_duplication($active_user->getId(), $post_data, $actual_key);
-                    if (count($dup_cnt) == 0) {
+                    
+                    if (count($dup_cnt) == 0) {                        
                         $errors->addError('Problem occured while saving data, please try again.', 'public_keys');
-                    } elseif (count($dup_cnt) > 0) {
+                    } elseif (count($dup_cnt) > 0) {                        
                         if ($dup_cnt[0]['dup_name_cnt'] > 0) {
                             $errors->addError('You have already added key with same name.');
                         }
                         if ($dup_cnt[1]['dup_name_cnt'] > 0) {
                             $errors->addError('Entered key is already added.');
                         }
-                    }
+                        $dup_cnt_deploy_key = GitoliteAc::check_duplicate_deploy_key($post_data, $actual_key);
+                        if (count($dup_cnt_deploy_key) == 0) {
+                        $errors->addError('Problem occured while saving data, please try again.', 'public_keys');
+                        } elseif (count($dup_cnt_deploy_key) > 0) {
+                            if ($dup_cnt_deploy_key[0]['dup_name_cnt'] > 0) {
+                                $errors->addError('You have already added key with same name in Deploy  keys.');
+                            }
+                            if ($dup_cnt_deploy_key[1]['dup_name_cnt'] > 0) {
+                                $errors->addError('Entered key is already added in Deploy keys.');
+                            }
+                        }
+                    }                    
                 }
                 // if errors found throw error exception
                 if ($errors->hasErrors()) {

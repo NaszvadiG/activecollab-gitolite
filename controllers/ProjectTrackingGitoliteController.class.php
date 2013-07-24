@@ -1018,15 +1018,217 @@ class ProjectTrackingGitoliteController extends RepositoryController {
         //$pull_commits = GitoliteAdmin::pull_repo_commits($repo->getRepositoryPathUrl());
         parent::update();
     }
-
+    /**
+     * Add deploy keys.
+     */
     function add_deploy_keys() {
         $project = $this->active_project;
         $project_id = $project->getId();
         $logged_user = $this->logged_user;
         $user_id = $logged_user->getId();
-        $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id
+        $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id         
+        
+        
+        $repo_obj = new ProjectSourceRepository($repo_id);
+        $src_repo_id = $repo_obj->getIntegerField1();
+        $key_exists = ProjectGitolite::deploy_key_exists($src_repo_id);
+                
+        if (is_array($key_exists) && count($key_exists) > 0) {            
+            foreach($key_exists as &$key) {
+                $key['keys'] = substr($key['keys'], 0, 25) . "....." . substr($key['keys'], -30);
+            }
+            $key_array = $key_exists;
+        } else {
+            $key_array = array();
+        }
+        //$src_repo->find
+        $this->response->assign(
+                array(
+                    'form_action' => Router::assemble('add_deploy_keys', array('project_slug' => $this->active_project->getSlug(),'project_source_repository_id' => $repo_id)),
+                    'key_array' => $key_array,
+                    'web_user' => $web_user,                    
+                    'webuser_pub_key' => $webuser_pub_key,
+                    'del_action' => Router::assemble('del_deploy_key', array('project_slug' => $this->active_project->getSlug(),'project_source_repository_id' => $repo_id)),
+                )
+        );
+        if ($this->request->isSubmitted()) { // check for form submission
+            $post_data = $this->request->post();            
+            try {
+                $errors = new ValidationErrors();
+                $deploy_keys = array();                
+                foreach ($post_data["deploykeys"] as $key => $value) {                    
+                    $deploy_keys[] = array ("key_name" => $value['key_name'], "key" => $value['key']);                     
+                }
+                if ($errors->hasErrors()) {
+                    throw $errors;
+                }
+                DB::beginWork('Add DEPLOY KEYS @ ' . __CLASS__);                
+                if ((is_array($deploy_keys) && count($deploy_keys) > 0)) {
+                    foreach ($deploy_keys as $deploy_key) {
+                        $is_same_repo = ProjectGitolite :: check_same_repo($deploy_key['key'], $repo_id);
+                        if($is_same_repo) {
+                            $errors->addError("Same key doesn't allowed in the same repo.");
+                            throw $errors;
+                        }
+                        else 
+                        {                                                        
+                            $parent_key = ProjectGitolite :: get_parent_key($deploy_key['key']);
+                            $pub_file_name = "";
+                            if(!$parent_key) {
+                                $parent_key = "0";                                
+                                $deploy_key['key_name'] = str_replace(array("\r\n", "\r", "\n"), "", $deploy_key['key_name']);
+                                $deploy_key['key'] = str_replace(array("\r\n", "\r", "\n"), "", $deploy_key['key']);
+                                $key_name = trim($deploy_key['key_name']);
+                                $public_keys = trim($deploy_key['key']);
+                                $pub_file_name = $key_name . "-" . time();
+                                $file = $pub_file_name . ".pub";
+                                
+                                if ($key_name == "") {
+                                    $errors->addError('Please enter key name', 'key_name');
+                                }
+                                
+                                
+                                if ($public_keys == "") {
+                                    $errors->addError('Please enter key', 'key');
+                                }
+                                
+                                if (!preg_match("/^[A-Za-z0-9-]+$/", $key_name)) {
+                                    $errors->addError('Please enter valid key name.', 'key_name');
+                                }
+                                
+                                
+                                $fetch_actual_key = explode(" ", $public_keys);
+                                if (!($fetch_actual_key[0] == "ssh-rsa" || $fetch_actual_key[0] == "ssh-dss")) {
+                                    $errors->addError("Key is invalid. It must begin with 'ssh-rsa' or 'ssh-dss'. Check that you're copying the public half of the key", 'public_keys');
+                                } else {
+                                    $tempStr = base64_decode($fetch_actual_key[1]);
+                                    if ($tempStr) {
+                                        if (strpos($tempStr, $fetch_actual_key[0]) === false) {
+                                            $errors->addError("Key is invalid. Check that you're copying the public half of the key", 'public_keys');
+                                        }
+                                    } else {
+                                        $errors->addError("Key is invalid. Check that you're copying the public half of the key2", 'public_keys');
+                                    }
+                                }    
+                                
+                                $actual_key = $fetch_actual_key[1];
+                                if (!$errors->hasErrors()) {
+                                    $dup_cnt = GitoliteAc::check_duplication(0, $deploy_key, $actual_key);
+                                    if (count($dup_cnt) == 0) {
+                                        $errors->addError('Problem occured while saving data, please try again.', 'public_keys');
+                                    } elseif (count($dup_cnt) > 0) {
+                                        if ($dup_cnt[0]['dup_name_cnt'] > 0) {
+                                            $errors->addError('You have already added key with same name as user public key.');
+                                        }
+                                        if ($dup_cnt[1]['dup_name_cnt'] > 0) {
+                                            $errors->addError('Entered key is already added as user public key.');
+                                        }
+                                    }
+                                }
+                                if ($errors->hasErrors()) {
+                                    throw $errors;
+                                }                                                                
+                            }
+                            else {
+                                $pub_file_name = ProjectGitolite::get_pub_file_name_from_parent_key($parent_key);
+                            }
+                           $deploy_key_add = ProjectGitolite :: add_deploy_keys($deploy_key['key_name'], $deploy_key['key'],  $parent_key , $src_repo_id, $this->logged_user->getId(), $pub_file_name);       
+                        }
+                        
+                        
+                        
+                        if($deploy_key_add) {
+                            if(!$parent_key) {
+                                $admin_settings = GitoliteAdmin :: get_admin_settings();
+                                if (!isset($admin_settings['gitoliteadminpath'])) {
+                                    $this->response->exception("Gitolite admin path not set");
+                                    die();
+                                }
+
+                                $dirpath = $admin_settings['gitoliteadminpath'] . "gitolite-admin/keydir/";
+                                $adminrepo = $admin_settings['gitoliteadminpath'] . "gitolite-admin/";
+                                $path = $dirpath . $file;
+
+                                $newfh = fopen($path, 'w+');
+                                if (!is_writable($path)) {
+                                    $this->response->exception("Can't write to file public file");
+                                    die();
+                                }
+                                $res = fwrite($newfh, $deploy_key['key']);
+                                fclose($newfh);                                
+                            }
+                        }                        
+                    }                        
+                    DB::commit('DEPLOY KEYS Added @ ' . __CLASS__);
+                    ProjectGitolite::update_repo_conf_column($repo_id);       
+                    $res = ProjectGitolite::render_conf_file();
+
+                    /** Git Push Files * */
+                    $command = "cd " . $adminrepo . " && git add * && git commit -am 'added key for deploy Keys $file' && git push";
+                    exec($command, $output, $return_var);                                
+                    
+                    $this->response->ok();
+                } else {
+                    $errors->addError("Error while saving DEPLOY KEYS.");
+                    throw $errors;
+                }
+
+            } catch (Exception $e) {
+
+                DB::rollback('Failed to add DEPLOY KEYS @ ' . __CLASS__);
+                $this->response->exception($e);
+            }
+        }
+        
     }
 
+    
+    function del_deploy_key() {
+        $repo_id = array_var($_GET, 'project_source_repository_id'); //project objects id         
+        $key_id = array_var($_REQUEST, 'deploy_key_id'); //key id        
+        $errors = new ValidationErrors();
+        DB::beginWork('Delete DEPLOY KEYS @ ' . __CLASS__);                
+        $is_parent_key = ProjectGitolite::is_parent_key($key_id);
+        $child_flag = 0;
+        if($is_parent_key) {
+            //echo "is parent";
+            $update_child = ProjectGitolite::update_child($key_id);
+            $del_parent = ProjectGitolite::remove_deploy_key_from_DB($key_id);
+        }        
+        else {
+            $is_child = ProjectGitolite::is_child_key($key_id);            
+            if(!$is_child) {
+                //echo "is sigle";            
+                $child_flag = 1;
+                $pub_file_name = ProjectGitolite::get_pub_file_name($key_id);
+                $file = $pub_file_name . ".pub";
+                $admin_settings = GitoliteAdmin :: get_admin_settings();
+                $dirpath = $admin_settings['gitoliteadminpath'] . "gitolite-admin/keydir/";
+                $adminrepo = $admin_settings['gitoliteadminpath'] . "gitolite-admin/";
+                $path = $dirpath . $file;
+                if(file_exists($path)) {
+                   unlink($path); 
+                }                
+            }            
+            $del_key = ProjectGitolite::remove_deploy_key_from_DB($key_id);
+        }        
+        $repo_master_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
+        $result = DB::execute("SELECT repo_id from $repo_master_table_name");
+        ProjectGitolite::update_repo_conf_column($repo_id);
+//        while($row=  mysql_fetch_array($result->getResource())) {
+//            
+//            $repo_id = $row['repo_id'];
+//            ProjectGitolite::update_repo_conf_column($repo_id);
+//        }
+        $res = ProjectGitolite::render_conf_file(); 
+        if($child_flag) {
+            /** Git Push Files * */
+            $command = "cd " . $adminrepo . " && git add * && git commit -am 'added key for deploy Keys $file' && git push";
+            exec($command, $output, $return_var);                                
+        }        
+        DB::commit('DEPLOY KEYS Added @ ' . __CLASS__);
+        exit;
+    }
     /**
      * Add hooks for a repositories.
      * @throws ValidationErrors

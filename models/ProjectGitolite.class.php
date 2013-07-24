@@ -177,11 +177,23 @@ class ProjectGitolite {
         return false;
     }
 
+    function get_deploy_key_config($repo_id) {
+        $deploy_key_table_name = TABLE_PREFIX . 'rt_deploy_keys';
+        $sql_get_deploy_keys = "SELECT `pub_file_name` from $deploy_key_table_name where repo_fk = '$repo_id'";
+        $result = DB::execute($sql_get_deploy_keys);
+        $str = "";
+        if($result) {
+            while($row = mysql_fetch_array($result->getResource())) {            
+                $str.= "\t R \t=\t" . $row["pub_file_name"] . "\n";
+            }
+        }        
+        return $str;
+    }
     public function update_repo_conf_column($repo_id, $access_level = false) {
         $repo_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
         $public_key_table_name = TABLE_PREFIX . 'rt_gitolite_user_public_keys';
         if ($access_level == false) {
-            $access_level_row = get_access_levels($repo_id);
+            $access_level_row = ProjectGitolite::get_access_levels($repo_id);
             if ($access_level_row && isset($access_level_row["permissions"])) {
                 $access_level = unserialize($access_level_row["permissions"]);
             }
@@ -217,6 +229,8 @@ class ProjectGitolite {
                             }
                         }
                     }
+                    $deploy_key_config_str = ProjectGitolite::get_deploy_key_config($repo_id);
+                    $repo_conf_str.= $deploy_key_config_str;
                     $sql = "update " . $repo_table_name . " set gitolite_config='" . $repo_conf_str . "' where repo_id =" . $repo_id;
                     DB::execute($sql);
                 }
@@ -250,8 +264,8 @@ class ProjectGitolite {
             $access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';
             $public_key_table_name = TABLE_PREFIX . 'rt_gitolite_user_public_keys';
             $source_table_name = TABLE_PREFIX . 'source_repositories';
-            $admin_settings_table_name = TABLE_PREFIX . 'rt_config_settings';
-
+            $admin_settings_table_name = TABLE_PREFIX . 'rt_config_settings';            
+            
             /** Defalut access to gitolite admin * */
             $get_git_admins = DB::execute("SELECT * FROM " . $admin_settings_table_name);
             fwrite($fh, "repo " . "@all" . "\n");
@@ -291,31 +305,30 @@ class ProjectGitolite {
             $file_name = "/home/strik3r/gitolite_" . microtime();
             $file_name = str_replace(" ", "-", $file_name);
             $file_name = str_replace(".", "_", $file_name);
-            $mysqlACLFlag= true;
+            $mysqlACLFlag = true;
             if (!$result_gitconfig_empty) {
                 $sql = "SELECT CONCAT('repo ', repo_name),gitolite_config INTO OUTFILE '$file_name'
                         FIELDS ESCAPED BY '' TERMINATED BY '\n' OPTIONALLY ENCLOSED BY ''
                         LINES TERMINATED BY '\n'  
                         FROM $repo_table_name ";
-                try{
+                try {
                     $result = DB::execute($sql);
-                }
-                catch(Exception $e){
-                    $mysqlACLFlag= false;
+                } catch (Exception $e) {
+                    $mysqlACLFlag = false;
                 }
 
-                if ( $mysqlACLFlag && file_exists( $file_name ) ) {
+                if ($mysqlACLFlag && file_exists($file_name)) {
                     $conf_content = file_get_contents($file_name);
                     fwrite($fh, $conf_content);
                     fclose($fh);
                     @unlink($file_name);
                     return true;
-                }else{
+                } else {
                     $sql = "SELECT CONCAT('repo ', repo_name) as 'repo_name',gitolite_config FROM $repo_table_name";
                     $result = DB::execute($sql);
-                    if($result){
+                    if ($result) {
                         while ($row = mysql_fetch_assoc($result->getResource())) {
-                            $conf_content = "\n". $row['repo_name'] . "\n" . $row['gitolite_config'];
+                            $conf_content = "\n" . $row['repo_name'] . "\n" . $row['gitolite_config'];
                             fwrite($fh, $conf_content);
                         }
                     }
@@ -701,7 +714,7 @@ class ProjectGitolite {
     }
 
     /**
-     * Add web hooks for a specifiv repository
+     * Add web hooks for a specific repository
      * @param string $array_urls_str
      * @param integer $src_repo_id
      * @param integer $added_by
@@ -716,7 +729,14 @@ class ProjectGitolite {
         );
         return DB::lastInsertId();
     }
-
+    
+    /**
+     * 
+     * @param type $array_urls_str
+     * @param type $src_repo_id
+     * @param type $added_by
+     * @return boolean
+     */
     function update_web_hooks($array_urls_str = "", $src_repo_id = 0, $added_by = 0) {
         if (!is_numeric($src_repo_id) || $array_urls_str == "" || !is_numeric($added_by)) {
             return FALSE;
@@ -726,6 +746,11 @@ class ProjectGitolite {
         return TRUE;
     }
 
+    /**
+     * 
+     * @param type $src_repo_id
+     * @return boolean
+     */
     function ftp_connections_exists($src_repo_id) {
 
         if ($src_repo_id == "" || $src_repo_id == 0) {
@@ -746,6 +771,13 @@ class ProjectGitolite {
         }
     }
 
+    /**
+     * Add ftp connection
+     * @param type $ftp_array
+     * @param type $src_repo_id
+     * @param type $added_by
+     * @return boolean
+     */
     function add_ftp_details($ftp_array = array(), $src_repo_id = 0, $added_by = 0) {
         if (!is_numeric($src_repo_id) || count($ftp_array) == 0 || !is_numeric($added_by)) {
             return FALSE;
@@ -756,14 +788,19 @@ class ProjectGitolite {
         );
         return DB::lastInsertId();
     }
-
+    
+    /**
+     * get ftp conection details
+     * @param type $src_repo_id
+     * @return boolean
+     */
     function get_connection_details($src_repo_id) {
         if ($src_repo_id == "" || $src_repo_id == 0) {
             return false;
         }
         $ftp_table_name = TABLE_PREFIX . "rt_ftp_connections";
         $result = DB::execute("SELECT * from  $ftp_table_name where repo_fk = '$src_repo_id'");
-
+        print_r($result);
         if ($result) {
             while ($row = mysql_fetch_array($result->getResource())) {
                 $ftp_details_array[] = $row;
@@ -774,4 +811,145 @@ class ProjectGitolite {
         }
     }
 
+    function deploy_key_exists($src_repo_id = 0) {
+        if ($src_repo_id == "" || $src_repo_id == 0) {
+            return false;
+        }
+        $deploy_key_table_name = TABLE_PREFIX . 'rt_deploy_keys';
+        $result = DB::execute("SELECT * from  $deploy_key_table_name where repo_fk = '$src_repo_id'");
+        $deploy_keys_array = array();
+        
+        if ($result) {
+            while ($row = mysql_fetch_array($result->getResource())) {                
+                $deploy_keys_array[] = $row;        
+            }               
+            if (is_array($deploy_keys_array) && count($deploy_keys_array) > 0) {                
+                return $deploy_keys_array;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+     
+    function add_deploy_keys($deploy_keys_name = "",$deploy_keys_key = "",$parent_key = "", $src_repo_id = 0, $added_by = 0, $pub_file_name = "") {
+        if (!is_numeric($src_repo_id) || $deploy_keys_name == "" || $deploy_keys_key == "" || !is_numeric($added_by) ) {
+            return FALSE;
+        }        
+        //echo $src_repo_id."</br>1".$deploy_keys_name."</br>2".$deploy_keys_key."<br/>3".$added_by."<br/>4".$parent_key;
+        //exit;
+        $add_deploy_key_table_name = TABLE_PREFIX . 'rt_deploy_keys';
+        DB::execute("INSERT INTO $add_deploy_key_table_name (`repo_fk`, `name`, `keys`, `added_by`, `parent_key`, `pub_file_name`) VALUES (? ,?, ?, ?, ?, ?)", $src_repo_id, $deploy_keys_name, $deploy_keys_key, $added_by, $parent_key, $pub_file_name);        
+        
+        return DB::lastInsertId();
+    }
+
+    function get_parent_key($deploy_key = "") {
+        if($deploy_key == "") {
+            return FALSE;
+        }        
+        $check_deploy_kay_table_name = TABLE_PREFIX . 'rt_deploy_keys';        
+        $result = DB::execute("SELECT id from $check_deploy_kay_table_name where `keys` = '$deploy_key' order by `id`");
+        if($result) {
+            $row = mysql_fetch_array($result->getResource());                        
+            return $row['id'];
+        }
+        else {
+            return FALSE;
+        }
+    }
+    
+    function is_parent_key($key_id ="") {
+        if($key_id == "") {
+            return FALSE;
+        }
+        $deploy_key_table_name = TABLE_PREFIX . 'rt_deploy_keys';
+        $result = DB::execute("SELECT count(id) as 'count_id' from $deploy_key_table_name where `parent_key` = '$key_id'");
+        if($result) {
+            $row = mysql_fetch_array($result->getResource());                        
+            return $row['count_id'];
+        }
+        else {
+            return FALSE;
+        }
+    }
+    
+    function is_child_key( $key_id = "") {
+        if($key_id == "") {
+            return FALSE;
+        }
+        $deploy_key_table_name = TABLE_PREFIX . 'rt_deploy_keys';
+        $result = DB::execute( " SELECT id from $deploy_key_table_name where parent_key <> '0' and id = '$key_id' " );        
+        if($result) {            
+            return TRUE;
+        }
+        else
+            return FALSE;
+    }
+    
+    function get_pub_file_name ($key_id = "") {
+        if($key_id == "") {
+            return FALSE;
+        }        
+        $deploy_key_table_name = TABLE_PREFIX . 'rt_deploy_keys';
+        $result = DB::execute("SELECT pub_file_name from $deploy_key_table_name where `id` = '$key_id'");
+        if($result) {
+            $row = $result->getRowAt(0);
+            return $row['pub_file_name'];
+        }        
+        return FALSE;
+    }
+    
+    function update_child($key_id = "") {
+        if($key_id == "") {
+            return FALSE;            
+        }
+        $deploy_key_table_name = TABLE_PREFIX . 'rt_deploy_keys';
+        $sql_get_first_child = DB::execute("SELECT `id` from $deploy_key_table_name where parent_key = '$key_id' order by `id` limit 0, 1");
+        $row = $sql_get_first_child->getRowAt(0);
+        $first_child = $row['id'];
+        
+        $update_all_child = DB::execute(" UPDATE $deploy_key_table_name set parent_key = '$first_child' where parent_key = '$key_id'");
+        
+        $update_first_child = DB::execute(" UPDATE $deploy_key_table_name set parent_key = '0' where id = '$first_child' ");
+        
+    }
+    
+    function remove_deploy_key_from_DB($key_id = "") {        
+        if($key_id == "") {
+            return FALSE;
+        }
+        $deploy_key_table_name = TABLE_PREFIX . 'rt_deploy_keys';
+        $delete_parent = DB::execute(" DELETE from $deploy_key_table_name where id = '$key_id' ");
+    }
+    
+    function get_pub_file_name_from_parent_key($parent_key = "") {
+        if($parent_key == "") {
+            return FALSE;
+        }
+        else {
+            $check_deploy_kay_table_name = TABLE_PREFIX . 'rt_deploy_keys';        
+            $sql_get_pub_file_name = "SELECT pub_file_name from $check_deploy_kay_table_name where id = '$parent_key'" ;
+            $result = DB::execute($sql_get_pub_file_name);
+            if ($result) {
+                $pub_file_name = $result->getRowAt(0);
+            }            
+            return $pub_file_name['pub_file_name'];
+        }
+    }
+    function check_same_repo($deploy_key = "", $repo_id = "") {
+        if($deploy_key == "" || $repo_id == "") {
+            return FALSE;
+        }
+        $check_same_repo_table_name = TABLE_PREFIX . 'rt_deploy_keys';
+        $result = DB::execute("SELECT id from $check_same_repo_table_name where `keys` like '%".trim($deploy_key)."%' and `repo_fk` = '$repo_id'");
+        if($result) {
+            return TRUE;
+        }
+        else {
+            return FALSE;
+        }
+    }
 }
+

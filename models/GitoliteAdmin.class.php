@@ -107,7 +107,7 @@ class GitoliteAdmin {
     public function get_admin_path() {
 
         return exec("cd ../work/git/ && pwd");
-        ;
+        
     }
 
     /**
@@ -310,16 +310,17 @@ class GitoliteAdmin {
         }
         return true;
     }
-    function update_repo_code($repo_id){
+
+    function update_repo_code($repo_id) {
         $remote_repos_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
-            $source_table_name = TABLE_PREFIX . 'source_repositories';
-            $result = DB::execute("SELECT a.*,b.update_type FROM " . $remote_repos_table_name . " a 
+        $source_table_name = TABLE_PREFIX . 'source_repositories';
+        $result = DB::execute("SELECT a.*,b.update_type FROM " . $remote_repos_table_name . " a 
                                        JOIN " . $source_table_name . " b ON a.repo_fk = b.id and a.repo_fk = '$repo_id'");
-            if ($result) {
-                while ($row_repos = mysql_fetch_assoc($result->getResource())) {
-                    self::pull_repo_commits($row_repos["git_repo_path"]);
-                }
+        if ($result) {
+            while ($row_repos = mysql_fetch_assoc($result->getResource())) {
+                self::pull_repo_commits($row_repos["git_repo_path"]);
             }
+        }
     }
 
     /**
@@ -360,13 +361,13 @@ class GitoliteAdmin {
 
         $source_obj = new SourceRepositories();
         $source_repositories = $source_obj->findById($repo_id);
-    
-        
+
+
         if ($source_repositories) {
 
             $results = "";
             foreach ($source_repositories as $source_repository) {
-                
+
                 $project_source_repositories = ProjectSourceRepositories::findByParent($source_repositories);
 
 
@@ -412,7 +413,7 @@ class GitoliteAdmin {
                         $revision_to = $head_revision;
                     } //if
 
-                    
+
                     $logs = $repository_engine->getLogs($revision_from, $revision_to);
                     if (!is_null($repository_engine->error)) {
                         continue;
@@ -562,15 +563,14 @@ class GitoliteAdmin {
                     //} //if
                 } // foreach
             }
-            if (empty($results)){
-                
+            if (empty($results)) {
+
                 //self::update_repo_code($repo_id);
-                
-            } else{
+            } else {
                 lang('Updated repositories: \n') . $results;
             }
         } else {
-           // self::update_repo_code($repo_id);
+            // self::update_repo_code($repo_id);
             echo lang('No repositories for update');
         }
     }
