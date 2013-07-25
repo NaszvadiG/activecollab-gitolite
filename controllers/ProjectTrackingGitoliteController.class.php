@@ -837,7 +837,7 @@ class ProjectTrackingGitoliteController extends RepositoryController {
                 ));
                  $this->wireframe->actions->add('add_deploys', 'DeployKeys', Router::assemble('add_deploy_keys',array('project_slug' => $this->active_project->getSlug(),
                                              'project_source_repository_id' => $repo_id)), array(
-                 'onclick' => new FlyoutFormCallback('urls_updated', array('width' => '900')),
+                 'onclick' => new FlyoutFormCallback('deploy_key_updated', array('width' => '900')),
                  'icon' => AngieApplication::getPreferedInterface() == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE) : AngieApplication::getImageUrl('icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE))
                 );
                  
@@ -1191,7 +1191,7 @@ class ProjectTrackingGitoliteController extends RepositoryController {
         DB::beginWork('Delete DEPLOY KEYS @ ' . __CLASS__);                
         $is_parent_key = ProjectGitolite::is_parent_key($key_id);
         $child_flag = 0;
-        
+        $admin_settings = GitoliteAdmin :: get_admin_settings();
         if($is_parent_key) {
             //echo "is parent";
             $update_child = ProjectGitolite::update_child($key_id);
@@ -1203,8 +1203,7 @@ class ProjectTrackingGitoliteController extends RepositoryController {
                 //echo "is sigle";            
                 $child_flag = 1;
                 $pub_file_name = ProjectGitolite::get_pub_file_name($key_id);
-                $file = $pub_file_name . ".pub";
-                $admin_settings = GitoliteAdmin :: get_admin_settings();
+                $file = $pub_file_name . ".pub";                
                 $dirpath = $admin_settings['gitoliteadminpath'] . "gitolite-admin/keydir/";
                 $path = $dirpath . $file;
                 if(file_exists($path)) {
@@ -1224,7 +1223,7 @@ class ProjectTrackingGitoliteController extends RepositoryController {
         $res = ProjectGitolite::render_conf_file();         
         $adminrepo = $admin_settings['gitoliteadminpath'] . "gitolite-admin/";
         /** Git Push Files * */
-        $command = "cd " . $adminrepo . " && git add * && git commit -am 'added key for deploy Keys ' && git push";
+        $command = "cd " . $adminrepo . " && git add * && git commit -am 'Key $key_id deleted for deploy Keys ' && git push";
         exec($command, $output, $return_var);                               
         
         DB::commit('DEPLOY KEYS Added @ ' . __CLASS__);

@@ -25,7 +25,7 @@
                     {/foreach}
                 {/if}
             </table>
-            <p id="no_days_off_message" style="{if is_foreachable($url_array)}display: none{/if}">{lang}There are no Deploy Key's defined.{/lang}</p>
+            <p id="no_days_off_message" style="{if is_foreachable($key_array)}display: none{/if}">{lang}There are no Deploy Key's defined.{/lang}</p>
             <p><a href="#" class="button_add">{lang}New Deploy Key{/lang}</a></p>
             {/wrap}
         </div>
