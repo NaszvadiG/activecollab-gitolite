@@ -63,11 +63,11 @@
             var init_day_off_row = function (row) {                
                 row.find("a.remove_day_off").click(function () {                      
                     if (confirm(App.lang("Are you sure that you want to delete this key?"))) {
-                        var post_url = $(this).attr('id');
+                        var post_url = $(this).attr('id');                        
                         if(typeof post_url !== 'undefined' && post_url !== false) {
-                            var post_url = decodeURIComponent(post_url);                        
+                            var post_url = decodeURIComponent(post_url);                            
                             var deploy_key_id = post_url.substr(post_url.lastIndexOf('/') + 1);
-                            post_url = post_url.replace(post_url.substr(post_url.lastIndexOf('/') + 1), '');
+                            post_url = post_url.substr(0,post_url.lastIndexOf('/'));                            
                             $.post(post_url,
                                 {
                                     deploy_key_id : deploy_key_id
