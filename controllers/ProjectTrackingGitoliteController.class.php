@@ -1063,6 +1063,7 @@ class ProjectTrackingGitoliteController extends RepositoryController {
                     throw $errors;
                 }
                 DB::beginWork('Add DEPLOY KEYS @ ' . __CLASS__);                
+                $admin_settings = GitoliteAdmin :: get_admin_settings();
                 if ((is_array($deploy_keys) && count($deploy_keys) > 0)) {
                     foreach ($deploy_keys as $deploy_key) {
                         $is_same_repo = ProjectGitolite :: check_same_repo($deploy_key['key'], $repo_id);
@@ -1139,7 +1140,7 @@ class ProjectTrackingGitoliteController extends RepositoryController {
                         
                         if($deploy_key_add) {
                             if(!$parent_key) {
-                                $admin_settings = GitoliteAdmin :: get_admin_settings();
+                                
                                 if (!isset($admin_settings['gitoliteadminpath'])) {
                                     $this->response->exception("Gitolite admin path not set");
                                     die();
@@ -1162,9 +1163,9 @@ class ProjectTrackingGitoliteController extends RepositoryController {
                     DB::commit('DEPLOY KEYS Added @ ' . __CLASS__);
                     ProjectGitolite::update_repo_conf_column($repo_id);       
                     $res = ProjectGitolite::render_conf_file();
-
+                    $adminrepo = $admin_settings['gitoliteadminpath'] . "gitolite-admin/";
                     /** Git Push Files * */
-                    $command = "cd " . $adminrepo . " && git add * && git commit -am 'added key for deploy Keys $file' && git push";
+                    $command = "cd " . $adminrepo . " && git add * && git commit -am 'added key for deploy Keys ' && git push";
                     exec($command, $output, $return_var);                                
                     
                     $this->response->ok();
@@ -1190,6 +1191,7 @@ class ProjectTrackingGitoliteController extends RepositoryController {
         DB::beginWork('Delete DEPLOY KEYS @ ' . __CLASS__);                
         $is_parent_key = ProjectGitolite::is_parent_key($key_id);
         $child_flag = 0;
+        
         if($is_parent_key) {
             //echo "is parent";
             $update_child = ProjectGitolite::update_child($key_id);
@@ -1204,7 +1206,6 @@ class ProjectTrackingGitoliteController extends RepositoryController {
                 $file = $pub_file_name . ".pub";
                 $admin_settings = GitoliteAdmin :: get_admin_settings();
                 $dirpath = $admin_settings['gitoliteadminpath'] . "gitolite-admin/keydir/";
-                $adminrepo = $admin_settings['gitoliteadminpath'] . "gitolite-admin/";
                 $path = $dirpath . $file;
                 if(file_exists($path)) {
                    unlink($path); 
@@ -1220,12 +1221,12 @@ class ProjectTrackingGitoliteController extends RepositoryController {
 //            $repo_id = $row['repo_id'];
 //            ProjectGitolite::update_repo_conf_column($repo_id);
 //        }
-        $res = ProjectGitolite::render_conf_file(); 
-        if($child_flag) {
-            /** Git Push Files * */
-            $command = "cd " . $adminrepo . " && git add * && git commit -am 'added key for deploy Keys $file' && git push";
-            exec($command, $output, $return_var);                                
-        }        
+        $res = ProjectGitolite::render_conf_file();         
+        $adminrepo = $admin_settings['gitoliteadminpath'] . "gitolite-admin/";
+        /** Git Push Files * */
+        $command = "cd " . $adminrepo . " && git add * && git commit -am 'added key for deploy Keys ' && git push";
+        exec($command, $output, $return_var);                               
+        
         DB::commit('DEPLOY KEYS Added @ ' . __CLASS__);
         exit;
     }
