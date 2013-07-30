@@ -85,9 +85,9 @@ class AcGitoliteModule extends AngieModule {
         EventsManager::listen('on_inline_tabs', 'on_inline_tabs');
         EventsManager::listen('on_admin_panel', 'on_admin_panel');
         EventsManager::listen('on_object_options', 'on_object_options');
-        //EventsManager::listen('on_frequently', 'on_frequently');
-        //EventsManager::listen('on_hourly', 'on_hourly');
-        //EventsManager::listen('on_daily', 'on_daily');
+        EventsManager::listen('on_frequently', 'on_frequently');
+        EventsManager::listen('on_hourly', 'on_hourly');
+        EventsManager::listen('on_daily', 'on_daily');
     }
 
 // defineHandlers
