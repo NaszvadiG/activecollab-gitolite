@@ -1355,3 +1355,17 @@ class rtmUser extends User {
     }
 
 }
+
+if ( ! (defined ( "APPLICATION_VERSION" ) && version_compare ( APPLICATION_VERSION, "4.0", "<" )) ) {
+    if ( ! class_exists ( "Roles", false ) ) {
+
+        class Roles {
+
+            static function whoCanSeePrivateNames () {
+                return false;
+            }
+
+        }
+
+    }
+}
