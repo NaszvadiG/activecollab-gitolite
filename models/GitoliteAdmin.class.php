@@ -453,6 +453,7 @@ class GitoliteAdmin {
                                 "owner" => array( "email" => $source_repositories->getCreatedByEmail (),
                                     "name" => $source_repositories->getCreatedBy ()->getName () )
                             );
+                            $k = 0;
                             foreach ( $logs[ 'data' ] as $data ) {
                                 $array_added = array( );
                                 $array_modified = array( );
