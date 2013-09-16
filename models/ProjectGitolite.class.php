@@ -437,7 +437,7 @@ class ProjectGitolite {
         $access_table_name = TABLE_PREFIX . 'rt_gitolite_access_master';
         $result = DB::execute("SELECT count(repo_fk) as chk_gitolite, b.permissions from $repo_table_name a , 
                                   $access_table_name b where a.repo_id = b.repo_id and
-                                   repo_fk = '$repo_fk'");
+                                   repo_fk = '$repo_fk' GROUP BY repo_fk");
 
         if ($result) {
             $cnt_array = $result->getRowAt("0");
