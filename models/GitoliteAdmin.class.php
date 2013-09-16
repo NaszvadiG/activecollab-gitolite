@@ -555,7 +555,7 @@ class GitoliteAdmin {
 
                             $project_source_repository->last_update_commits_count = $total_commits;
                             $project_source_repository->source_repository = $source_repositories;
-                            SourceRepository::sendCommitNotificationsToSubscribers ( $project_source_repository );
+                            ProjectSourceRepositories::sendCommitNotificationsToSubscribers ( $project_source_repository );
                             $project_source_repository->createActivityLog ();
                         } //foreach
                     }
