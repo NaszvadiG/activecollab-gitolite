@@ -576,8 +576,8 @@ class ProjectTrackingGitoliteController extends RepositoryController {
         }
 
         if ( $do_continue ) {
-
-            $users_details = $this->active_project->users ()->describe ( $this->logged_user, true, true, STATE_ARCHIVED );
+            
+            $users_details = $this->active_project->users()->describe( $this->logged_user, true, true, STATE_ARCHIVED );
 
             $repo_details = ProjectGitolite::get_repo_details ( $repo_id );
 
@@ -629,8 +629,6 @@ class ProjectTrackingGitoliteController extends RepositoryController {
 
                     $user_keys = GitoliteAc::check_keys_added ( $value[ 'user' ][ 'id' ] );
                     if ( $user_keys > 0 ) {
-
-                        $repoobj = new ProjectSourceRepositories();
                         $user_detail_permissions[ $value[ 'user' ][ 'id' ] ] =
                                 array( 'readaccess' => ($permissions_array[ $value[ 'user' ][ 'id' ] ] == "2") ? TRUE : FALSE,
                                     'writeaccess' => ($permissions_array[ $value[ 'user' ][ 'id' ] ] == "3") ? TRUE : FALSE,
@@ -642,8 +640,8 @@ class ProjectTrackingGitoliteController extends RepositoryController {
                 }
             }
 
-            if ( $this->logged_user->isAdministrator () || $this->logged_user->isProjectManager () ) {
-
+            if (! isset( $user_detail_permissions[ $user_id ]) && ($this->logged_user->isAdministrator () || $this->logged_user->isProjectManager () ) ) {
+                $repoobj = new ProjectSourceRepositories();
                 $objuser = new rtmUser ( $user_id );
                 $user_keys = GitoliteAc::check_keys_added ( $user_id );
                 if ( $user_keys ) {

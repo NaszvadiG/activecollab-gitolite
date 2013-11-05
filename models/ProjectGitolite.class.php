@@ -203,7 +203,7 @@ class ProjectGitolite {
                 if (is_array($prjusers)) {
                     $str = "";
                     $sep = "";
-                    foreach ($prjusers as $user) {
+                    foreach ($access_level as $user=>$permission) {
                         $str .= $sep . $user;
                         $sep = ",";
                     }
@@ -231,7 +231,7 @@ class ProjectGitolite {
      * @return boolean|string
      */
     function render_conf_file() {
-
+        
         $settings = GitoliteAdmin :: get_admin_settings();
         $conf_path = $settings['gitoliteadminpath'] . "/gitolite-admin/conf/gitolite.conf";
         $webuser = exec("whoami");
@@ -417,7 +417,7 @@ class ProjectGitolite {
         }
         /* echo "update  ".$access_table_name." set permissions = '$permissions' where repo_id = ".DB::escape($repo_id);
           die(); */
-        $update_access = DB::execute("update  " . $access_table_name . " set permissions = '$permissions' where repo_id = " . DB::escape($repo_id));
+        $update_access = DB::execute("update  " . $access_table_name . " set permissions = " . DB::escape($permissions) . " where repo_id = " . DB::escape($repo_id));
         ProjectGitolite::update_repo_conf_column(DB::escape($repo_id), $permissions);
         return TRUE;
     }
