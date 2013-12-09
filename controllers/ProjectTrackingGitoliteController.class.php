@@ -820,7 +820,7 @@ class ProjectTrackingGitoliteController extends RepositoryController {
 
         if ( is_array ( $repo_details ) && count ( $repo_details ) > 0 ) {
 
-            if ( $this->logged_user->isAdministrator () || $this->logged_user->isProjectManager () || $project->isLeader ( $this->logged_user ) ) {
+            //if ( $this->logged_user->isAdministrator () || $this->logged_user->isProjectManager () || $project->isLeader ( $this->logged_user ) ) {
 
                 $this->wireframe->actions->add ( 'manage_access', lang ( 'Manage Access' ), Router::assemble ( 'edit_git_repository', array( 'project_slug' => $project->getSlug (),
                             'project_source_repository_id' => $repo_id ) )
@@ -829,7 +829,7 @@ class ProjectTrackingGitoliteController extends RepositoryController {
                     'onclick' => new FlyoutFormCallback ( "access_updated", array( 'width' => 'narrow' ) ),
                     'icon' => AngieApplication::getPreferedInterface () == AngieApplication::INTERFACE_DEFAULT ? AngieApplication::getImageUrl ( 'icons/16X16-git.png', AC_GITOLITE_MODULE ) : AngieApplication::getImageUrl ( 'icons/16X16-git.png', AC_GITOLITE_MODULE, AngieApplication::INTERFACE_PHONE ),
                 ) );
-            } //if
+            //} //if
         }
         /*  Commented FTP section
           $this->wireframe->actions->add('add_ftp', 'FTP Connectiions', Router::assemble('add_ftp_conn',array('project_slug' => $this->active_project->getSlug(),
