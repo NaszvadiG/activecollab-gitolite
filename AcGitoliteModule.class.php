@@ -37,6 +37,7 @@ class AcGitoliteModule extends AngieModule {
         Router::map ( 'add_git_repository', '/projects/:project_slug/repositories/add-git', array( 'controller' => 'project_tracking_gitolite', 'action' => 'add_git_repo' ) );
         Router::map ( 'project_repositories', '/projects/:project_slug/repositories', array( 'controller' => 'project_tracking_gitolite', 'action' => 'index' ) );
         Router::map ( 'repository_history', '/projects/:project_slug/repositories/:project_source_repository_id', array( 'controller' => 'project_tracking_gitolite', 'action' => 'history' ), array( 'project_source_repository_id' => Router::MATCH_ID ) );
+        Router::map ( 'project_project_source_repository', '/projects/:project_slug/repositories/:project_source_repository_id', array( 'controller' => 'project_tracking_gitolite', 'action' => 'history' ), array( 'project_source_repository_id' => Router::MATCH_ID ) );
         Router::map ( 'get_public_keys', 'people/:company_id/users/:user_id/public-keys', array( 'controller' => 'ac_gitolite', 'action' => 'getpublickeys' ) );
         Router::map ( 'add_public_keys', 'people/:company_id/users/:user_id/add-public-keys', array( 'controller' => 'ac_gitolite', 'action' => 'add_public_keys' ) );
         Router::map ( 'remove_key', 'people/:company_id/users/:user_id/delete-keys/:key_id', array( 'controller' => 'ac_gitolite', 'action' => 'remove_key' ) );
