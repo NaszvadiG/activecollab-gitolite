@@ -69,9 +69,7 @@ class ProjectTrackingGitoliteController extends RepositoryController {
                 } else {
                     $permissions_array = array( );
                 }
-
-                if ( (array_key_exists ( $this->logged_user->getId (), $permissions_array ) && $permissions_array[ $this->logged_user->getId () ] > 1) || $this->logged_user->isAdministrator () || $this->logged_user->isProjectManager () || $this->active_project->isLeader ( $this->logged_user ) || $repository->canAdd ( $this->logged_user )
-                ) {
+                if ( (array_key_exists ( $this->logged_user->getId (), $permissions_array ) && $permissions_array[ $this->logged_user->getId () ] > 1) || $this->logged_user->isAdministrator () || $this->logged_user->isProjectManager () || $this->active_project->isLeader ( $this->logged_user )) {
                     $allowed_repos[ ] = $repository->getId ();
                 }
                 /* $clone_url = $get_admin_settings['gitoliteuser']."@".$get_admin_settings['gitoliteserveradd'].":".$repository->getName();
@@ -859,8 +857,7 @@ class ProjectTrackingGitoliteController extends RepositoryController {
                 $permissions_array = array( );
             }
 
-            if ( (array_key_exists ( $this->logged_user->getId (), $permissions_array ) && $permissions_array[ $this->logged_user->getId () ] > 1) || $this->logged_user->isAdministrator () || $this->logged_user->isProjectManager () || $this->active_project->isLeader ( $this->logged_user ) || $repository->canAdd ( $this->logged_user )
-            ) {
+            if ( (array_key_exists ( $this->logged_user->getId (), $permissions_array ) && $permissions_array[ $this->logged_user->getId () ] > 1) || $this->logged_user->isAdministrator () || $this->logged_user->isProjectManager () || $this->active_project->isLeader ( $this->logged_user ) ) {
 
                 $body = "<h2>Git Global Setup</h2>";
                 $body.= "<code>";
