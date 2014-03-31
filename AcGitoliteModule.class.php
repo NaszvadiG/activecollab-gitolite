@@ -21,7 +21,7 @@ class AcGitoliteModule extends AngieModule {
      *
      * @var string
      */
-    protected $version = '1.3.9.2';
+    protected $version = '1.3.10';
 
     /**
      * Name of the project object class (or classes) that this module uses
@@ -282,8 +282,7 @@ class AcGitoliteModule extends AngieModule {
 
 
         $repo_tb_name = TABLE_PREFIX . "rt_gitolite_repomaster";
-        $chkcol = DB::execute ( "SELECT * FROM $repo_tb_name LIMIT 1" );
-        $add_new_col = mysql_fetch_array ( $chkcol );
+		$add_new_col = DB::executeFirstRow( "SELECT * FROM $repo_tb_name LIMIT 1" );
         if ( ! isset ( $add_new_col[ 'git_ssh_path' ] ) ) {
             mysql_query ( "ALTER TABLE $repo_tb_name ADD column `git_ssh_path` varchar(255) NOT NULL" );
         }
@@ -297,16 +296,14 @@ class AcGitoliteModule extends AngieModule {
 
 
         $repo_remote_tb_name = TABLE_PREFIX . "rt_remote_repos";
-        $chkcol = DB::execute ( "SELECT * FROM $repo_remote_tb_name LIMIT 1" );
-        $add_new_col = mysql_fetch_array ( $chkcol );
+		$add_new_col = DB::executeFirstRow ( "SELECT * FROM $repo_remote_tb_name LIMIT 1" );
 
         if ( ! isset ( $add_new_col[ 'actual_repo_name' ] ) ) {
             mysql_query ( "ALTER TABLE $repo_remote_tb_name ADD column `actual_repo_name` varchar(255) NOT NULL" );
         }
         try {
             DB::execute ( "update " . TABLE_PREFIX . "source_repositories set update_type=NULL where id in (select repo_fk from " . $repo_tb_name . ")" );
-            $chkcol = DB::execute ( "select * from " . TABLE_PREFIX . "source_users limit 1" );
-            $add_new_col = mysql_fetch_array ( $chkcol );
+			$add_new_col = DB::executeFirstRow ( "select * from " . TABLE_PREFIX . "source_users limit 1" );
             if ( ! isset ( $add_new_col[ 'id' ] ) ) {
                 try {
                     mysql_query ( "ALTER TABLE  " . TABLE_PREFIX . "source_users  DROP PRIMARY KEY" );

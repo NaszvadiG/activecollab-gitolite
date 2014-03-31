@@ -136,7 +136,7 @@ class ProjectTrackingGitoliteController extends RepositoryController {
             $users_details = $this->active_project->users ()->describe ( $this->logged_user, true, true, STATE_VISIBLE );
 
             $user_detail_permissions = array( );
-
+            $repoobj = new ProjectSourceRepositories();
             if ( is_foreachable ( $users_details ) ) {
 
                 foreach ( $users_details as $key => $value ) {
@@ -146,7 +146,6 @@ class ProjectTrackingGitoliteController extends RepositoryController {
                     if ( $user_keys > 0 ) {
 
                         $objuser = new rtmUser ( $value[ 'user' ][ 'id' ] );
-                        $repoobj = new ProjectSourceRepositories();
                         $user_detail_permissions[ $value[ 'user' ][ 'id' ] ] =
                                 array( 'readaccess' => $repoobj->canAccess ( $objuser, $project ),
                                     'writeaccess' => $repoobj->canAdd ( $objuser, $project ),
@@ -575,7 +574,7 @@ class ProjectTrackingGitoliteController extends RepositoryController {
 
         if ( $do_continue ) {
             
-            $users_details = $this->active_project->users()->describe( $this->logged_user, true, true, STATE_ARCHIVED );
+            $users_details = $this->active_project->users ()->describe ( $this->logged_user, true, true, STATE_VISIBLE );
 
             $repo_details = ProjectGitolite::get_repo_details ( $repo_id );
 
@@ -644,9 +643,9 @@ class ProjectTrackingGitoliteController extends RepositoryController {
                 $user_keys = GitoliteAc::check_keys_added ( $user_id );
                 if ( $user_keys ) {
                     $user_detail_permissions[ $user_id ] =
-                            array( 'readaccess' => $repoobj->canAccess ( $objuser, $project ),
-                                'writeaccess' => $repoobj->canAdd ( $objuser, $project ),
-                                'writeaccessplus' => $repoobj->canManage ( $objuser, $project ),
+                            array( 'readaccess' => ($permissions_array[ $user_id ] == "2") ? TRUE : $repoobj->canAccess ( $objuser, $project ),
+                                'writeaccess' => ($permissions_array[ $user_id ] == "3") ? TRUE : $repoobj->canAdd ( $objuser, $project ),
+                                'writeaccessplus' => ($permissions_array[ $user_id ] == "3") ? TRUE : $repoobj->canManage ( $objuser, $project ),
                                 'user_keys' => $user_keys );
                     $allowed_users[ $user_id ] = $logged_user->getName ();
                 } else {

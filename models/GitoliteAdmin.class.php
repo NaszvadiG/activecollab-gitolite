@@ -3,578 +3,603 @@
 /**
  * GitoliteAdmin class
  *
- * @package custom.modules.ac_gitolite
+ * @package    custom.modules.ac_gitolite
  * @subpackage models
- * @author rtCamp Software Solutions Pvt Ltd <admin@rtcamp.com>
- * @author Rahul Bansal <rahul.bansal@rtcamp.com>
- * @author Kasim Badami <kasim.badami@rtcamp.com>
-
+ * @author     rtCamp Software Solutions Pvt Ltd <admin@rtcamp.com>
+ * @author     Rahul Bansal <rahul.bansal@rtcamp.com>
+ * @author     Kasim Badami <kasim.badami@rtcamp.com>
  */
 class GitoliteAdmin {
 
-    /**
-     * Get admin settings from database
-     * @return void
-     */
-    public function get_admin_settings () {
-        $settings_table_name = TABLE_PREFIX . 'rt_config_settings';
+	/**
+	 * Get admin settings from database
+	 *
+	 * @return void
+	 */
+	public function get_admin_settings() {
+		$settings_table_name = TABLE_PREFIX . 'rt_config_settings';
 
-        $result = DB::execute ( "SELECT * from " . $settings_table_name . "
+		$settings = DB::executeFirstRow( "SELECT * from " . $settings_table_name . "
                                    WHERE module_name = '" . AC_GITOLITE_MODULE . "'" );
-        if ( $result ) {
+		if ( $settings ) {
+			if ( $settings[ 'config_settings' ] != "" ) {
+				$config_settings = @unserialize( $settings[ 'config_settings' ] );
+			}
+			$cloneurl = $config_settings[ 'gitoliteuser' ] . "@" . $config_settings[ 'gitoliteserveradd' ] . ":";
 
-            $settings = $result->getRowAt ( 0 );
-            if ( $settings[ 'config_settings' ] != "" ) {
-                $config_settings = @unserialize ( $settings[ 'config_settings' ] );
-            }
-            $cloneurl = $config_settings[ 'gitoliteuser' ] . "@" . $config_settings[ 'gitoliteserveradd' ] . ":";
+			if ( $config_settings[ 'git_ssh_port' ] != "" && intval( $config_settings[ 'git_ssh_port' ] ) != 22 ) {
+				$cloneurl = "ssh://" . $cloneurl . $config_settings[ 'git_ssh_port' ] . "/";
+			}
+			$results = array(
+				'gitoliteuser' => $config_settings[ 'gitoliteuser' ], 'gitoliteserveradd' => $config_settings[ 'gitoliteserveradd' ], 'gitoliteadminpath' => $config_settings[ 'gitoliteadminpath' ], 'git_server_location' => $config_settings[ 'git_server_location' ], 'git_ssh_port' => $config_settings[ 'git_ssh_port' ], 'git_clone_url' => $cloneurl
+			);
+			//'initialize_repo' => $config_settings['initialize_repo'],
+			//'ignore_files' => $config_settings['ignore_files']
+		} else {
+			$results = array();
+		}
 
-            if ( $config_settings[ 'git_ssh_port' ] != "" && intval ( $config_settings[ 'git_ssh_port' ] ) != 22 ) {
-                $cloneurl = "ssh://" . $cloneurl . $config_settings[ 'git_ssh_port' ] . "/";
-            }
-            $results = array(
-                'gitoliteuser' => $config_settings[ 'gitoliteuser' ],
-                'gitoliteserveradd' => $config_settings[ 'gitoliteserveradd' ],
-                'gitoliteadminpath' => $config_settings[ 'gitoliteadminpath' ],
-                'git_server_location' => $config_settings[ 'git_server_location' ],
-                'git_ssh_port' => $config_settings[ 'git_ssh_port' ],
-                'git_clone_url' => $cloneurl
-            );
-            //'initialize_repo' => $config_settings['initialize_repo'],
-            //'ignore_files' => $config_settings['ignore_files']
-        } else {
-            $results = array( );
-        }
-        return $results;
-    }
+		return $results;
+	}
 
-    /**
-     * Check whether settings are already added.
-     * @return boolean
-     */
-    function setting_exists () {
-        $settings_table_name = TABLE_PREFIX . 'rt_config_settings';
+	/**
+	 * Check whether settings are already added.
+	 *
+	 * @return boolean
+	 */
+	function setting_exists() {
+		$settings_table_name = TABLE_PREFIX . 'rt_config_settings';
 
-        $result = DB::execute ( "SELECT COUNT(setting_id) as cnt_settings from " . $settings_table_name .
-                        " WHERE module_name = '" . AC_GITOLITE_MODULE . "'" );
-        if ( $result ) {
-            $is_exists = $result->getRowAt ( 0 );
-        }
-        return $is_exists;
-    }
+		$result = DB::execute( "SELECT COUNT(setting_id) as cnt_settings from " . $settings_table_name . " WHERE module_name = '" . AC_GITOLITE_MODULE . "'" );
+		if ( $result ) {
+			$is_exists = $result[0];
+		}
 
-    /**
-     * Insert module settings.
-     * @param array $post_data
-     * @param integer $active_user
-     * @return boolean
-     */
-    function insert_settings ( $post_data = array( ), $active_user = 0 ) {
+		return $is_exists;
+	}
 
-        if ( count ( $post_data ) == 0 || $active_user == 0 ) {
-            return FALSE;
-        }
-        $module_name = AC_GITOLITE_MODULE;
-        $settings_table_name = TABLE_PREFIX . 'rt_config_settings';
-        DB::execute ( "INSERT INTO $settings_table_name (module_name,config_settings,added_by) VALUES (?, ?, ?)", $module_name, serialize ( $post_data ), $active_user
-        );
-        return DB::lastInsertId ();
-    }
+	/**
+	 * Insert module settings.
+	 *
+	 * @param array   $post_data
+	 * @param integer $active_user
+	 *
+	 * @return boolean
+	 */
+	function insert_settings( $post_data = array(), $active_user = 0 ) {
 
-    /**
-     * Update admin settings.
-     * @param array $post_data
-     * @param integer $active_user
-     * @return boolean
-     */
-    function update_settings ( $post_data = array( ), $active_user = 0 ) {
-        if ( count ( $post_data ) == 0 || $active_user == 0 ) {
-            return FALSE;
-        }
-        $admins = "";
-        $settings_table_name = TABLE_PREFIX . 'rt_config_settings';
+		if ( count( $post_data ) == 0 || $active_user == 0 ) {
+			return false;
+		}
+		$module_name         = AC_GITOLITE_MODULE;
+		$settings_table_name = TABLE_PREFIX . 'rt_config_settings';
+		DB::execute( "INSERT INTO $settings_table_name (module_name,config_settings,added_by) VALUES (?, ?, ?)", $module_name, serialize( $post_data ), $active_user );
+
+		return DB::lastInsertId();
+	}
+
+	/**
+	 * Update admin settings.
+	 *
+	 * @param array   $post_data
+	 * @param integer $active_user
+	 *
+	 * @return boolean
+	 */
+	function update_settings( $post_data = array(), $active_user = 0 ) {
+		if ( count( $post_data ) == 0 || $active_user == 0 ) {
+			return false;
+		}
+		$admins              = "";
+		$settings_table_name = TABLE_PREFIX . 'rt_config_settings';
 
 
-        DB::execute ( "UPDATE  $settings_table_name SET config_settings = '" . serialize ( $post_data ) . "'"
-        );
-        return DB::affectedRows ();
-    }
+		DB::execute( "UPDATE  $settings_table_name SET config_settings = '" . serialize( $post_data ) . "'" );
 
-    /**
-     * Get gitolite admin path.
-     * @return string path
-     */
-    public function get_admin_path () {
+		return DB::affectedRows();
+	}
 
-        return exec ( "cd ../work/git/ && pwd" );
-        ;
-    }
+	/**
+	 * Get gitolite admin path.
+	 *
+	 * @return string path
+	 */
+	public function get_admin_path() {
 
-    /**
-     * Get git user home path.
-     * @return boolean
-     */
-    public function get_server_user_path () {
-        $admin_settings = self::get_admin_settings ();
-        if ( isset ( $admin_settings[ 'gitoliteuser' ] ) && $admin_settings[ 'gitoliteuser' ] != "" ) {
-            $user = $admin_settings[ 'gitoliteuser' ];
-            return exec ( "cd ~$user && pwd" );
-        } else {
-            return false;
-        }
-    }
+		return exec( "cd ../work/git/ && pwd" );;
+	}
 
-    /**
-     * Check whether is gitolite settings added.
-     * @return boolean
-     */
-    function is_gitolite () {
-        $admin_settings = self::get_admin_settings ();
-        $is_gitolite = TRUE;
-        if ( ! isset ( $admin_settings[ 'gitoliteadminpath' ] ) || $admin_settings[ 'gitoliteadminpath' ] == "" ) {
-            $is_gitolite = FALSE;
-        }
+	/**
+	 * Get git user home path.
+	 *
+	 * @return boolean
+	 */
+	public function get_server_user_path() {
+		$admin_settings = self::get_admin_settings();
+		if ( isset ( $admin_settings[ 'gitoliteuser' ] ) && $admin_settings[ 'gitoliteuser' ] != "" ) {
+			$user = $admin_settings[ 'gitoliteuser' ];
 
-        return $is_gitolite;
-    }
+			return exec( "cd ~$user && pwd" );
+		} else {
+			return false;
+		}
+	}
 
-    /**
-     * Get gitolite setup script path.
-     * @param boolean $path
-     * @return string
-     */
-    function get_setup_path ( $gituser = "git", $path = TRUE ) {
+	/**
+	 * Check whether is gitolite settings added.
+	 *
+	 * @return boolean
+	 */
+	function is_gitolite() {
+		$admin_settings = self::get_admin_settings();
+		$is_gitolite    = true;
+		if ( ! isset ( $admin_settings[ 'gitoliteadminpath' ] ) || $admin_settings[ 'gitoliteadminpath' ] == "" ) {
+			$is_gitolite = false;
+		}
 
-        if ( $gituser == "" )
-            $gituser = "git";
+		return $is_gitolite;
+	}
 
-        //$path = exec("cd ../custom/modules/ac_gitolite/ && pwd");
-        if ( $path )
-            return "curl -Ls http://rt.cx/gitlab | sudo bash -s <span class='gitolite-user'>" . $gituser . "</span> " . ' ' . GitoliteAdmin::get_web_user () . ' ' . GitoliteAdmin::get_server_name () . ' ' . substr ( LICENSE_KEY, 0, 5 );
-        else
-            return "curl -Ls http://rt.cx/gitlab | sudo bash -s " . $gituser . ' ' . GitoliteAdmin::get_web_user () . ' ' . GitoliteAdmin::get_server_name () . ' ' . substr ( LICENSE_KEY, 0, 5 );
-    }
+	/**
+	 * Get gitolite setup script path.
+	 *
+	 * @param boolean $path
+	 *
+	 * @return string
+	 */
+	function get_setup_path( $gituser = "git", $path = true ) {
 
-    /**
-     * Get server name
-     * @return string server name
-     */
-    function get_server_name () {
-        preg_match ( '/^(?:www\.)?(?:(.+)\.)?(.+\..+)$/i', $_SERVER[ 'HTTP_HOST' ], $matches );
-        if ( is_array ( $matches ) && count ( $matches ) > 0 ) {
-            if ( isset ( $matches[ 1 ] ) && trim ( $matches[ 1 ] ) != '' ) {
-                $return_str .= $matches[ 1 ] . ".";
-            }
-            $return_str .= $matches[ 2 ];
-        } else {
-            $return_str = $_SERVER[ 'HTTP_HOST' ];
-        }
-        return $return_str;
-    }
+		if ( $gituser == "" ) {
+			$gituser = "git";
+		}
 
-    /**
-     * Get empty git repositories
-     * @return array $empty_array
-     */
-    function get_empty_repositories () {
+		//$path = exec("cd ../custom/modules/ac_gitolite/ && pwd");
+		if ( $path ) {
+			return "curl -Ls http://rt.cx/gitlab | sudo bash -s <span class='gitolite-user'>" . $gituser . "</span> " . ' ' . GitoliteAdmin::get_web_user() . ' ' . GitoliteAdmin::get_server_name() . ' ' . substr( LICENSE_KEY, 0, 5 );
+		} else {
+			return "curl -Ls http://rt.cx/gitlab | sudo bash -s " . $gituser . ' ' . GitoliteAdmin::get_web_user() . ' ' . GitoliteAdmin::get_server_name() . ' ' . substr( LICENSE_KEY, 0, 5 );
+		}
+	}
 
-        $source_table_name = TABLE_PREFIX . 'source_repositories';
-        $objects_table_name = TABLE_PREFIX . 'project_objects';
-        $commits_table_name = TABLE_PREFIX . 'source_commits';
+	/**
+	 * Get server name
+	 *
+	 * @return string server name
+	 */
+	function get_server_name() {
+		preg_match( '/^(?:www\.)?(?:(.+)\.)?(.+\..+)$/i', $_SERVER[ 'HTTP_HOST' ], $matches );
+		if ( is_array( $matches ) && count( $matches ) > 0 ) {
+			if ( isset ( $matches[ 1 ] ) && trim( $matches[ 1 ] ) != '' ) {
+				$return_str .= $matches[ 1 ] . ".";
+			}
+			$return_str .= $matches[ 2 ];
+		} else {
+			$return_str = $_SERVER[ 'HTTP_HOST' ];
+		}
 
-        $empty_array = array( );
+		return $return_str;
+	}
 
-        $result = DB::execute ( "SELECT src.`id` as src_repo_id , src.`name` as repo_name ,comm.id,pro.project_id,pro.id as obj_id
+	/**
+	 * Get empty git repositories
+	 *
+	 * @return array $empty_array
+	 */
+	function get_empty_repositories() {
+
+		$source_table_name  = TABLE_PREFIX . 'source_repositories';
+		$objects_table_name = TABLE_PREFIX . 'project_objects';
+		$commits_table_name = TABLE_PREFIX . 'source_commits';
+
+		$empty_array = array();
+
+		$result = DB::execute( "SELECT src.`id` as src_repo_id , src.`name` as repo_name ,comm.id,pro.project_id,pro.id as obj_id
             FROM $source_table_name src LEFT JOIN $objects_table_name pro on pro.integer_field_1 = src.id
             LEFT JOIN $commits_table_name comm ON src.id = comm.repository_id and comm.type = 'GitCommit'
             WHERE src.type = 'GitRepository' group by src.`id` having comm.id IS NULL" );
 
-        if ( $result ) {
-            foreach ( $result as $empty_repos ) {
-                $empty_array[ ] = array(
-                    'repo_name' => $empty_repos[ 'repo_name' ],
-                    'src_repo_id' => $empty_repos[ 'src_repo_id' ],
-                    'obj_id' => $empty_repos[ 'obj_id' ]
-                );
-            }
-        }
+		if ( $result ) {
+			foreach ( $result as $empty_repos ) {
+				$empty_array[ ] = array(
+					'repo_name' => $empty_repos[ 'repo_name' ], 'src_repo_id' => $empty_repos[ 'src_repo_id' ], 'obj_id' => $empty_repos[ 'obj_id' ]
+				);
+			}
+		}
 
-        return $empty_array;
-    }
+		return $empty_array;
+	}
 
-    /**
-     * Get web user name
-     * @return string
-     */
-    function get_web_user () {
-        if ( $_SERVER[ "USER" ] != "" )
-            return $_SERVER[ "USER" ];
-        else {
-            $processUser = posix_getpwuid ( posix_geteuid () );
-            return $processUser[ 'name' ];
-        }
-    }
+	/**
+	 * Get web user name
+	 *
+	 * @return string
+	 */
+	function get_web_user() {
+		if ( $_SERVER[ "USER" ] != "" ) {
+			return $_SERVER[ "USER" ];
+		} else {
+			$processUser = posix_getpwuid( posix_geteuid() );
 
-    /**
-     * Clone remote repositories.
-     * @param string $repo_url
-     * @param string $work_git_path
-     * @return boolean status
-     */
-    function clone_remote_repo ( $repo_url, $work_git_path, $actual_git_repo_name, &$error_msg = "" ) {
-        if ( $repo_url == "" || $work_git_path == "" || $actual_git_repo_name == "" ) {
-            return FALSE;
-        }
+			return $processUser[ 'name' ];
+		}
+	}
 
-        $path = exec ( "cd $work_git_path && git clone $repo_url $actual_git_repo_name  2>&1", $output, $return_var );
+	/**
+	 * Clone remote repositories.
+	 *
+	 * @param string $repo_url
+	 * @param string $work_git_path
+	 *
+	 * @return boolean status
+	 */
+	function clone_remote_repo( $repo_url, $work_git_path, $actual_git_repo_name, &$error_msg = "" ) {
+		if ( $repo_url == "" || $work_git_path == "" || $actual_git_repo_name == "" ) {
+			return false;
+		}
 
-        if ( $return_var === 0 ) {
-            return TRUE;
-        } else {
-            //May be ssh error
-            $tem_url = strtolower ( $repo_url );
-            if ( strpos ( $tem_url, '@' ) !== false ) {
-                $tem_url = split ( "@", $tem_url );
-                if ( count ( $tem_url ) > 1 )
-                    $tem_url = $tem_url[ 1 ];
-                $tem_url = split ( ":", $tem_url );
-                if ( count ( $tem_url ) > 0 )
-                    $tem_url = $tem_url[ 0 ];
-            }else {
-                $tem_url = split ( "://", $tem_url );
-                if ( count ( $tem_url ) > 1 )
-                    $tem_url = $tem_url[ 1 ];
-                else
-                    $tem_url = $tem_url[ 0 ];
+		$path = exec( "cd $work_git_path && git clone $repo_url $actual_git_repo_name  2>&1", $output, $return_var );
 
-                $tem_url = split ( "/", $tem_url );
-                if ( count ( $tem_url ) > 0 )
-                    $tem_url = $tem_url[ 0 ];
+		if ( $return_var === 0 ) {
+			return true;
+		} else {
+			//May be ssh error
+			$tem_url = strtolower( $repo_url );
+			if ( strpos( $tem_url, '@' ) !== false ) {
+				$tem_url = split( "@", $tem_url );
+				if ( count( $tem_url ) > 1 ) {
+					$tem_url = $tem_url[ 1 ];
+				}
+				$tem_url = split( ":", $tem_url );
+				if ( count( $tem_url ) > 0 ) {
+					$tem_url = $tem_url[ 0 ];
+				}
+			} else {
+				$tem_url = split( "://", $tem_url );
+				if ( count( $tem_url ) > 1 ) {
+					$tem_url = $tem_url[ 1 ];
+				} else {
+					$tem_url = $tem_url[ 0 ];
+				}
 
-                $tem_url = split ( ":", $tem_url );
+				$tem_url = split( "/", $tem_url );
+				if ( count( $tem_url ) > 0 ) {
+					$tem_url = $tem_url[ 0 ];
+				}
 
-                if ( count ( $tem_url ) > 0 )
-                    $tem_url = $tem_url[ 0 ];
-            }
-            exec ( "ssh-keyscan {$tem_url} >> ~/.ssh/known_hosts" );
-            $output = array( );
-            $path = exec ( "cd $work_git_path && git clone $repo_url $actual_git_repo_name 2>&1", $output, $return_var );
-            if ( $return_var === 0 ) {
-                return TRUE;
-            } else {
-                $error_msg = $output;
-                return FALSE;
-            }
-        }
-        return FALSE;
-    }
+				$tem_url = split( ":", $tem_url );
 
-    /**
-     * Execute pull commands for every repositories
-     * @param strin $path
-     * @return boolean
-     */
-    function pull_repo_commits ( $path = "" ) {
-        if ( $path == "" ) {
-            return false;
-        }
-        $path = exec ( "cd $path && git pull --all" );
-        var_dump ( $path );
-        return true;
-    }
+				if ( count( $tem_url ) > 0 ) {
+					$tem_url = $tem_url[ 0 ];
+				}
+			}
+			exec( "ssh-keyscan {$tem_url} >> ~/.ssh/known_hosts" );
+			$output = array();
+			$path   = exec( "cd $work_git_path && git clone $repo_url $actual_git_repo_name 2>&1", $output, $return_var );
+			if ( $return_var === 0 ) {
+				return true;
+			} else {
+				$error_msg = $output;
 
-    /**
-     * Pull repository commits, to update it on frequently.
-     * @param type $update_type
-     * @return boolean
-     */
-    function call_events ( $update_type = 0 ) {
-        $update_type = ( int ) $update_type;
-        if ( $update_type > 0 && $update_type == 1 ) {
-            $remote_repos_table_name = TABLE_PREFIX . 'rt_remote_repos';
-            $source_table_name = TABLE_PREFIX . 'source_repositories';
-            $result = DB::execute ( "SELECT a.*,b.update_type FROM " . $remote_repos_table_name . " a
+				return false;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Execute pull commands for every repositories
+	 *
+	 * @param strin $path
+	 *
+	 * @return boolean
+	 */
+	function pull_repo_commits( $path = "" ) {
+		if ( $path == "" ) {
+			return false;
+		}
+		$path = exec( "cd $path && git pull --all" );
+		var_dump( $path );
+
+		return true;
+	}
+
+	/**
+	 * Pull repository commits, to update it on frequently.
+	 *
+	 * @param type $update_type
+	 *
+	 * @return boolean
+	 */
+	function call_events( $update_type = 0 ) {
+		$update_type = ( int )$update_type;
+		if ( $update_type > 0 && $update_type == 1 ) {
+			$remote_repos_table_name = TABLE_PREFIX . 'rt_remote_repos';
+			$source_table_name       = TABLE_PREFIX . 'source_repositories';
+			$result                  = DB::execute( "SELECT a.*,b.update_type FROM " . $remote_repos_table_name . " a
                                        JOIN " . $source_table_name . " b ON a.repo_fk = b.id and b.update_type = '$update_type'" );
-            if ( $result ) {
+			if ( $result ) {
 
-                while ( $row_repos = mysql_fetch_assoc ( $result->getResource () ) ) {
-                    self::pull_repo_commits ( $row_repos[ "remote_repo_path" ] );
-                }
-            }
+				foreach ( $result as $row_repos ) {
+					self::pull_repo_commits( $row_repos[ "remote_repo_path" ] );
+				}
+			}
 
-            /* $gitolite_repos_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
-              $source_table_name = TABLE_PREFIX . 'source_repositories';
+			/* $gitolite_repos_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
+			  $source_table_name = TABLE_PREFIX . 'source_repositories';
 
-              $result = DB::execute("SELECT a.*,b.update_type FROM ".$gitolite_repos_table_name." a
-              JOIN ".$source_table_name." b ON a.repo_fk = b.id and b.update_type = '$update_type'"); */
-        }
-        return true;
-    }
+			  $result = DB::execute("SELECT a.*,b.update_type FROM ".$gitolite_repos_table_name." a
+			  JOIN ".$source_table_name." b ON a.repo_fk = b.id and b.update_type = '$update_type'"); */
+		}
 
-    function update_repo_code ( $repo_id ) {
-        $remote_repos_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
-        $source_table_name = TABLE_PREFIX . 'source_repositories';
-        $result = DB::execute ( "SELECT a.*,b.update_type FROM " . $remote_repos_table_name . " a
+		return true;
+	}
+
+	function update_repo_code( $repo_id ) {
+		$remote_repos_table_name = TABLE_PREFIX . 'rt_gitolite_repomaster';
+		$source_table_name       = TABLE_PREFIX . 'source_repositories';
+		$result                  = DB::execute( "SELECT a.*,b.update_type FROM " . $remote_repos_table_name . " a
                                        JOIN " . $source_table_name . " b ON a.repo_fk = b.id and a.repo_fk = '$repo_id'" );
-        if ( $result ) {
-            while ( $row_repos = mysql_fetch_assoc ( $result->getResource () ) ) {
-                self::pull_repo_commits ( $row_repos[ "git_repo_path" ] );
-            }
-        }
-    }
+		if ( $result ) {
+			foreach ($result as $row_repos ) {
+				self::pull_repo_commits( $row_repos[ "git_repo_path" ] );
+			}
+		}
+	}
 
-    /**
-     * Get PHP running user key.
-     * @return string
-     */
-    function get_web_user_key () {
-        $user = self::get_web_user ();
-        $sshdir = exec ( "cd ~$user && cd .ssh && pwd", $output );
-        if ( is_array ( $output ) && count ( $output ) > 0 ) {
-            exec ( "cd $sshdir && cat id_rsa.pub", $output_key );
-            if ( is_array ( $output_key ) && count ( $output_key ) > 0 ) {
-                exec ( "cd $sshdir && cp id_rsa.pub " . ROOT . "/../mypubkey.pub" );
-                return $output_key;
-            } else {
-                exec ( "ssh-keygen -q -N '' -f $sshdir/id_rsa", $output_key );
-                exec ( "cd $sshdir && cat id_rsa.pub", $output_key );
-                if ( is_array ( $output_key ) && count ( $output_key ) > 0 ) {
-                    exec ( "cd $sshdir && cp id_rsa.pub " . ROOT . "/../mypubkey.pub" );
-                    return $output_key;
-                } else {
-                    return "nokey";
-                }
-            }
-        } else {
-            return "nodir";
-        }
-    }
+	/**
+	 * Get PHP running user key.
+	 *
+	 * @return string
+	 */
+	function get_web_user_key() {
+		$user   = self::get_web_user();
+		$sshdir = exec( "cd ~$user && cd .ssh && pwd", $output );
+		if ( is_array( $output ) && count( $output ) > 0 ) {
+			exec( "cd $sshdir && cat id_rsa.pub", $output_key );
+			if ( is_array( $output_key ) && count( $output_key ) > 0 ) {
+				exec( "cd $sshdir && cp id_rsa.pub " . ROOT . "/../mypubkey.pub" );
 
-    /**
-     * Update remote repository after adding in database
-     * @param integer $repo_id
-     * @return string result
-     */
-    function update_remote_repo ( $repo_id = 0, $call_hooks = false ) {
+				return $output_key;
+			} else {
+				exec( "ssh-keygen -q -N '' -f $sshdir/id_rsa", $output_key );
+				exec( "cd $sshdir && cat id_rsa.pub", $output_key );
+				if ( is_array( $output_key ) && count( $output_key ) > 0 ) {
+					exec( "cd $sshdir && cp id_rsa.pub " . ROOT . "/../mypubkey.pub" );
 
-        require_once(ANGIE_PATH . '/classes/xml/xml2array.php');
+					return $output_key;
+				} else {
+					return "nokey";
+				}
+			}
+		} else {
+			return "nodir";
+		}
+	}
 
-        $source_obj = new SourceRepositories();
-        $source_repositories = $source_obj->findById ( $repo_id );
+	/**
+	 * Update remote repository after adding in database
+	 *
+	 * @param integer $repo_id
+	 *
+	 * @return string result
+	 */
+	function update_remote_repo( $repo_id = 0, $call_hooks = false ) {
 
-        self::update_repo_code ( $repo_id );
-        if ( $source_repositories ) {
+		require_once( ANGIE_PATH . '/classes/xml/xml2array.php' );
 
-            $results = "";
-            foreach ( $source_repositories as $source_repository ) {
+		$source_obj          = new SourceRepositories();
+		$source_repositories = $source_obj->findById( $repo_id );
 
-                $project_source_repositories = ProjectSourceRepositories::findByParent ( $source_repositories );
+		self::update_repo_code( $repo_id );
+		if ( $source_repositories ) {
 
+			$results = "";
+			foreach ( $source_repositories as $source_repository ) {
 
-                if ( ($error = $source_repositories->loadEngine ()) !== true ) {
-
-                    return($error);
-                } // if
-                if ( ! $repository_engine = $source_repositories->getEngine () ) {
-
-                    return lang ( 'Failed to load repository engine class' );
-                } // if
-
-                if ( is_error ( $repository_engine->error ) ) {
-
-                    $results .= lang ( 'Error connecting to repository ' ) . ' ' . $source_repositories->getName () . ': ' . $repository_engine->error->getMessage ();
-                    continue;
-                } //if
-
-                $branches = $source_repositories->hasBranches () ? $repository_engine->getBranches () : Array( '' );
-
-                foreach ( $branches as $branch ) {
-
-                    $repository_engine->active_branch = $branch;
-                    $last_commit = $source_repositories->getLastCommit ( $branch );
+				$project_source_repositories = ProjectSourceRepositories::findByParent( $source_repositories );
 
 
-                    $latest_revision = $last_commit instanceof SourceCommit ? $last_commit->getRevisionNumber () : ($repository_engine->getZeroRevision () - 1);
-                    $head_revision = $repository_engine->getHeadRevision ();
+				if ( ( $error = $source_repositories->loadEngine() ) !== true ) {
 
-                    if ( ! $head_revision ) {
+					return ( $error );
+				} // if
+				if ( ! $repository_engine = $source_repositories->getEngine() ) {
 
-                        $results .= lang ( 'Connection to' ) . ' ' . $source_repositories->getName () . ' ' . lang ( 'failed' ) . '. ' . lang ( 'Please contact repository server administrator' );
-                        continue;
-                    } //if
+					return lang( 'Failed to load repository engine class' );
+				} // if
 
-                    if ( ! is_null ( $repository_engine->error ) || ($latest_revision == $head_revision) ) {
-                        continue;
-                    } //if
+				if ( is_error( $repository_engine->error ) ) {
 
-                    $revision_from = $latest_revision + 1;
-                    $revision_to = $revision_from + $repository_engine->getModuleLogsPerRequest () - 1;
-                    if ( $revision_to >= $head_revision ) {
-                        $revision_to = $head_revision;
-                    } //if
+					$results .= lang( 'Error connecting to repository ' ) . ' ' . $source_repositories->getName() . ': ' . $repository_engine->error->getMessage();
+					continue;
+				} //if
 
+				$branches = $source_repositories->hasBranches() ? $repository_engine->getBranches() : Array( '' );
 
-                    $logs = $repository_engine->getLogs ( $revision_from, $revision_to );
-                    if ( ! is_null ( $repository_engine->error ) ) {
-                        continue;
-                    } //if
-                    //die();
-                    /* commits.append({'id': r['id'],
-                      'author': {'name': r['name'], 'email': r['email']},
-                      'url': url,
-                      'message': r['message'],
-                      'timestamp': r['date']
-                      }) */
+				foreach ( $branches as $branch ) {
 
-                    $hooks_table_name = TABLE_PREFIX . "rt_web_hooks";
-                    $get_repo_hooks = DB::execute ( "SELECT * from $hooks_table_name where repo_fk = '" . $repo_id . "'" );
-                    if ( $get_repo_hooks ) {
-                        $array_pay_load = array( );
-                        // get last commit
-                        $before = $source_repositories->getLastCommit ( $branch, 1 );
-                        if ( isset ( $before ) && $before != NULL ) {
-                            $array_pay_load[ "before" ] = $before->getName ();
-                        } else {
-                            $array_pay_load[ "before" ] = "";
-                        }
-                    }
-
-                    $source_repositories->update ( $logs[ 'data' ], $branch );
-                    //print_r($logs['data']);
-                    // call hooks added on repositories
-                    if ( $get_repo_hooks ) {
-                        $array_commits = array( );
-
-                        if ( is_foreachable ( $logs[ 'data' ] ) ) {
-                            $array_pay_load[ "repository" ] = array(
-                                "url" => $source_repositories->getViewUrl (),
-                                "name" => $source_repositories->getName (),
-                                "description" => "",
-                                "owner" => array( "email" => $source_repositories->getCreatedByEmail (),
-                                    "name" => $source_repositories->getCreatedBy ()->getName () )
-                            );
-                            $k = 0;
-                            foreach ( $logs[ 'data' ] as $data ) {
-                                $array_added = array( );
-                                $array_modified = array( );
-                                $array_deleted = array( );
-                                $array_commits = array( );
-
-                                $array_commits[ "id" ] = urlencode ( $data[ 'commit' ][ 'name' ] );
-                                $array_commits[ "url" ] = "";
-                                $array_commits[ "author" ] = array(
-                                    "email" => $data[ 'commit' ][ 'authored_by_email' ],
-                                    "name" => $data[ 'commit' ][ 'authored_by_name' ]
-                                );
-                                $array_commits[ "message" ] = urlencode ( $data[ 'commit' ][ 'message_body' ] );
-                                $array_commits[ "message" ] = urlencode ( $data[ 'commit' ][ 'message_body' ] );
-
-                                $array_commits[ "message_title" ] = urlencode ( $data[ 'commit' ][ 'message_title' ] );
-                                $array_commits[ "timestamp" ] = urlencode ( $data[ 'commit' ][ 'commited_on' ] );
-
-                                $paths_array = unserialize ( $data[ "paths" ] );
-                                if ( is_foreachable ( $paths_array ) ) {
-                                    foreach ( $paths_array as $key_paths => $value_paths ) {
-                                        if ( $value_paths[ "action" ] == "A" ) {
-                                            $array_added[ ] = $value_paths[ "path" ];
-                                        } elseif ( $value_paths[ "action" ] == "M" ) {
-                                            $array_modified[ ] = $value_paths[ "path" ];
-                                        } elseif ( $value_paths[ "action" ] == "D" ) {
-                                            $array_deleted[ ] = $value_paths[ "path" ];
-                                        }
-                                    }
-                                }
-
-                                $array_commits[ "added" ] = $array_added;
-                                $array_commits[ "removed" ] = $array_deleted;
-                                $array_commits[ "modified" ] = $array_modified;
-                                $last_commit_payload = $data[ 'commit' ][ 'name' ]; // keep assigning commits , as we need last commit id
-                                $array_pay_load[ "commits" ][ ] = $array_commits;
-                                //print_r($data);
-                                //print_r(unserialize($data["paths"]));
-                                $k ++;
-                            }
-
-                            $array_pay_load[ "after" ] = $last_commit_payload;
-                            $array_pay_load[ "ref" ] = "refs/heads/" . $branch;
-                        }
-
-                        //foreach($array_commits as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
-                        $fields_string = json_encode ( $array_pay_load );
+					$repository_engine->active_branch = $branch;
+					$last_commit                      = $source_repositories->getLastCommit( $branch );
 
 
-                        if ( $get_repo_hooks ) {
+					$latest_revision = $last_commit instanceof SourceCommit ? $last_commit->getRevisionNumber() : ( $repository_engine->getZeroRevision() - 1 );
+					$head_revision   = $repository_engine->getHeadRevision();
 
-                            $url_array = $get_repo_hooks->getRowAt ( 0 );
-                            $url_array = @unserialize ( $url_array[ "webhook_urls" ] );
+					if ( ! $head_revision ) {
 
-                            if ( is_foreachable ( $url_array ) ) {
-                                foreach ( $url_array as $key_url => $value_url ) {
-                                    $url = $value_url;
-                                    rtrim ( $fields_string, '&' );
-                                    //open connection
-                                    $ch = curl_init ();
-                                    //set the url, number of POST vars, POST data
-                                    curl_setopt ( $ch, CURLOPT_URL, $url );
-                                    curl_setopt ( $ch, CURLOPT_POST, count ( $array_pay_load ) );
-                                    curl_setopt ( $ch, CURLOPT_POSTFIELDS, $fields_string );
-                                    curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
-                                    curl_setopt ( $ch, CURLOPT_HTTPHEADER, array(
-                                        'Content-Type: application/json',
-                                        'Content-Length: ' . strlen ( $fields_string ) )
-                                    );
-                                    //execute post
-                                    $curl_result = curl_exec ( $ch );
+						$results .= lang( 'Connection to' ) . ' ' . $source_repositories->getName() . ' ' . lang( 'failed' ) . '. ' . lang( 'Please contact repository server administrator' );
+						continue;
+					} //if
 
-                                    $http_status = curl_getinfo ( $ch, CURLINFO_HTTP_CODE );
-                                    curl_close ( $ch );
-                                }
-                            }
-                        }
-                    }
-                    // call hooks added on repositories ends here
-                    // deploy on FTP as per details added under repositories
-                    // deploy on FTP as per details added under repositories ends here
+					if ( ! is_null( $repository_engine->error ) || ( $latest_revision == $head_revision ) ) {
+						continue;
+					} //if
 
-                    $total_commits = $logs[ 'total' ] - $logs[ 'skipped_commits' ];
-                    $branch_string = $branch ? ' ' . lang ( 'Branch' ) . ': ' . $branch : '';
-                    $results .= $source_repositories->getName () . $branch_string . ' (' . $total_commits . ' ' . lang ( 'new commits' ) . '); \n';
+					$revision_from = $latest_revision + 1;
+					$revision_to   = $revision_from + $repository_engine->getModuleLogsPerRequest() - 1;
+					if ( $revision_to >= $head_revision ) {
+						$revision_to = $head_revision;
+					} //if
 
-                    $repo_table_name = TABLE_PREFIX . "rt_gitolite_repomaster";
-                    $res_repo_details = DB::execute ( "SELECT * from $repo_table_name where repo_fk = '" . $source_repositories->getId () . "'" );
-                    if ( $res_repo_details ) {
-                        $repo_details = $res_repo_details->getRowAt ( 0 );
-                        $send_notifi = $repo_details[ "disable_notifications" ];
-                    } else {
-                        $send_notifi = "no";
-                    }
-                    if ( $send_notifi == "no" ) {
-                        foreach ( $project_source_repositories as $project_source_repository ) {
-                            if ( $total_commits <= MAX_UPDATED_COMMITS_TO_SEND_DETAILED_NOTIFICATIONS ) {
-                                $project_source_repository->detailed_notifications = true;
-                            } //if
 
-                            $project_source_repository->last_update_commits_count = $total_commits;
-                            $project_source_repository->source_repository = $source_repositories;
-                            ProjectSourceRepositories::sendCommitNotificationsToSubscribers ( $project_source_repository );
-                            $project_source_repository->createActivityLog ();
-                        } //foreach
-                    }
-                    //} //if
-                    //} //if
-                } // foreach
-            }
-            if ( empty ( $results ) ) {
+					$logs = $repository_engine->getLogs( $revision_from, $revision_to );
+					if ( ! is_null( $repository_engine->error ) ) {
+						continue;
+					} //if
+					//die();
+					/* commits.append({'id': r['id'],
+					  'author': {'name': r['name'], 'email': r['email']},
+					  'url': url,
+					  'message': r['message'],
+					  'timestamp': r['date']
+					  }) */
 
-                //self::update_repo_code($repo_id);
-            } else {
-                lang ( 'Updated repositories: \n' ) . $results;
-            }
-        } else {
-            // self::update_repo_code($repo_id);
-            echo lang ( 'No repositories for update' );
-        }
-    }
+					$hooks_table_name = TABLE_PREFIX . "rt_web_hooks";
+					$get_repo_hooks   = DB::execute( "SELECT * from $hooks_table_name where repo_fk = '" . $repo_id . "'" );
+					if ( $get_repo_hooks ) {
+						$array_pay_load = array();
+						// get last commit
+						$before = $source_repositories->getLastCommit( $branch, 1 );
+						if ( isset ( $before ) && $before != null ) {
+							$array_pay_load[ "before" ] = $before->getName();
+						} else {
+							$array_pay_load[ "before" ] = "";
+						}
+					}
+
+					$source_repositories->update( $logs[ 'data' ], $branch );
+					//print_r($logs['data']);
+					// call hooks added on repositories
+					if ( $get_repo_hooks ) {
+						$array_commits = array();
+
+						if ( is_foreachable( $logs[ 'data' ] ) ) {
+							$array_pay_load[ "repository" ] = array(
+								"url" => $source_repositories->getViewUrl(), "name" => $source_repositories->getName(), "description" => "", "owner" => array(
+									"email" => $source_repositories->getCreatedByEmail(), "name" => $source_repositories->getCreatedBy()->getName()
+								)
+							);
+							$k                              = 0;
+							foreach ( $logs[ 'data' ] as $data ) {
+								$array_added    = array();
+								$array_modified = array();
+								$array_deleted  = array();
+								$array_commits  = array();
+
+								$array_commits[ "id" ]      = urlencode( $data[ 'commit' ][ 'name' ] );
+								$array_commits[ "url" ]     = "";
+								$array_commits[ "author" ]  = array(
+									"email" => $data[ 'commit' ][ 'authored_by_email' ], "name" => $data[ 'commit' ][ 'authored_by_name' ]
+								);
+								$array_commits[ "message" ] = urlencode( $data[ 'commit' ][ 'message_body' ] );
+								$array_commits[ "message" ] = urlencode( $data[ 'commit' ][ 'message_body' ] );
+
+								$array_commits[ "message_title" ] = urlencode( $data[ 'commit' ][ 'message_title' ] );
+								$array_commits[ "timestamp" ]     = urlencode( $data[ 'commit' ][ 'commited_on' ] );
+
+								$paths_array = unserialize( $data[ "paths" ] );
+								if ( is_foreachable( $paths_array ) ) {
+									foreach ( $paths_array as $key_paths => $value_paths ) {
+										if ( $value_paths[ "action" ] == "A" ) {
+											$array_added[ ] = $value_paths[ "path" ];
+										} elseif ( $value_paths[ "action" ] == "M" ) {
+											$array_modified[ ] = $value_paths[ "path" ];
+										} elseif ( $value_paths[ "action" ] == "D" ) {
+											$array_deleted[ ] = $value_paths[ "path" ];
+										}
+									}
+								}
+
+								$array_commits[ "added" ]       = $array_added;
+								$array_commits[ "removed" ]     = $array_deleted;
+								$array_commits[ "modified" ]    = $array_modified;
+								$last_commit_payload            = $data[ 'commit' ][ 'name' ]; // keep assigning commits , as we need last commit id
+								$array_pay_load[ "commits" ][ ] = $array_commits;
+								//print_r($data);
+								//print_r(unserialize($data["paths"]));
+								$k ++;
+							}
+
+							$array_pay_load[ "after" ] = $last_commit_payload;
+							$array_pay_load[ "ref" ]   = "refs/heads/" . $branch;
+						}
+
+						//foreach($array_commits as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+						$fields_string = json_encode( $array_pay_load );
+
+
+						if ( $get_repo_hooks ) {
+
+							$url_array = $get_repo_hooks[ 0 ];
+							$url_array = @unserialize( $url_array[ "webhook_urls" ] );
+
+							if ( is_foreachable( $url_array ) ) {
+								foreach ( $url_array as $key_url => $value_url ) {
+									$url = $value_url;
+									rtrim( $fields_string, '&' );
+									//open connection
+									$ch = curl_init();
+									//set the url, number of POST vars, POST data
+									curl_setopt( $ch, CURLOPT_URL, $url );
+									curl_setopt( $ch, CURLOPT_POST, count( $array_pay_load ) );
+									curl_setopt( $ch, CURLOPT_POSTFIELDS, $fields_string );
+									curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+									curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
+											'Content-Type: application/json', 'Content-Length: ' . strlen( $fields_string )
+										) );
+									//execute post
+									$curl_result = curl_exec( $ch );
+
+									$http_status = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+									curl_close( $ch );
+								}
+							}
+						}
+					}
+					// call hooks added on repositories ends here
+					// deploy on FTP as per details added under repositories
+					// deploy on FTP as per details added under repositories ends here
+
+					$total_commits = $logs[ 'total' ] - $logs[ 'skipped_commits' ];
+					$branch_string = $branch ? ' ' . lang( 'Branch' ) . ': ' . $branch : '';
+					$results .= $source_repositories->getName() . $branch_string . ' (' . $total_commits . ' ' . lang( 'new commits' ) . '); \n';
+
+					$repo_table_name  = TABLE_PREFIX . "rt_gitolite_repomaster";
+					$res_repo_details = DB::execute( "SELECT * from $repo_table_name where repo_fk = '" . $source_repositories->getId() . "'" );
+					if ( $res_repo_details ) {
+						$repo_details = $res_repo_details[ 0 ];
+						$send_notifi  = $repo_details[ "disable_notifications" ];
+					} else {
+						$send_notifi = "no";
+					}
+					if ( $send_notifi == "no" ) {
+						foreach ( $project_source_repositories as $project_source_repository ) {
+							if ( $total_commits <= MAX_UPDATED_COMMITS_TO_SEND_DETAILED_NOTIFICATIONS ) {
+								$project_source_repository->detailed_notifications = true;
+							} //if
+
+							$project_source_repository->last_update_commits_count = $total_commits;
+							$project_source_repository->source_repository         = $source_repositories;
+							ProjectSourceRepositories::sendCommitNotificationsToSubscribers( $project_source_repository );
+							$project_source_repository->createActivityLog();
+						} //foreach
+					}
+					//} //if
+					//} //if
+				} // foreach
+			}
+			if ( empty ( $results ) ) {
+
+				//self::update_repo_code($repo_id);
+			} else {
+				lang( 'Updated repositories: \n' ) . $results;
+			}
+		} else {
+			// self::update_repo_code($repo_id);
+			echo lang( 'No repositories for update' );
+		}
+	}
 
 }
 
